@@ -1,10 +1,15 @@
 package com.cwjn.skada.damage;
 
+import com.cwjn.skada.SkadaRegistry;
+import com.cwjn.skada.data.damage.DamageInfo;
+import com.cwjn.skada.data.damage.ElementSpread;
+import com.cwjn.skada.data.registry.Element;
 import net.minecraft.core.Holder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
 public class SkadaDamageSource extends DamageSource {
@@ -40,19 +45,19 @@ public class SkadaDamageSource extends DamageSource {
         this.damageInfo = damageInfo;
     }
 
-    public static SkadaDamageSource convert(DamageSource source) {
-        ElementSpread spread = new ElementSpread(
-                source.is(SkadaDamageTags.CONVERT_FIRE) ? 1:0,
-                source.is(SkadaDamageTags.CONVERT_COLD) ? 1:0,
-                source.is(SkadaDamageTags.CONVERT_LIGHTNING) ? 1:0,
-                source.is(SkadaDamageTags.CONVERT_WATER) ? 1:0,
-                source.is(SkadaDamageTags.CONVERT_EARTH) ? 1:0,
-                source.is(SkadaDamageTags.CONVERT_WIND) ? 1:0,
-                source.is(SkadaDamageTags.CONVERT_DARK) ? 1:0,
-                source.is(SkadaDamageTags.CONVERT_LIGHT) ? 1:0,
-                1.0);
-        DamageInfo newInfo = new DamageInfo(0, 0, 0, 0, 0, 0, false, true, spread);
-        return new SkadaDamageSource(source.typeHolder(), source.getEntity(), source.getDirectEntity(), source.getSourcePosition(), newInfo);
+    public SkadaDamageSource(DamageSource source, DamageInfo damageInfo) {
+        super(source.typeHolder(), source.getEntity(), source.getDirectEntity(), source.getSourcePosition());
+        this.damageInfo = damageInfo;
+    }
+
+    public static SkadaDamageSource environmental(DamageSource source) {
+        ElementSpread spread = new ElementSpread();
+        for (RegistryObject<Element> element : SkadaRegistry.ELEMENTS.getEntries()) {
+            if (source.is(element.get().getKey())) {
+                spread.addRatio(element.get(), 1.0);
+            }
+        }
+        return new SkadaDamageSource(source.typeHolder(), source.getEntity(), source.getDirectEntity(), source.getSourcePosition(), DamageInfo.environmental(spread));
     }
 
 }

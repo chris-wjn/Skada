@@ -1,0 +1,72 @@
+ELASTICITY
+{
+Things with high ELASTICITY will be able to undergo more elastic deformation before succumbing to plastic deformation. ELASTICITY is NOT the opposite of STIFFNESS.
+
+Elasticity is the ability of a body to resist a distorting influence and to return to its original size and shape when that influence or force is removed.
+}
+
+STIFFNESS vs COMPLIANCE
+{
+Stiffness is the rigidity of an object — the extent to which it resists deformation in response to an applied force.
+The opposite of stiff is compliant.
+}
+
+HARDNESS VS SOFT
+{
+If something is hard, it will likely take a lot of effort to do something like scratch it.
+
+PROS:
+They don’t scratch as easily, and thus stay pretty longer.
+They hold their edges longer.
+The edges don’t deform as much on contact with other blades.
+CONS: If you make something really hard, you tend to make it brittle
+}
+
+TOUGH VS BRITTLE
+{
+Toughness is the ability of a material to absorb energy and plastically deform without fracturing
+}
+
+weight {
+ -> increased striking damage
+ -> negatively affects attack speed
+ -> positively affects lethality
+}
+hardness {
+ thrust {
+  -> +lethality
+ }
+ slash {
+  -> +lethality
+ }
+ strike {
+  -> +damage
+ }
+ -> ++durability
+ -> ++critical failure
+}
+toughness {
+ -> --durability
+ -> --critical failure
+ thrust {
+  -> +damage
+  -> +aim
+ }
+ slash {
+  -> -damage
+  -> ++aim
+ }
+ strike {
+  -> +lethality
+ }
+}
+flexibility {
+ thrust {
+  -> ---aim
+ }
+ slash {
+  -> ++damage
+  -> --aim
+ }
+}
+

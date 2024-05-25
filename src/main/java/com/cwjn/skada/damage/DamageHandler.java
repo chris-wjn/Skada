@@ -1,16 +1,22 @@
 package com.cwjn.skada.damage;
 
-import com.cwjn.skada.Config;
-import com.cwjn.skada.SkadaData;
 import com.cwjn.skada.SkadaRegistry;
-import net.minecraft.util.Mth;
+import com.cwjn.skada.data.damage.DamageInfo;
+import com.cwjn.skada.data.damage.ElementSpread;
+import com.cwjn.skada.data.registry.AttackType;
+import com.cwjn.skada.data.registry.Element;
+import com.cwjn.skada.event.custom.PostMitigationEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import static com.cwjn.skada.data.SkadaData.*;
+import static com.cwjn.skada.data.damage.LethalityFunction.*;
 
 @Mod.EventBusSubscriber
 public class DamageHandler {
@@ -19,69 +25,89 @@ public class DamageHandler {
     public static void doDamageCalculation(LivingHurtEvent event) {
         SkadaDamageSource source;
         LivingEntity target = event.getEntity();
+        //Skada.LOGGER.debug("Damage event for " + target.getName().getString() + " with amount " + event.getAmount() + " from " + event.getSource().getMsgId());
         double amount = event.getAmount();
         if (event.getSource() instanceof SkadaDamageSource) {
+            //Skada.LOGGER.debug("Damage source is a SkadaDamageSource, using it.");
             source = (SkadaDamageSource) event.getSource();
         } else {
-            source = SkadaDamageSource.convert(event.getSource());
+            //Skada.LOGGER.debug("Damage source is not a SkadaDamageSource, creating environmental source.");
+            source = SkadaDamageSource.environmental(event.getSource());
         }
-
         DamageInfo info = source.getInfo();
         ElementSpread spread = info.elementSpread();
-        int extrahits = 0;
-        double primaryStat = info.primaryStat();
-        double secondaryStat = info.secondaryStat();
-        double vitality = target.getAttributeValue(SkadaRegistry.VITALITY.get());
-        double agility = target.getAttributeValue(SkadaRegistry.AGILITY.get());
         double armour = target.getAttributeValue(Attributes.ARMOR);
-
-        //IMPACT VS GRIT
-        if (Config.isArmourPenEnabled() && !info.isEnvironmental()) {
-            double impact = info.impact();
-            double grit = target.getAttributeValue(SkadaRegistry.GRIT.get());
-            armour = impactGritFormula(armour, primaryStat, vitality, impact, grit);
+        if (source.getInfo().isEnvironmental() && source.is(SkadaDamageTypeTags.BLOCKED_BY_ARMOUR)) {
+            if (armour != 0) {
+                //Skada.LOGGER.debug("Damage is environmental and blocked by armour, cancelling event.");
+                event.setCanceled(true);
+                return;
+            }
         }
 
-        //SUBTRACT ARMOUR FROM DAMAGE AND THEN TRANSFORM INTO ELEMENTAL DAMAGE
-        amount = amount - armour;
-        spread.transform(amount);
+        if (!info.isEnvironmental()) {
+            //Check attack aim vs defender evasion to determine hit chance
+            double aim = info.aim();
+            double evasion = target.getAttributeValue(SkadaRegistry.EVASIVENESS.get());
+            double hitChance = aimEvasionFormula(aim, evasion);
+            //Skada.LOGGER.debug("Hit chance: " + hitChance);
+            if (hitChance < target.getRandom().nextDouble()) {
+                event.setCanceled(true);
+                return;
+            }
 
-        //FINESSE VS MOBILITY
-        if (Config.isGlancingBlowEnabled() && !info.isEnvironmental()) {
-            double finesse = info.finesse();
-            double mobility = target.getAttributeValue(SkadaRegistry.MOBILITY.get());
-            extrahits = finesseMobilityFormula(spread, finesse, mobility, secondaryStat, agility, target.getRandom());
-        }
+            //Check attack lethality vs defender armour toughness to apply lethality function.
+            double lethality = info.lethality();
+            double toughness = target.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
+            //Skada.LOGGER.debug("Pre-lethality damage: " + amount);
+            switch (info.attackType().type().getOperation()) {
+                case SUM_WITH_DAMAGE -> amount += info.attackType().type().apply(lethality, toughness);
+                case SUM_WITH_ARMOUR -> armour += info.attackType().type().apply(lethality, toughness);
+                case MULTIPLY_WITH_DAMAGE -> amount *= info.attackType().type().apply(lethality, toughness);
+                case MULTIPLY_WITH_ARMOUR -> armour *= info.attackType().type().apply(lethality, toughness);
+            }
+            //Skada.LOGGER.debug("Post-lethality damage: " + amount);
 
-        //DEFTNESS VS RESILIENCE
-        if (Config.isCritDamageEnabled() && !info.isEnvironmental() && info.isCrit()) {
-            double deftness = info.deftness();
-            double resilience = target.getAttributeValue(SkadaRegistry.RESILIENCE.get());
-            spread.applyFunctionToAll((x) -> {
-                double ratio1 = ((primaryStat+secondaryStat)/20)*deftness;
-                double ratio2 = ((vitality+agility)/20)*resilience;
-                return x*(ratio1/ratio2);
-            });
-        }
+            //ATTACK TYPE WEAKNESSES
+            AttackType attackType = info.attackType();
+            //Skada.LOGGER.debug("Pre-attack type damage: " + amount);
+            amount = amount * (1 / target.getAttributeValue(attackType.resistAttribute()));
+            //Skada.LOGGER.debug("Post-attack type damage: " + amount);
 
-        //DAMAGE CLASS WEAKNESSES
-        DamageClass clazz = info.damageClass();
-        if (SkadaData.DAMAGE_CLASSES.contains(clazz)) {
-            spread.applyFunctionToAll((x) -> x * (1 / target.getAttributeValue(clazz.resistAttribute())));
+            //ARMOUR FORMULA
+            //Skada.LOGGER.debug("Pre-armour damage: " + amount);
+            amount = armourReductionFormula(amount, armour);
+            //Skada.LOGGER.debug("Pre-attack type damage: " + amount);
         }
 
         //ELEMENTAL WEAKNESSES
-        spread.applyFunctionToFire((x) -> x * (1 / target.getAttributeValue(SkadaRegistry.FIRE_RESIST.get())));
-        spread.applyFunctionToCold((x) -> x * (1 / target.getAttributeValue(SkadaRegistry.COLD_RESIST.get())));
-        spread.applyFunctionToLightning((x) -> x * (1 / target.getAttributeValue(SkadaRegistry.LIGHTNING_RESIST.get())));
-        spread.applyFunctionToWater((x) -> x * (1 / target.getAttributeValue(SkadaRegistry.WATER_RESIST.get())));
-        spread.applyFunctionToWind((x) -> x * (1 / target.getAttributeValue(SkadaRegistry.WIND_RESIST.get())));
-        spread.applyFunctionToEarth((x) -> x * (1 / target.getAttributeValue(SkadaRegistry.EARTH_RESIST.get())));
-        spread.applyFunctionToLight((x) -> x * (1 / target.getAttributeValue(SkadaRegistry.LIGHT_RESIST.get())));
-        spread.applyFunctionToDark((x) -> x * (1 / target.getAttributeValue(SkadaRegistry.DARK_RESIST.get())));
+        spread.transform(amount);
+        for (Element element : spread.getElements().keySet()) {
+            if (source.getEntity() instanceof LivingEntity le) {
+                spread.applyFunctionToElement(element, x -> x + le.getAttributeValue(element.baseDamage()));
+                spread.applyFunctionToElement(element, x -> x * le.getAttributeValue(element.affinityAttribute()));
+            }
+            spread.applyFunctionToElement(element, x -> x * (1 / target.getAttributeValue(element.resistAttribute())));
+        }
+        PostMitigationEvent evt = new PostMitigationEvent(target, spread.getElements());
+        MinecraftForge.EVENT_BUS.post(evt);
 
         event.setAmount((float) spread.sum());
+    }
 
+    private static double aimEvasionFormula(double aim, double evasion) {
+        if (aim >= evasion) return 1;
+        else {
+            int difference = (int) (evasion - aim);
+            return 0.05 + 0.05*difference;
+        }
+    }
+
+    /*
+     * Base armour damage reduction formula. Returns the damage after reduction.
+     */
+    private static double armourReductionFormula(double damage, double armour) {
+        return damage / Math.pow(2, armour/damage);
     }
 
     /*
@@ -140,24 +166,6 @@ public class DamageHandler {
             spread.applyFunctionToAll(d -> d * (1 - finalDamageReduc * 0.01));
         }
         return 0;
-    }
-
-    /*
-    * This method determines a multiplier for defender armor depending on a ratio of the attacker's impact to the defender's grit.
-    * The ratio must be between 0.5 and 2, so we use Minecraft's clamp util.
-     */
-    private static double impactGritFormula(double armour, double strength, double vitality, double impact, double grit) {
-        double ratio = Mth.clamp(
-                ((strength*impact)/(vitality*grit)),
-                0.5,
-                2);
-        if (ratio < 1) {
-            return armour * (2*ratio - 1);
-        }
-        else if (ratio > 1) {
-            return armour * ratio;
-        }
-        else return armour;
     }
 
 }

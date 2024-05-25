@@ -1,0 +1,785 @@
+{
+  "diamond_axe": {
+    "attack_types": {
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.5,
+        "failChance": 0.2,
+        "lethality": 5.4,
+        "aim": 4.0,
+        "minReach": 0.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.4
+  },
+  "diamond_hoe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 2.5,
+        "failChance": 0.2,
+        "lethality": 5.1,
+        "aim": 1.2,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.1
+  },
+  "diamond_pickaxe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 2.5,
+        "failChance": 0.2,
+        "lethality": 5.2,
+        "aim": 1.2,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.2
+  },
+  "diamond_shovel": {
+    "attack_types": {
+      "skada:strike": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.9,
+        "damageBonus": 5.1,
+        "failChance": 0.2,
+        "lethality": 2.7,
+        "aim": 0.0,
+        "minReach": 1.0
+      },
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 2.5,
+        "failChance": 0.2,
+        "lethality": 5.2,
+        "aim": 1.2,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.5,
+        "failChance": 0.2,
+        "lethality": 5.1,
+        "aim": 4.0,
+        "minReach": 1.0
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.3
+  },
+  "diamond_sword": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 2.5,
+        "failChance": 0.2,
+        "lethality": 5.5,
+        "aim": 1.2,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.5,
+        "failChance": 0.2,
+        "lethality": 5.2,
+        "aim": 4.0,
+        "minReach": 0.25
+      }
+    },
+    "spread": {
+      "powerBudget": 2.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5,
+        "skada:ice": 0.25,
+        "skada:lightning": 0.75,
+        "skada:earth": 0.25,
+        "skada:dark": 1.0,
+        "skada:light": 0.75
+      }
+    },
+    "weight": 0.6
+  },
+  "golden_axe": {
+    "attack_types": {
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.0,
+        "failChance": 0.0,
+        "lethality": 3.4,
+        "aim": 4.0,
+        "minReach": 0.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 1.9
+  },
+  "golden_hoe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 3.0,
+        "failChance": 0.0,
+        "lethality": 2.1,
+        "aim": 0.3,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.6
+  },
+  "golden_pickaxe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 3.0,
+        "failChance": 0.0,
+        "lethality": 2.8,
+        "aim": 0.3,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 1.3
+  },
+  "golden_shovel": {
+    "attack_types": {
+      "skada:strike": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.9,
+        "damageBonus": 2.1,
+        "failChance": 0.0,
+        "lethality": 4.3,
+        "aim": 0.0,
+        "minReach": 1.0
+      },
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 3.0,
+        "failChance": 0.0,
+        "lethality": 2.6,
+        "aim": 0.3,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.0,
+        "failChance": 0.0,
+        "lethality": 2.0,
+        "aim": 4.0,
+        "minReach": 1.0
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 1.6
+  },
+  "golden_sword": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 3.0,
+        "failChance": 0.0,
+        "lethality": 4.1,
+        "aim": 0.3,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.0,
+        "failChance": 0.0,
+        "lethality": 2.6,
+        "aim": 4.0,
+        "minReach": 0.25
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.2
+  },
+  "iron_axe": {
+    "attack_types": {
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": 2.0,
+        "failChance": 0.0,
+        "lethality": 2.8,
+        "aim": 2.0,
+        "minReach": 0.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.8
+  },
+  "iron_hoe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 4.0,
+        "failChance": 0.0,
+        "lethality": 2.3,
+        "aim": -4.0,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.3
+  },
+  "iron_pickaxe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 4.0,
+        "failChance": 0.0,
+        "lethality": 2.5,
+        "aim": -4.0,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.5
+  },
+  "iron_shovel": {
+    "attack_types": {
+      "skada:strike": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.9,
+        "damageBonus": 2.3,
+        "failChance": 0.0,
+        "lethality": 4.5,
+        "aim": 0.0,
+        "minReach": 1.0
+      },
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 4.0,
+        "failChance": 0.0,
+        "lethality": 2.5,
+        "aim": -4.0,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": 2.0,
+        "failChance": 0.0,
+        "lethality": 2.2,
+        "aim": 2.0,
+        "minReach": 1.0
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.7
+  },
+  "iron_sword": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 4.0,
+        "failChance": 0.0,
+        "lethality": 3.0,
+        "aim": -4.0,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": 2.0,
+        "failChance": 0.0,
+        "lethality": 2.4,
+        "aim": 2.0,
+        "minReach": 0.25
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 1.3
+  },
+  "netherite_axe": {
+    "attack_types": {
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -0.5,
+        "failChance": 0.1,
+        "lethality": 4.4,
+        "aim": 4.0,
+        "minReach": 0.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 0.5,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 0.4
+  },
+  "netherite_hoe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 3.5,
+        "failChance": 0.1,
+        "lethality": 4.1,
+        "aim": -0.5,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 0.5,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 0.1
+  },
+  "netherite_pickaxe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 3.5,
+        "failChance": 0.1,
+        "lethality": 4.3,
+        "aim": -0.5,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 0.5,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 0.3
+  },
+  "netherite_shovel": {
+    "attack_types": {
+      "skada:strike": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.9,
+        "damageBonus": 4.1,
+        "failChance": 0.1,
+        "lethality": 3.8,
+        "aim": 0.0,
+        "minReach": 1.0
+      },
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 3.5,
+        "failChance": 0.1,
+        "lethality": 4.2,
+        "aim": -0.5,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -0.5,
+        "failChance": 0.1,
+        "lethality": 4.1,
+        "aim": 4.0,
+        "minReach": 1.0
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 0.5,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 0.4
+  },
+  "netherite_sword": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 3.5,
+        "failChance": 0.1,
+        "lethality": 4.6,
+        "aim": -0.5,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -0.5,
+        "failChance": 0.1,
+        "lethality": 4.2,
+        "aim": 4.0,
+        "minReach": 0.25
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 0.5,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 0.7
+  },
+  "stone_axe": {
+    "attack_types": {
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.0,
+        "failChance": 0.0,
+        "lethality": 1.7,
+        "aim": 3.0,
+        "minReach": 0.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.2
+  },
+  "stone_hoe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 2.0,
+        "failChance": 0.0,
+        "lethality": 1.6,
+        "aim": 0.7,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.1
+  },
+  "stone_pickaxe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 2.0,
+        "failChance": 0.0,
+        "lethality": 1.7,
+        "aim": 0.7,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.2
+  },
+  "stone_shovel": {
+    "attack_types": {
+      "skada:strike": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.9,
+        "damageBonus": 1.6,
+        "failChance": 0.0,
+        "lethality": 2.2,
+        "aim": 0.0,
+        "minReach": 1.0
+      },
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 2.0,
+        "failChance": 0.0,
+        "lethality": 1.6,
+        "aim": 0.7,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.0,
+        "failChance": 0.0,
+        "lethality": 1.6,
+        "aim": 3.0,
+        "minReach": 1.0
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.2
+  },
+  "stone_sword": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 2.0,
+        "failChance": 0.0,
+        "lethality": 1.8,
+        "aim": 0.7,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.0,
+        "failChance": 0.0,
+        "lethality": 1.6,
+        "aim": 3.0,
+        "minReach": 0.25
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.4
+  },
+  "trident": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "wooden_axe": {
+    "attack_types": {
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.5,
+        "failChance": 0.0,
+        "lethality": 0.6,
+        "aim": 4.0,
+        "minReach": 0.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.1
+  },
+  "wooden_hoe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 2.5,
+        "failChance": 0.0,
+        "lethality": 0.5,
+        "aim": 1.2,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "wooden_pickaxe": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85,
+        "damageBonus": 2.5,
+        "failChance": 0.0,
+        "lethality": 0.5,
+        "aim": 1.2,
+        "minReach": 1.5
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "wooden_shovel": {
+    "attack_types": {
+      "skada:strike": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.9,
+        "damageBonus": 0.5,
+        "failChance": 0.0,
+        "lethality": 2.5,
+        "aim": 0.0,
+        "minReach": 1.0
+      },
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 2.5,
+        "failChance": 0.0,
+        "lethality": 0.5,
+        "aim": 1.2,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.5,
+        "failChance": 0.0,
+        "lethality": 0.5,
+        "aim": 4.0,
+        "minReach": 1.0
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.1
+  },
+  "wooden_sword": {
+    "attack_types": {
+      "skada:thrust": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "damageBonus": 2.5,
+        "failChance": 0.0,
+        "lethality": 0.6,
+        "aim": 1.2,
+        "minReach": 1.0
+      },
+      "skada:slash": {
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "damageBonus": -1.5,
+        "failChance": 0.0,
+        "lethality": 0.5,
+        "aim": 4.0,
+        "minReach": 0.25
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.1
+  }
+}

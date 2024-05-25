@@ -1,0 +1,1182 @@
+{
+  "arcanethyst": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "awakened_lichblade": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "bramblethorn": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 1.0
+  },
+  "brimstone_claymore": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "diamond_chakram": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_claymore": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_cutlass": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_glaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_greataxe": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_greathammer": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_halberd": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_katana": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_longsword": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_rapier": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_sai": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_scythe": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_spear": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_twinblade": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "diamond_warglaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "dormant_relic": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "emberblade": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "emberlash": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "flamewind": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "frostfall": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "gold_chakram": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_claymore": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_cutlass": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_glaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_greataxe": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_greathammer": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_halberd": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_katana": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_longsword": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_rapier": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_sai": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_scythe": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_spear": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_twinblade": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "gold_warglaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 4.0
+  },
+  "harbinger": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "hearthflame": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "hiveheart": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "icewhisper": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "iron_chakram": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_claymore": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_cutlass": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_glaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_greataxe": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_greathammer": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_halberd": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_katana": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_longsword": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_rapier": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_sai": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_scythe": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_spear": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_twinblade": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "iron_warglaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 3.0
+  },
+  "livyatan": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "mjolnir": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "molten_edge": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "netherite_chakram": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_claymore": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_cutlass": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_glaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_greataxe": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_greathammer": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_halberd": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_katana": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_longsword": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_rapier": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_sai": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_scythe": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_spear": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_twinblade": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "netherite_warglaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0,
+        "skada:fire": 0.5
+      }
+    },
+    "weight": 4.0
+  },
+  "ribboncleaver": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "righteous_relic": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_chakram": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_claymore": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_cutlass": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_glaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_greataxe": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_greathammer": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_halberd": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_katana": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_longsword": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_rapier": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_sai": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_scythe": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_spear": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_twinblade": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "runic_warglaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "shadowsting": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "slumbering_lichblade": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "soulkeeper": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "soulpyre": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "soulrender": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "soulstealer": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "stars_edge": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "stormbringer": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "storms_edge": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "sunfire": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "sword_on_a_stick": {
+    "attack_types": {
+      "skada:thrust": {
+        "minReach": 1.0,
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75,
+        "effectiveWeight": 0.9,
+        "aim": 0.0
+      },
+      "skada:slash": {
+        "minReach": 0.25,
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0,
+        "effectiveWeight": 0.7,
+        "aim": 1.0
+      }
+    },
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 1.0
+  },
+  "tainted_relic": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "tempest": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "thunderbrand": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "toxic_longsword": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "twisted_blade": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "waking_lichblade": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "watcher_claymore": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "watching_warglaive": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "waxweaver": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "whisperwind": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  },
+  "wickpiercer": {
+    "attack_types": {},
+    "spread": {
+      "powerBudget": 1.0,
+      "ratios": {
+        "skada:basic": 1.0
+      }
+    },
+    "weight": 0.0
+  }
+}
