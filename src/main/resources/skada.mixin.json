@@ -4,6 +4,10 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "skada-refmap.json",
   "mixins": [
+    "AccessRangedAttribute",
+    "ItemWeaponInfo",
+    "PlayerAttackUseSkada",
+    "RemoveItemstackModifierTooltipLines",
     "RemoveVanillaDamageHandling$MixinLivingEntity",
     "RemoveVanillaDamageHandling$MixinPlayer"
   ],

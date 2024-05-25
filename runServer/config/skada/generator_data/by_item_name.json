@@ -1,0 +1,83 @@
+{
+  "sword": {
+    "weightMultiplier": 1.0,
+    "attackTypes": {
+      "skada:slash": {
+        "effectiveWeight": 0.7,
+        "aim": 1.0,
+        "minReach": 0.25,
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0
+      },
+      "skada:thrust": {
+        "effectiveWeight": 0.9,
+        "aim": 0.0,
+        "minReach": 1.0,
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75
+      }
+    }
+  },
+  "axe": {
+    "weightMultiplier": 1.25,
+    "attackTypes": {
+      "skada:slash": {
+        "effectiveWeight": 0.95,
+        "aim": 1.0,
+        "minReach": 0.5,
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0
+      }
+    }
+  },
+  "shovel": {
+    "weightMultiplier": 0.75,
+    "attackTypes": {
+      "skada:slash": {
+        "effectiveWeight": 0.5,
+        "aim": 1.0,
+        "minReach": 1.0,
+        "maxReach": 3.0,
+        "attackSpeedMod": 1.0
+      },
+      "skada:strike": {
+        "effectiveWeight": 0.5,
+        "aim": 0.0,
+        "minReach": 1.0,
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.9
+      },
+      "skada:thrust": {
+        "effectiveWeight": 0.7,
+        "aim": 0.0,
+        "minReach": 1.0,
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.75
+      }
+    }
+  },
+  "pickaxe": {
+    "weightMultiplier": 0.85,
+    "attackTypes": {
+      "skada:thrust": {
+        "effectiveWeight": 1.0,
+        "aim": 1.0,
+        "minReach": 1.5,
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85
+      }
+    }
+  },
+  "hoe": {
+    "weightMultiplier": 0.5,
+    "attackTypes": {
+      "skada:thrust": {
+        "effectiveWeight": 1.0,
+        "aim": 1.0,
+        "minReach": 1.5,
+        "maxReach": 3.0,
+        "attackSpeedMod": 0.85
+      }
+    }
+  }
+}
