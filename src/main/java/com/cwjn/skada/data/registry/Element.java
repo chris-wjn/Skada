@@ -17,7 +17,7 @@ public record Element(String name,
                       Attribute resistAttribute,
                       int colour,
                       ResourceLocation icon,
-                      TagKey<DamageType> key) implements SkadaAttributeHolder, Comparable<Element> {
+                      TagKey<DamageType> tagKey) implements SkadaAttributeHolder, Comparable<Element> {
 
     @Override
     public Attribute getAttribute() {
@@ -36,8 +36,8 @@ public record Element(String name,
         return SkadaData.REGISTRY_ELEMENT.get().getValue(Util.rl("basic"));
     }
 
-    public TagKey<DamageType> getKey() {
-        return key;
+    public TagKey<DamageType> getTagKey() {
+        return tagKey;
     }
 
     public static Codec<Element> CODEC = RecordCodecBuilder.create(

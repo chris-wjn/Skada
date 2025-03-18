@@ -1,6 +1,5 @@
 package com.cwjn.skada.data.gen;
 
-import com.cwjn.skada.data.damage.ElementSpread;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 

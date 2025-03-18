@@ -19,4 +19,8 @@ public class PostMitigationEvent extends LivingEvent {
         return damage;
     }
 
+    public float getTotalDamage() {
+        return (float) damage.values().stream().mapToDouble(Float::doubleValue).sum();
+    }
+
 }

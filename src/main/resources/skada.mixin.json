@@ -4,12 +4,22 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "skada-refmap.json",
   "mixins": [
-    "AccessRangedAttribute",
-    "ItemWeaponInfo",
-    "PlayerAttackUseSkada",
-    "RemoveItemstackModifierTooltipLines",
-    "RemoveVanillaDamageHandling$MixinLivingEntity",
-    "RemoveVanillaDamageHandling$MixinPlayer"
+    "attack_injectors.BowItemUseSkada",
+    "attack_injectors.CrossbowItemUseSkada",
+    "attack_injectors.PlayerAttackUseSkada",
+    "attack_injectors.TridentThrowUseSkada",
+    "new_features.AccessRangedAttribute",
+    "new_features.FireAttributeCalculationEvent",
+    "new_features.ItemInfo",
+    "new_features.ProjectileData",
+    "vanilla_rework.RemoveItemstackModifierTooltipLines",
+    "vanilla_rework.RemoveKnockbackMixin",
+    "vanilla_rework.RemoveVanillaDamageHandling$MixinLivingEntity",
+    "vanilla_rework.RemoveVanillaDamageHandling$MixinPlayer"
   ],
-  "minVersion": "0.8"
+  "minVersion": "0.8",
+  "client": [
+    "new_features.CustomReticlesDetectEntities",
+    "new_features.CustomReticlesHitDetectedEntities"
+  ]
 }

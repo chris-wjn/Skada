@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 public class S2CSendWeaponInfoMap {
 
-    private Map<String, Map<String, WeaponInfo>> map;
+    private final Map<String, Map<String, WeaponInfo>> map;
     public S2CSendWeaponInfoMap(Map<String, Map<String, WeaponInfo>> map) {
         this.map = map;
     }

@@ -2,7 +2,7 @@ package com.cwjn.skada.damage;
 
 import com.cwjn.skada.SkadaRegistry;
 import com.cwjn.skada.data.damage.DamageInfo;
-import com.cwjn.skada.data.damage.ElementSpread;
+import com.cwjn.skada.data.damage.ElementSpreadInstance;
 import com.cwjn.skada.data.registry.Element;
 import net.minecraft.core.Holder;
 import net.minecraft.world.damagesource.DamageSource;
@@ -11,6 +11,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SkadaDamageSource extends DamageSource {
 
@@ -51,12 +54,13 @@ public class SkadaDamageSource extends DamageSource {
     }
 
     public static SkadaDamageSource environmental(DamageSource source) {
-        ElementSpread spread = new ElementSpread();
+        Map<Element, Double> ratios = new HashMap<>();
         for (RegistryObject<Element> element : SkadaRegistry.ELEMENTS.getEntries()) {
-            if (source.is(element.get().getKey())) {
-                spread.addRatio(element.get(), 1.0);
+            if (source.is(element.get().getTagKey())) {
+                ratios.put(element.get(), 1.0);
             }
         }
+        ElementSpreadInstance spread = new ElementSpreadInstance(1.0, ratios);
         return new SkadaDamageSource(source.typeHolder(), source.getEntity(), source.getDirectEntity(), source.getSourcePosition(), DamageInfo.environmental(spread));
     }
 

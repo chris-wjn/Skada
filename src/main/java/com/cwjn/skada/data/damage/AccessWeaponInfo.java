@@ -1,12 +1,8 @@
-package com.cwjn.skada.util;
-
-import com.cwjn.skada.data.damage.WeaponInfo;
+package com.cwjn.skada.data.damage;
 
 public interface AccessWeaponInfo {
 
     WeaponInfo skada$getWeaponInfo();
-
-    WeaponInfo skada$getOrCreateWeaponInfo();
 
     void skada$setWeaponInfo(WeaponInfo info);
 

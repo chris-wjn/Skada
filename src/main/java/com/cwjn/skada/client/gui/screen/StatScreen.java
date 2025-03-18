@@ -6,7 +6,7 @@ import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
-import com.cwjn.skada.util.AccessPlayerWeaponInfo;
+import com.cwjn.skada.util.SkadaEntity;
 import com.cwjn.skada.util.Keybinds;
 import com.cwjn.skada.util.Util;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -30,14 +30,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.cwjn.skada.SkadaRegistry.ELEMENTS;
+import static com.cwjn.skada.data.SkadaData.WEAPON_INFO_TAG_KEY;
 
 public class StatScreen extends Screen {
 
     private final Minecraft minecraft = Minecraft.getInstance();
     private final Player player = Minecraft.getInstance().player;
-    private final WeaponInfo weaponInfo = ((AccessPlayerWeaponInfo) player).getWeaponInfo();
-    private final AttackType attackType = weaponInfo.getAttackTypes().keySet().toArray(AttackType[]::new)[((AccessPlayerWeaponInfo) player).getAttackTypeIndex()];
-    private final AttackTypeInfo attackTypeInfo = weaponInfo.getAttackTypes().get(attackType);
+    private final WeaponInfo weaponInfo;
+    private final AttackType attackType;
+    private final AttackTypeInfo attackTypeInfo;
     private final static int BOOK_WIDTH = 695;
     private final static int BOOK_HEIGHT = 417;
     private final static int BOOK_TURNING_HEIGHT = 457;
@@ -98,10 +99,13 @@ public class StatScreen extends Screen {
         TABS_APPEAR_ANIM.addDelay(130);
     }
 
-    public StatScreen() {
+    public StatScreen(WeaponInfo info, AttackType type, AttackTypeInfo attackTypeInfo) {
         super(Component.literal("Stat Screen"));
         savedScale = minecraft.getWindow().getGuiScale();
         savedScreen = minecraft.screen;
+        weaponInfo = info;
+        attackType = type;
+        this.attackTypeInfo = attackTypeInfo;
     }
 
     @Override

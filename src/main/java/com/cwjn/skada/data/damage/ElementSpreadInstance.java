@@ -16,7 +16,7 @@ import java.util.function.DoubleUnaryOperator;
 /*
     * This class is used to store the element spread of a SkadaDamageSource.
  */
-public class ElementSpread {
+public class ElementSpreadInstance {
 
     /*
         * Two maps that represent ratios to convert a total damage value into individual elemental values,
@@ -27,25 +27,10 @@ public class ElementSpread {
     private final double powerBudget;
     private boolean transformed = false;
 
-    public static final Codec<ElementSpread> CODEC = RecordCodecBuilder.create(
-            instance -> instance.group(
-                    Codec.DOUBLE.fieldOf("powerBudget").forGetter(ElementSpread::powerBudget),
-                    Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).fieldOf("ratios").forGetter(ElementSpread::ratios)
-            ).apply(instance, ElementSpread::fromStringMap)
-    );
-    private double powerBudget() {return powerBudget;}
-    private Map<String, Double> ratios() {
-        Map<String, Double> retMap = new TreeMap<>();
-        for (Element e : ratios.keySet()) {
-            retMap.put(SkadaData.REGISTRY_ELEMENT.get().getKey(e).toString(), ratios.get(e));
-        }
-        return retMap;
-    }
-
     /*
-     * Construct a new ElementSpread with a power budget and ratio. We start with a basic element taking up the remaining power budget.
+     * Construct a new ElementSpreadInstance with a power budget and ratio. We start with a basic element taking up the remaining power budget.
      */
-    public ElementSpread(double powerBudget, Map<Element, Double> ratios) {
+    public ElementSpreadInstance(double powerBudget, Map<Element, Double> ratios) {
         this.powerBudget = powerBudget;
         this.ratios = ratios;
         double remaining = powerBudget - ratios.values().stream().mapToDouble(aDouble -> aDouble).sum();
@@ -55,26 +40,26 @@ public class ElementSpread {
     /*
      * Overload constructor
      */
-    public ElementSpread(double powerBudget) {
+    public ElementSpreadInstance(double powerBudget) {
         this(powerBudget, new HashMap<>());
     }
 
     /*
      * Overload constructor
      */
-    public ElementSpread() {
+    public ElementSpreadInstance() {
         this(1);
     }
 
     /*
-        * Construct a new ElementSpread with a power budget and ratio from a string map.
+        * Construct a new ElementSpreadInstance with a power budget and ratio from a string map.
      */
-    public static ElementSpread fromStringMap(double powerBudget, Map<String, Double> ratios) {
+    public static ElementSpreadInstance fromStringMap(double powerBudget, Map<String, Double> ratios) {
         Map<Element, Double> retMap = new TreeMap<>();
         for (String s : ratios.keySet()) {
             retMap.put(SkadaData.REGISTRY_ELEMENT.get().getValue(ResourceLocation.tryParse(s)), ratios.get(s));
         }
-        return new ElementSpread(powerBudget, retMap);
+        return new ElementSpreadInstance(powerBudget, retMap);
     }
 
     public void addRatio(Element element, double ratio) {
@@ -166,14 +151,14 @@ public class ElementSpread {
         return values;
     }
 
-    public static ElementSpread fromCompoundTag(CompoundTag tag) {
+    public static ElementSpreadInstance fromCompoundTag(CompoundTag tag) {
         double powerBudget = tag.getDouble("powerBudget");
         CompoundTag ratios = tag.getCompound("ratios");
         Map<Element, Double> ratioMap = new TreeMap<>();
         for (String key : ratios.getAllKeys()) {
             ratioMap.put(SkadaData.REGISTRY_ELEMENT.get().getValue(new ResourceLocation(key)), ratios.getDouble(key));
         }
-        return new ElementSpread(powerBudget, ratioMap);
+        return new ElementSpreadInstance(powerBudget, ratioMap);
     }
 
     public CompoundTag toCompoundTag() {
