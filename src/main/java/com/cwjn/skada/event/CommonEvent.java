@@ -2,44 +2,44 @@ package com.cwjn.skada.event;
 
 import com.cwjn.skada.SkadaCommand;
 import com.cwjn.skada.SkadaRegistry;
-import com.cwjn.skada.data.SkadaData;
+import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
+import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.data.registry.Parameter;
 import com.cwjn.skada.event.custom.PostMitigationEvent;
-import com.cwjn.skada.mixin.PlayerAttackUseSkada;
 import com.cwjn.skada.network.SkadaNetwork;
 import com.cwjn.skada.network.server_to_client.S2CCreateDamageIndicator;
+import com.cwjn.skada.network.server_to_client.S2CSendArmourInfoMap;
 import com.cwjn.skada.network.server_to_client.S2CSendWeaponInfoMap;
-import com.cwjn.skada.network.server_to_client.S2CUpdateWeaponInfo;
-import com.cwjn.skada.util.AccessPlayerWeaponInfo;
 import com.cwjn.skada.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.ItemAttributeModifierEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.server.command.ConfigCommand;
@@ -47,7 +47,6 @@ import net.minecraftforge.server.command.ConfigCommand;
 import java.io.BufferedReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 import static com.cwjn.skada.Skada.LOGGER;
@@ -73,7 +72,6 @@ public class CommonEvent {
                     e.add(entityType, parameter.attribute());
                 }
                 e.add(entityType, SkadaRegistry.LETHALITY.get());
-                e.add(entityType, SkadaRegistry.AIM.get());
                 e.add(entityType, SkadaRegistry.EVASIVENESS.get());
             });
         }
@@ -103,36 +101,89 @@ public class CommonEvent {
          */
         @SubscribeEvent(priority = EventPriority.HIGHEST)
         public static void addWeaponInfo(ItemAttributeModifierEvent e) {
-            if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
-                Util.addWeaponInfoTagIfNotExists(e.getItemStack());
-            }
+            Util.addWeaponInfoTagIfNotExists(e.getItemStack());
         }
 
+        /*
+        This is where we add the attribute modifiers to items based on their weapon or armour info
+         */
         @SubscribeEvent(priority = EventPriority.HIGH)
         public static void addWeaponInfoModifiers(ItemAttributeModifierEvent e) {
-            if (e.getSlotType() == LivingEntity.getEquipmentSlotForItem(e.getItemStack()) && e.getItemStack().hasTag() && e.getItemStack().getTag().contains(WEAPON_INFO_TAG_KEY)) {
-                WeaponInfo info = WeaponInfo.fromCompoundTag(e.getItemStack().getTagElement(WEAPON_INFO_TAG_KEY));
-                if (info.getAttackTypes().isEmpty()) return;
-                int attackIndex = e.getItemStack().getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
-                AttackTypeInfo attackInfo = info.getAttackTypes().get(info.getAttackTypes().keySet().toArray(AttackType[]::new)[attackIndex]);
+            ItemStack stack = e.getItemStack();
+            if (!stack.hasTag()) return;
+            if (LivingEntity.getEquipmentSlotForItem(stack) != e.getSlotType()) return;
+            if (stack.getTagElement(WEAPON_INFO_TAG_KEY) != null) {
+                WeaponInfo info = WeaponInfo.fromCompoundTag(stack.getTagElement(WEAPON_INFO_TAG_KEY));
+                if (info.ignoreAttributes()) return;
+                AttackTypeInfo attackInfo =
+                        info.getAttackTypes().get(
+                                info.getAttackTypes().keySet().toArray(AttackType[]::new)[stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
+                        );
                 e.addModifier(ForgeMod.ENTITY_REACH.get(),
-                        new AttributeModifier(ATTACK_TYPE_BASE_MOD_UUID, "attack_type_reach_mod", attackInfo.maxReach()-3.0, AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_reach_mod", attackInfo.maxReach() - 3.0, AttributeModifier.Operation.ADDITION));
                 e.addModifier(Attributes.ATTACK_SPEED,
-                        new AttributeModifier(ATTACK_TYPE_BASE_MOD_UUID, "attack_type_speed_mod", attackInfo.attackSpeedMod()-1, AttributeModifier.Operation.MULTIPLY_TOTAL));
-                e.addModifier(SkadaRegistry.AIM.get(),
-                        new AttributeModifier(ATTACK_TYPE_BASE_MOD_UUID, "attack_type_aim_mod", attackInfo.aim(), AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_speed_mod", attackInfo.attackSpeedMod() - 1, AttributeModifier.Operation.MULTIPLY_TOTAL));
                 e.addModifier(SkadaRegistry.LETHALITY.get(),
-                        new AttributeModifier(ATTACK_TYPE_BASE_MOD_UUID, "attack_type_lethality_mod", attackInfo.lethality(), AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_lethality_mod", attackInfo.lethality(), AttributeModifier.Operation.ADDITION));
                 e.addModifier(Attributes.ATTACK_DAMAGE,
-                        new AttributeModifier(ATTACK_TYPE_BASE_MOD_UUID, "attack_type_damage_mod", attackInfo.damageBonus(), AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_damage_mod", attackInfo.damageBonus(), AttributeModifier.Operation.ADDITION));
+            }
+            if (stack.getTagElement(ARMOUR_INFO_TAG_KEY) != null) {
+                ArmourInfo info = ArmourInfo.fromCompoundTag(stack.getTagElement(ARMOUR_INFO_TAG_KEY));
+                for (Map.Entry<Element, Double> entry : info.elementalResists().entrySet()) {
+                    e.addModifier(entry.getKey().resistAttribute(),
+                            new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, entry.getKey() + "_resist_mod", entry.getValue(), AttributeModifier.Operation.ADDITION));
+                }
+                for (Map.Entry<AttackType, Double> entry : info.attackResists().entrySet()) {
+                    e.addModifier(entry.getKey().resistAttribute(),
+                            new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, entry.getKey() + "_resist_mod", entry.getValue(), AttributeModifier.Operation.ADDITION));
+                }
+                e.addModifier(Attributes.ARMOR,
+                        new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, "armour_bonus_mod", info.armourBonus(), AttributeModifier.Operation.ADDITION));
+                e.addModifier(Attributes.ARMOR_TOUGHNESS,
+                        new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, "armour_toughness_bonus_mod", info.armourToughnessBonus(), AttributeModifier.Operation.ADDITION));
             }
         }
 
+        /*
+        Add attribute modifiers to mobs when they join the world.
+         */
+        @SubscribeEvent
+        public static void onMobJoinWorld(EntityJoinLevelEvent e)  {
+            if (e.getEntity() instanceof Mob mob) {
+                if (mob.getPersistentData().contains("skada_has_persistent_bonus")) return;
+                MobData data = MOB_DATA.get(mob.getType());
+                if (data == null) {
+                    LOGGER.error("No mob data found for {}", mob.getType().getDescriptionId());
+                }
+                else {
+                    for (Map.Entry<Attribute, AttributeModifier> entry : data.extraModifiers().entries()) {
+                        if (mob.getAttribute(entry.getKey()) == null) {
+                            continue;
+                        }
+                        mob.getAttribute(entry.getKey()).addPermanentModifier(
+                                new AttributeModifier(
+                                        SKADA_MOB_MODIFIER,
+                                        entry.getKey().getDescriptionId(),
+                                        entry.getValue().getAmount(),
+                                        entry.getValue().getOperation()
+                                )
+                        );
+                    }
+                    mob.getPersistentData().putBoolean("skada_has_persistent_bonus", true);
+                }
+            }
+        }
+
+        /*
+            * Here we listen to when a player joins the server and update their config maps
+         */
         @SubscribeEvent
         public static void onPlayerJoin(OnDatapackSyncEvent event) {
             ResourceManager manager = event.getPlayer().server.getResourceManager();
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            HashMap<String, Map<String, WeaponInfo>> mapToSend = new HashMap<>();
+            HashMap<String, Map<String, WeaponInfo>> weaponMapToSend = new HashMap<>();
+            HashMap<String, Map<String, ArmourInfo>> armourMapToSend = new HashMap<>();
             manager.listResources("weapon_info", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
                 try {
                     BufferedReader reader = new BufferedReader(manager.openAsReader(rl));
@@ -140,29 +191,44 @@ public class CommonEvent {
                     DataResult<Map<String, WeaponInfo>> info = WeaponInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, obj);
                     String[] split = rl.getPath().split("/");
                     String modId = split[split.length-1].substring(0, split[split.length-1].length()-5);
-                    info.result().ifPresent((map) -> mapToSend.put(modId, map));
+                    info.result().ifPresent((map) -> weaponMapToSend.put(modId, map));
                 } catch (Exception e) {
                     LOGGER.error("Failed to read weapon info from " + rl, e);
                 }
             });
-            SkadaNetwork.serverToPlayer(new S2CSendWeaponInfoMap(mapToSend), event.getPlayer());
+            manager.listResources("armour_info", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
+                try {
+                    BufferedReader reader = new BufferedReader(manager.openAsReader(rl));
+                    JsonObject obj = gson.fromJson(reader, JsonObject.class);
+                    DataResult<Map<String, ArmourInfo>> info = ArmourInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, obj);
+                    String[] split = rl.getPath().split("/");
+                    String modId = split[split.length-1].substring(0, split[split.length-1].length()-5);
+                    info.result().ifPresent((map) -> armourMapToSend.put(modId, map));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to read armour info from " + rl, e);
+                }
+            });
+            SkadaNetwork.serverToPlayer(new S2CSendWeaponInfoMap(weaponMapToSend), event.getPlayer());
+            SkadaNetwork.serverToPlayer(new S2CSendArmourInfoMap(armourMapToSend), event.getPlayer());
         }
 
-        @SubscribeEvent
-        public static void onPlayerEquipItem(LivingEquipmentChangeEvent e) {
-            if (!(e.getEntity() instanceof Player)) return;
-            if (e.getSlot() != EquipmentSlot.MAINHAND && e.getSlot() != EquipmentSlot.OFFHAND) return;
-            if (e.getTo().hasTag() && e.getTo().getTag().contains(WEAPON_INFO_TAG_KEY)) {
-                WeaponInfo info = WeaponInfo.fromCompoundTag(e.getTo().getTagElement(WEAPON_INFO_TAG_KEY));
-                SkadaNetwork.serverToPlayer(new S2CUpdateWeaponInfo(e.getTo().getTagElement(WEAPON_INFO_TAG_KEY)), (ServerPlayer) e.getEntity());
-                ((AccessPlayerWeaponInfo) e.getEntity()).setWeaponInfo(info);
-                ((AccessPlayerWeaponInfo) e.getEntity()).setAttackTypeIndex(e.getTo().getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY));
-            }
-        }
+//        @SubscribeEvent
+//        public static void onLivingEntityEquip(LivingEquipmentChangeEvent e) {
+//            if (e.getSlot() != EquipmentSlot.MAINHAND && e.getSlot() != EquipmentSlot.OFFHAND) return;
+//            if (e.getTo().hasTag() && e.getTo().getTag().contains(WEAPON_INFO_TAG_KEY)) {
+//                WeaponInfo info = WeaponInfo.fromCompoundTag(e.getTo().getTagElement(WEAPON_INFO_TAG_KEY));
+//                SkadaNetwork.serverToAll(new S2CUpdateWeaponInfo(e.getTo().getTagElement(WEAPON_INFO_TAG_KEY), e.getEntity().getId()));
+//                ((SkadaEntity) e.getEntity()).setWeaponInfo(info);
+//            }
+//            else {
+//                ((SkadaEntity) e.getEntity()).setWeaponInfo(WeaponInfo.NO_WEAPON);
+//                SkadaNetwork.serverToAll(new S2CUpdateWeaponInfo(WeaponInfo.NO_WEAPON.toCompoundTag(), e.getEntity().getId()));
+//            }
+//        }
 
         @SubscribeEvent
         public static void onCommandsRegister(RegisterCommandsEvent e) {
-            new SkadaCommand(e.getDispatcher());
+            new SkadaCommand(e.getDispatcher(), e.getBuildContext());
             ConfigCommand.register(e.getDispatcher());
         }
 
@@ -198,6 +264,12 @@ public class CommonEvent {
                 max = (max+step)*-1;
                 step*=-1;
             }
+        }
+
+        @SubscribeEvent
+        public static void onProjectileImpact(ProjectileImpactEvent e) {
+
+
         }
 
     }

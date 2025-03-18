@@ -26,7 +26,7 @@ public class Keybinds {
     }
 
     private static KeyMapping create(String name, int key) {
-        return new KeyMapping("key." + Skada.MODID + "." + name, key, "key.category." + Skada.MODID);
+        return new KeyMapping("tagKey." + Skada.MODID + "." + name, key, "tagKey.category." + Skada.MODID);
     }
 
 }

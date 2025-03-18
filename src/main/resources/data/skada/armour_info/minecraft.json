@@ -1,0 +1,168 @@
+{
+  "chainmail_boots": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "chainmail_chestplate": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "chainmail_helmet": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "chainmail_leggings": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "diamond_boots": {
+    "elemental_resists": {
+      "skada:cold": 2.0
+    },
+    "attack_type_resists": {
+      "skada:slash": 2.0
+    },
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "diamond_chestplate": {
+    "elemental_resists": {
+      "skada:cold": 2.0
+    },
+    "attack_type_resists": {
+      "skada:slash": 2.0
+    },
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "diamond_helmet": {
+    "elemental_resists": {
+      "skada:cold": 2.0
+    },
+    "attack_type_resists": {
+      "skada:slash": 2.0
+    },
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "diamond_leggings": {
+    "elemental_resists": {
+      "skada:cold": 2.0
+    },
+    "attack_type_resists": {
+      "skada:slash": 2.0
+    },
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "golden_boots": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "golden_chestplate": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "golden_helmet": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "golden_leggings": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "iron_boots": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "iron_chestplate": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "iron_helmet": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "iron_leggings": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "leather_boots": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "leather_chestplate": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "leather_helmet": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "leather_leggings": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "netherite_boots": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "netherite_chestplate": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "netherite_helmet": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "netherite_leggings": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  },
+  "turtle_helmet": {
+    "elemental_resists": {},
+    "attack_type_resists": {},
+    "armour_bonus": 0.0,
+    "armour_toughness_bonus": 0.0
+  }
+}

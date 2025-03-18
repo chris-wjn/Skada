@@ -1,8 +1,6 @@
 package com.cwjn.skada;
 
-import com.cwjn.skada.client.Particles;
-import com.cwjn.skada.data.damage.LethalityFunction;
-import com.cwjn.skada.mixin.AccessRangedAttribute;
+import com.cwjn.skada.mixin.new_features.AccessRangedAttribute;
 import com.cwjn.skada.network.SkadaNetwork;
 import com.cwjn.skada.util.Util;
 import com.mojang.logging.LogUtils;
@@ -41,7 +39,7 @@ public class Skada {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
-        DAMAGE_CLASSES.register(modEventBus);
+        ATTACK_TYPES.register(modEventBus);
         ELEMENTS.register(modEventBus);
         PARAMETERS.register(modEventBus);
         PARTICLES.register(modEventBus);
@@ -63,12 +61,26 @@ public class Skada {
     private void commonSetup(final FMLCommonSetupEvent event) {
         SkadaNetwork.init();
         Path dir = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada");
-        Path dir1 = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "generated");
-        Path dir2 = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "generator_data");
+        Path dirWeapon = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons");
+        Path dirArmour = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour");
+        Path dirMobs = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs");
+        Path dirWeaponGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generated");
+        Path dirArmourGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generated");
+        Path dirMobsGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs", "generated");
+        Path dirWeaponGenerator = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generator_data");
+        Path dirArmourGenerator = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generator_data");
+        Path dirMobsGenerator = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs", "generator_data");
         try {
             Files.createDirectories(dir);
-            Files.createDirectories(dir1);
-            Files.createDirectories(dir2);
+            Files.createDirectories(dirWeapon);
+            Files.createDirectories(dirArmour);
+            Files.createDirectories(dirMobs);
+            Files.createDirectories(dirWeaponGenerated);
+            Files.createDirectories(dirArmourGenerated);
+            Files.createDirectories(dirWeaponGenerator);
+            Files.createDirectories(dirArmourGenerator);
+            Files.createDirectories(dirMobsGenerated);
+            Files.createDirectories(dirMobsGenerator);
         }
         catch (IOException e) {
             if (e instanceof FileAlreadyExistsException) {}
@@ -81,6 +93,8 @@ public class Skada {
     @SubscribeEvent
     public void attachSkadaWeaponInfos(ServerAboutToStartEvent event) {
         Util.updateWeaponInfoItemsFromResources(event.getServer().getResourceManager());
+        Util.updateArmourInfoItemsFromResources(event.getServer().getResourceManager());
+        Util.updateMobInfoFromResources(event.getServer().getResourceManager());
     }
 
     @SubscribeEvent

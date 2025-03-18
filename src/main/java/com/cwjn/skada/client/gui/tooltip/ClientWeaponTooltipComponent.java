@@ -1,10 +1,9 @@
 package com.cwjn.skada.client.gui.tooltip;
 
 import com.cwjn.skada.data.damage.AttackTypeInfo;
-import com.cwjn.skada.data.damage.ElementSpread;
 import com.cwjn.skada.data.damage.WeaponInfo;
+import com.cwjn.skada.data.gen.ElementSpread;
 import com.cwjn.skada.data.registry.AttackType;
-import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -36,14 +35,13 @@ import static com.cwjn.skada.data.SkadaData.*;
 import static net.minecraft.world.item.ItemStack.ATTRIBUTE_MODIFIER_FORMAT;
 
 @OnlyIn(Dist.CLIENT)
-public class ClientIconTooltipComponent implements ClientTooltipComponent {
+public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
 
     private final List<Component> lines = new ArrayList<>();
     private final Multimap<Attribute, AttributeModifier> mainAttributes;
     private final List<Multimap<Attribute, AttributeModifier>> otherAttributes;
     private final Player player = Minecraft.getInstance().player;
     private final WeaponInfo info;
-    //get the attack types from the weapon info and sort them into an array
     private final AttackType[] attackTypes;
     private int longest = 0; //the length of the longest line in lines
     private int arrowXCoord = 0; //the coordinate to draw the selector arrow at
@@ -52,25 +50,31 @@ public class ClientIconTooltipComponent implements ClientTooltipComponent {
     private static final ResourceLocation SPRITES = Util.rl("textures/gui/spritesheet.png");
     private static final DecimalFormat df = new DecimalFormat("#.#");
 
-    public ClientIconTooltipComponent(ItemStack itemstack) {
+    public ClientWeaponTooltipComponent(ItemStack itemstack) {
         EquipmentSlot[] slots = Arrays.stream(EquipmentSlot.values()).filter(s -> !s.equals(LivingEntity.getEquipmentSlotForItem(itemstack))).toArray(EquipmentSlot[]::new);
         this.mainAttributes = itemstack.getAttributeModifiers(LivingEntity.getEquipmentSlotForItem(itemstack));
         this.otherAttributes = Arrays.stream(slots).map(itemstack::getAttributeModifiers).toList();
-        this.info = WeaponInfo.fromCompoundTag(itemstack.getTagElement(WEAPON_INFO_TAG_KEY));
-        this.attackTypes = info.getAttackTypes().keySet().toArray(AttackType[]::new);
-        int attackIndex = itemstack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
-        if (info.getAttackTypes().isEmpty()) return;
-        AttackTypeInfo attackInfo = info.getAttackTypes().get(info.getAttackTypes().keySet().stream().sorted().toArray(AttackType[]::new)[attackIndex]);
-        lines.add(attackTypesComponent(attackIndex));
-        lines.add(attackInfoComponent(attackInfo, WEAPON_INFO_COMPONENT_TYPE.AIM));
-        lines.add(attackInfoComponent(attackInfo, WEAPON_INFO_COMPONENT_TYPE.REACH));
-        lines.add(attackInfoComponent(attackInfo, WEAPON_INFO_COMPONENT_TYPE.LETHALITY));
-        lines.add(attackInfoComponent(attackInfo, WEAPON_INFO_COMPONENT_TYPE.ATTACK_SPEED));
+        info = Util.getWeaponInfo(itemstack);
+        attackTypes = Util.getAttackTypes(itemstack);
+        AttackTypeInfo currentInfo = Util.getAttackTypeInfo(itemstack);
+        int index = itemstack.getOrCreateTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
+        if (attackTypes.length <= index) {
+            //debug
+            System.out.println("item: " + itemstack.getDisplayName());
+            System.out.println("attackTypes.length: " + attackTypes.length);
+            System.out.println("index: " + index);
+            return;
+        }
+        ;
+        lines.add(attackTypesComponent(attackTypes[index]));
+        lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.REACH));
+        lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.LETHALITY));
+        lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.ATTACK_SPEED));
         lines.addAll(attackDamageComponent(info.getSpread()));
         //lines.addAll(getAttributeComponents(mainAttributes));
-        /*lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.shift_for_weapon_info"), false));
-        lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.test_numbers",120495), true));
-        lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.test_swedish_characters"), false));*/
+            /*lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.shift_for_weapon_info"), false));
+            lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.test_numbers",120495), true));
+            lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.test_swedish_characters"), false));*/
     }
 
     private List<Component> attackDamageComponent(ElementSpread spread) {
@@ -127,7 +131,7 @@ public class ClientIconTooltipComponent implements ClientTooltipComponent {
         ClientTooltipComponent.super.renderImage(font, x, y, guiGraphics);
         if (lines.isEmpty()) return;
         //this.drawHorizontalGradient(guiGraphics, x, y+font.lineHeight, x+longest, y+font.lineHeight+0.5f, 0, 0xFFFFFFFF, 0x00FFFFFF);
-        //kguiGraphics.blit(SPRITES, x+arrowXCoord, y+font.lineHeight-10, 1, 0, 5, 4);
+        //guiGraphics.blit(SPRITES, x+arrowXCoord, y+font.lineHeight-10, 1, 0, 5, 4);
         if (info.getAttackTypes().size() != 1) guiGraphics.blit(SPRITES, x+arrowXCoord, y+font.lineHeight-1, 1, 4, 5, 4);
     }
 
@@ -172,7 +176,7 @@ public class ClientIconTooltipComponent implements ClientTooltipComponent {
         return list;
     }
 
-    private Component attackTypesComponent(int attackIndex) {
+    private Component attackTypesComponent(AttackType attackType) {
         //start an empty MutableComponent that will be appended to, so we can return a single component
         MutableComponent retComp = Component.empty();
         Font font = Minecraft.getInstance().font;
@@ -181,7 +185,7 @@ public class ClientIconTooltipComponent implements ClientTooltipComponent {
          * (attackTypes.length + 2 + attackTypes.length-1) is the size of the array, where the +2 is for the curly braces
          * and the +attackTypes.length-1 is for the commas between the attack types
         */
-        MutableComponent[] attackTypeComponents = new MutableComponent[attackTypes.length + 2 + attackTypes.length-1];
+        MutableComponent[] attackTypeComponents = new MutableComponent[info.getAttackTypes().size() + 2 + info.getAttackTypes().size()-1];
         //attackTypeComponents[0] = Component.literal("[");
         retComp.append(Util.pixelFontComponent(Component.literal("[")));
         //attackTypeComponents[attackTypeComponents.length-1] = Component.literal("]");
@@ -198,7 +202,7 @@ public class ClientIconTooltipComponent implements ClientTooltipComponent {
                 countArrow+=font.width(thisComp);
                 doSlash = false;
             }
-            else if (correctAttackIndex == attackIndex) {
+            else if (attackType.equals(attackTypes[correctAttackIndex])) {
                 thisComp = Util.pixelFontComponent(Component.literal(attackTypes[correctAttackIndex].name().toUpperCase())).withStyle(ChatFormatting.AQUA);
                 correctAttackIndex++;
                 arrowXCoord = countArrow+(font.width(thisComp)/2)-2;
@@ -222,10 +226,6 @@ public class ClientIconTooltipComponent implements ClientTooltipComponent {
         MutableComponent retComp = Component.empty();
         retComp.append(Component.translatable("skada.icon." + componentType.toString().toLowerCase()).withStyle(ICONS));
         switch (componentType) {
-            case AIM:
-                retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.aim",
-                        df.format(attackTypeInfo.aim()))));
-                break;
             case REACH:
                 retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.reach",
                         df.format(attackTypeInfo.minReach()),
@@ -246,7 +246,6 @@ public class ClientIconTooltipComponent implements ClientTooltipComponent {
     }
 
     private enum WEAPON_INFO_COMPONENT_TYPE {
-        AIM,
         REACH,
         LETHALITY,
         ATTACK_SPEED

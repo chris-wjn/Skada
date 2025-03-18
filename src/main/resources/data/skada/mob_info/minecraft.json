@@ -1,0 +1,333 @@
+{
+  "allay": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "axolotl": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "bat": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "bee": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "blaze": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "camel": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "cat": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "cave_spider": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "chicken": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "cod": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "cow": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "creeper": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "dolphin": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "donkey": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "drowned": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "elder_guardian": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "ender_dragon": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "enderman": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "endermite": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "evoker": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "fox": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "frog": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "ghast": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "giant": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "glow_squid": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "goat": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "guardian": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "hoglin": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "horse": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "husk": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "illusioner": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "llama": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "magma_cube": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "mooshroom": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "mule": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "ocelot": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "panda": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "parrot": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "phantom": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "pig": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "piglin": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "piglin_brute": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "pillager": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "polar_bear": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "pufferfish": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "rabbit": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "ravager": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "salmon": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "sheep": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "shulker": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "silverfish": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "skeleton": {
+    "parent": "minecraft:zombie",
+    "attackType": "skada:strike",
+    "extraModifiers": {
+      "skada:damage_class.thrust_resist": [
+        {
+          "amount": 1.0,
+          "operation": 0
+        }
+      ]
+    }
+  },
+  "skeleton_horse": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "slime": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "sniffer": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "spider": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "squid": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "stray": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "strider": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "tadpole": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "trader_llama": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "tropical_fish": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "turtle": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "vex": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "vindicator": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "wandering_trader": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "warden": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "witch": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "wither": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "wither_skeleton": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "wolf": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "zoglin": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "zombie": {
+    "attackType": "skada:strike",
+    "extraModifiers": {
+      "skada:element.heat_resist": [
+        {
+          "amount": -1.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.aether_resist": [
+        {
+          "amount": -1.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor": [
+        {
+          "amount": -2.0,
+          "operation": 0
+        }
+      ]
+    }
+  },
+  "zombie_horse": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "zombie_villager": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "zombified_piglin": {
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  }
+}

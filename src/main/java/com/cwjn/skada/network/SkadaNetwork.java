@@ -1,9 +1,10 @@
 package com.cwjn.skada.network;
 
 import com.cwjn.skada.network.client_to_server.C2SAddWeaponTag;
-import com.cwjn.skada.network.client_to_server.C2SCycleAttackType;
-import com.cwjn.skada.network.client_to_server.C2SCycleAttackTypeFromMenu;
+import com.cwjn.skada.network.client_to_server.C2SUpdateAttackIndex;
+import com.cwjn.skada.network.client_to_server.C2SUpdateAttackIndexFromMenu;
 import com.cwjn.skada.network.server_to_client.S2CCreateDamageIndicator;
+import com.cwjn.skada.network.server_to_client.S2CSendArmourInfoMap;
 import com.cwjn.skada.network.server_to_client.S2CSendWeaponInfoMap;
 import com.cwjn.skada.network.server_to_client.S2CUpdateWeaponInfo;
 import com.cwjn.skada.util.Util;
@@ -32,15 +33,20 @@ public class SkadaNetwork {
                 S2CSendWeaponInfoMap::decode,
                 S2CSendWeaponInfoMap::handle);
         INSTANCE.registerMessage(id++,
-                C2SCycleAttackType.class,
-                C2SCycleAttackType::encode,
-                C2SCycleAttackType::decode,
-                C2SCycleAttackType::handle);
+                S2CSendArmourInfoMap.class,
+                S2CSendArmourInfoMap::encode,
+                S2CSendArmourInfoMap::decode,
+                S2CSendArmourInfoMap::handle);
         INSTANCE.registerMessage(id++,
-                C2SCycleAttackTypeFromMenu.class,
-                C2SCycleAttackTypeFromMenu::encode,
-                C2SCycleAttackTypeFromMenu::decode,
-                C2SCycleAttackTypeFromMenu::handle);
+                C2SUpdateAttackIndex.class,
+                C2SUpdateAttackIndex::encode,
+                C2SUpdateAttackIndex::decode,
+                C2SUpdateAttackIndex::handle);
+        INSTANCE.registerMessage(id++,
+                C2SUpdateAttackIndexFromMenu.class,
+                C2SUpdateAttackIndexFromMenu::encode,
+                C2SUpdateAttackIndexFromMenu::decode,
+                C2SUpdateAttackIndexFromMenu::handle);
         INSTANCE.registerMessage(id++,
                 C2SAddWeaponTag.class,
                 C2SAddWeaponTag::encode,

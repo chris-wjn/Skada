@@ -1,31 +1,46 @@
 package com.cwjn.skada;
 
+import com.cwjn.skada.data.SkadaData;
+import com.cwjn.skada.data.armour.ArmourInfo;
+import com.cwjn.skada.data.gen.ArmourMaterialInfo;
+import com.cwjn.skada.data.gen.ArmourPieceInfo;
 import com.cwjn.skada.data.gen.ExtraTierInfo;
 import com.cwjn.skada.data.gen.NamedInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
-import com.cwjn.skada.util.AccessWeaponInfo;
+import com.cwjn.skada.data.mob.MobData;
+import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.util.Util;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.item.*;
 import net.minecraftforge.common.TierSortingRegistry;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.command.ModIdArgument;
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -39,22 +54,73 @@ import static net.minecraft.commands.Commands.literal;
 
 public class SkadaCommand {
 
-    public SkadaCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public SkadaCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ctx) {
         dispatcher.register(literal("skada")
                 .then(literal("get")
                         .then(literal("weaponInfo")
                                 .executes(stack -> getWeaponInfo(stack.getSource()))
                         )
+                        .then(literal("mobInfo")
+                                .then(Commands.argument("entity", ResourceArgument.resource(ctx, Registries.ENTITY_TYPE)).suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
+                                        .executes(stack -> displayMobInfo(stack.getSource(), ResourceArgument.getEntityType(stack, "entity")))
+                                )
+                        )
                 )
                 .then(literal("generate")
-                        .then(Commands.argument("namespace", ModIdArgument.modIdArgument())
-                                .executes(stack -> generateWeaponInfoForNamespace(stack.getSource(), stack.getArgument("namespace", String.class)))
+                        .then(Commands.literal("weapons")
+                                .then(Commands.argument("namespace", ModIdArgument.modIdArgument())
+                                        .executes(stack -> generateWeaponInfoForNamespace(stack.getSource(), stack.getArgument("namespace", String.class)))
+                                )
+                                .then(literal("all")
+                                        .executes(stack -> generateWeaponInfoForAllNamespaces(stack.getSource()))
+                                )
                         )
-                        .then(literal("all")
-                                .executes(stack -> generateWeaponInfoForAllNamespaces(stack.getSource()))
+                        .then(Commands.literal("armour")
+                                .then(Commands.argument("namespace", ModIdArgument.modIdArgument())
+                                        .executes(stack -> generateArmourInfoForNamespace(stack.getSource(), stack.getArgument("namespace", String.class)))
+                                )
+                                .then(literal("all")
+                                        .executes(stack -> generateArmourInfoForAllNamespaces(stack.getSource()))
+                                )
+                        )
+                        .then(Commands.literal("mobs")
+                                .then(Commands.argument("namespace", ModIdArgument.modIdArgument())
+                                        .executes(stack -> generateMobInfoForNamespace(stack.getSource(), stack.getArgument("namespace", String.class)))
+                                )
+                                .then(literal("all")
+                                        .executes(stack -> generateMobInfoForAllNamespaces(stack.getSource()))
+                                )
                         )
                 )
         );
+    }
+
+    private int displayMobInfo(CommandSourceStack source, Holder.Reference<EntityType<?>> entity) {
+        ServerPlayer player = source.getPlayer();
+        EntityType<?> type = entity.get();
+        System.out.println("got player");
+        if (player == null) {
+            return 0;
+        }
+        System.out.println("player is not null");
+        MobData data = SkadaData.MOB_DATA.get(type);
+        System.out.println("got data");
+        if (data == null) {
+            player.displayClientMessage(Component.translatable("skada.command_get_mobinfo.error.no_info", type.getDescriptionId()), false);
+            return 0;
+        }
+        System.out.println("data is not null");
+        StringBuilder attributes = new StringBuilder("Attributes for " + type.getDescriptionId() + ":\n");
+        for (Map.Entry<Attribute, AttributeModifier> entry : data.extraModifiers().entries()) {
+            attributes.append(entry.getKey().getDescriptionId())
+                    .append(": ")
+                    .append(entry.getValue().getAmount())
+                    .append(" (")
+                    .append(entry.getValue().getOperation())
+                    .append(")\n");
+        }
+        player.displayClientMessage(Component.literal(attributes.toString()), false);
+        return 1;
     }
 
     private int getWeaponInfo(CommandSourceStack source) {
@@ -62,13 +128,7 @@ public class SkadaCommand {
         if (player == null) {
             return 0;
         }
-        if (player.getMainHandItem().isEmpty()) {
-            player.displayClientMessage(Component.translatable("skada.command_get_weaponinfo.error.no_item"), false);
-            return 0;
-        }
-        Item item = player.getMainHandItem().getItem();
-        AccessWeaponInfo mixinItem = (AccessWeaponInfo) item;
-        WeaponInfo info = mixinItem.skada$getWeaponInfo();
+        WeaponInfo info = Util.getWeaponInfo(player);
         if (info != null) {
             player.displayClientMessage(info.toTextComponent().get(), false);
         } else {
@@ -82,6 +142,16 @@ public class SkadaCommand {
         return 1;
     }
 
+    private int generateArmourInfoForAllNamespaces(CommandSourceStack stack) {
+        FMLLoader.getLoadingModList().getMods().forEach(mod -> generateArmourInfoForNamespace(stack, mod.getModId()));
+        return 1;
+    }
+
+    private int generateMobInfoForAllNamespaces(CommandSourceStack stack) {
+        FMLLoader.getLoadingModList().getMods().forEach(mod -> generateMobInfoForNamespace(stack, mod.getModId()));
+        return 1;
+    }
+
     private int generateWeaponInfoForNamespace(CommandSourceStack source, String namespace) {
         ServerPlayer player = source.getPlayer();
         if (player == null) {
@@ -92,7 +162,7 @@ public class SkadaCommand {
         HashMap<Tier, ExtraTierInfo> tierMap = new HashMap<>();
         HashMap<String, NamedInfo> namedMap = new HashMap<>();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Path generator_data_item_name = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "generator_data", "by_item_name.json");
+        Path generator_data_item_name = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generator_data", "by_item_name.json");
         try {
             BufferedReader reader = new BufferedReader(new FileReader(generator_data_item_name.toString()));
             DataResult<Map<String, NamedInfo>> namedInfo = NamedInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
@@ -102,7 +172,7 @@ public class SkadaCommand {
             player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
             return 0;
         }
-        File generator_data_tier_info = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "generator_data", "tier_info").toFile();
+        File generator_data_tier_info = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generator_data", "tier_info").toFile();
         File[] listing = generator_data_tier_info.listFiles();
         if (listing == null) {
             player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
@@ -137,7 +207,7 @@ public class SkadaCommand {
                         info = WeaponInfo.generate(tierMap.get(tItem.getTier()), nInfo);
                     }
                     else {
-                        info = new WeaponInfo();
+                        info = WeaponInfo.generate(tierMap.get(Tiers.DIAMOND), nInfo);
                     }
                     map.put(path, info);
                 }
@@ -148,8 +218,133 @@ public class SkadaCommand {
             return 0;
         }
         player.displayClientMessage(Component.translatable("skada.generate_weapon_info.found_items", map.size()), false);
-        Path path = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "generated");
+        Path path = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generated");
         WeaponInfo.STRING_MAP_CODEC.encodeStart(JsonOps.INSTANCE, map).result().ifPresent(jsonElement -> {
+            String json = gson.toJson(jsonElement);
+            try {
+                FileUtils.write(new File(path.toFile(), namespace + ".json") ,json);
+            } catch (IOException e) {
+                player.displayClientMessage(Component.translatable("skada.generate_weapon_info.io_error"), false);
+            }
+        });
+        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.finish", map.size()), false);
+        return 1;
+    }
+
+    private int generateArmourInfoForNamespace(@NotNull CommandSourceStack source, String namespace) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            return 0;
+        }
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        player.displayClientMessage(Component.translatable("skada.generate_armour_info.start", namespace), false);
+        Path generator_data_item_name = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generator_data", "by_item_name.json");
+        Map<String, ArmourPieceInfo> armourPieceNameMap = new HashMap<>();
+        Map<String, ArmourMaterialInfo> armourMaterialInfoMap = new HashMap<>();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(generator_data_item_name.toString()));
+            DataResult<Map<String, ArmourPieceInfo>> armourPieceInfo = ArmourPieceInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+            armourPieceInfo.result().ifPresent(armourPieceNameMap::putAll);
+        }
+        catch (FileNotFoundException e) {
+            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
+            return 0;
+        }
+        File generator_data_tier_info = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generator_data", "material_info").toFile();
+        File[] listing = generator_data_tier_info.listFiles();
+        if (listing == null) {
+            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
+            return 0;
+        }
+        for (File material_json : listing) {
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(material_json));
+                DataResult<ArmourMaterialInfo> info = ArmourMaterialInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+                info.result().ifPresent(mInfo -> {
+                    String[] nameSplit = material_json.getName().split("\\.");
+                    armourMaterialInfoMap.put(nameSplit[1], mInfo);
+                    System.out.println(nameSplit[1]);
+                });
+            } catch (FileNotFoundException e) {
+                player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
+            }
+        }
+        TreeMap<String, ArmourInfo> map = new TreeMap<>();
+        for (Item item : ForgeRegistries.ITEMS.getValues()) {
+            if (!item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.HEAD).isEmpty() ||
+                    !item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.CHEST).isEmpty() ||
+                    !item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.LEGS).isEmpty() ||
+                    !item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.FEET).isEmpty()) {
+                if (Util.getItemNamespace(item).equals(namespace)) {
+                    ArmourPieceInfo nInfo = ArmourPieceInfo.DEFAULT;
+                    String path = Util.getItemPath(item);
+                    for (String s : armourPieceNameMap.keySet()) {
+                        if (Pattern.compile("\\b" + s + "\\b", Pattern.CASE_INSENSITIVE).matcher(path.replace('_', ' ')).find()) {
+                            nInfo = armourPieceNameMap.get(s);
+                            break;
+                        }
+                    }
+                    ArmourMaterialInfo mInfo;
+                    if (item instanceof ArmorItem aItem && armourMaterialInfoMap.containsKey(aItem.getMaterial().getName())) {
+                        mInfo = armourMaterialInfoMap.get(aItem.getMaterial().getName());
+                    }
+                    else {
+                        mInfo = ArmourMaterialInfo.DEFAULT;
+                    }
+                    map.put(path, ArmourInfo.generate(nInfo, mInfo));
+                }
+            }
+        }
+        if (map.isEmpty()) {
+            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_items", namespace), false);
+            return 0;
+        }
+        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.found_items", map.size()), false);
+        Path path = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generated");
+        ArmourInfo.STRING_MAP_CODEC.encodeStart(JsonOps.INSTANCE, map).result().ifPresent(jsonElement -> {
+            String json = gson.toJson(jsonElement);
+            try {
+                FileUtils.write(new File(path.toFile(), namespace + ".json") ,json);
+            } catch (IOException e) {
+                player.displayClientMessage(Component.translatable("skada.generate_weapon_info.io_error"), false);
+            }
+        });
+        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.finish", map.size()), false);
+        return 1;
+    }
+
+    private int generateMobInfoForNamespace(CommandSourceStack source, String namespace) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            return 0;
+        }
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        TreeMap<String, MobData> map = new TreeMap<>();
+        player.displayClientMessage(Component.translatable("skada.generate_mob_info.start", namespace), false);
+        for (EntityType<?> type : ForgeRegistries.ENTITY_TYPES.getValues()) {
+            if (type.getCategory() != MobCategory.MISC) {
+                if (Util.getEntityNamespace(type).equals(namespace)) {
+                    //create empty multimap
+                    if (Util.getEntityPath(type).equals("zombie")) {
+                        Multimap<Attribute, AttributeModifier> multimap = ArrayListMultimap.create();
+                        multimap.put(SkadaRegistry.WITHER.get().resistAttribute(),
+                                new AttributeModifier(SkadaData.SKADA_MOB_MODIFIER, "wither_resist", 1, AttributeModifier.Operation.ADDITION));
+                        map.put(Util.getEntityPath(type), new MobData(null, AttackType.strike(), multimap));
+                    }
+                    else {
+                        Multimap<Attribute, AttributeModifier> multimap = ArrayListMultimap.create();
+                        map.put(Util.getEntityPath(type), new MobData(null, AttackType.strike(), multimap));
+                    }
+                }
+            }
+        }
+        if (map.isEmpty()) {
+            player.displayClientMessage(Component.translatable("skada.generate_mob_info.error.no_mobs", namespace), false);
+            return 0;
+        }
+        player.displayClientMessage(Component.translatable("skada.generate_mob_info.found_mobs", map.size()), false);
+        Path path = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs", "generated");
+        MobData.STRING_MAP_CODEC.encodeStart(JsonOps.INSTANCE, map).result().ifPresent(jsonElement -> {
             String json = gson.toJson(jsonElement);
             try {
                 FileUtils.write(new File(path.toFile(), namespace + ".json") ,json);

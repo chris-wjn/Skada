@@ -1,4 +1,4 @@
-package com.cwjn.skada.mixin;
+package com.cwjn.skada.mixin.new_features;
 
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import org.spongepowered.asm.mixin.Mixin;
