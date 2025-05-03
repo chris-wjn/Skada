@@ -33,6 +33,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.*;
 import net.minecraftforge.common.TierSortingRegistry;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -192,8 +193,10 @@ public class SkadaCommand {
         }
         for (Item item : ForgeRegistries.ITEMS.getValues()) {
             if (!item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND).isEmpty() ||
-                    !item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty()) {
+                    !item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty() ||
+                    item instanceof ProjectileWeaponItem) {
                 if (Util.getItemNamespace(item).equals(namespace)) {
+                    boolean ignoreAttributes = item instanceof ProjectileWeaponItem;
                     String path = Util.getItemPath(item);
                     WeaponInfo info;
                     NamedInfo nInfo = new NamedInfo();
@@ -204,10 +207,10 @@ public class SkadaCommand {
                         }
                     }
                     if (item instanceof TieredItem tItem && tierMap.containsKey(tItem.getTier())) {
-                        info = WeaponInfo.generate(tierMap.get(tItem.getTier()), nInfo);
+                        info = WeaponInfo.generate(tierMap.get(tItem.getTier()), nInfo, false);
                     }
                     else {
-                        info = WeaponInfo.generate(tierMap.get(Tiers.DIAMOND), nInfo);
+                        info = WeaponInfo.generate(nInfo, ignoreAttributes);
                     }
                     map.put(path, info);
                 }

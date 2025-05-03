@@ -4,5 +4,6 @@ public interface AccessProjectileData {
 
     DamageInfo getDamageInfo();
     void setDamageInfo(DamageInfo data);
+    boolean hasDamageInfo();
 
 }

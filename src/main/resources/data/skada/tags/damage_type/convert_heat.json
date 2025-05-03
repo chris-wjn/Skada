@@ -2,6 +2,8 @@
   "values": [
     "minecraft:in_fire",
     "minecraft:on_fire",
-    "minecraft:lava"
+    "minecraft:lava",
+    "minecraft:fireball",
+    "minecraft:unattributed_fireball"
   ]
 }

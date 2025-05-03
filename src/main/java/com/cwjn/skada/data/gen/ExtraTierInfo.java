@@ -12,7 +12,17 @@ public record ExtraTierInfo(double weight, double hardness, double toughness, do
                     Codec.DOUBLE.fieldOf("toughness").forGetter(ExtraTierInfo::toughness),
                     Codec.DOUBLE.fieldOf("flexibility").forGetter(ExtraTierInfo::flexibility),
                     ElementSpread.CODEC.fieldOf("spread").forGetter(ExtraTierInfo::spread)
-            ).apply(instance, ExtraTierInfo::new)
+            ).apply(instance, ExtraTierInfo::validateExtraTierInfo)
     );
+
+    public static ExtraTierInfo validateExtraTierInfo(double weight, double hardness, double toughness, double flexibility, ElementSpread spread) {
+        return new ExtraTierInfo(
+                Math.max(0.01, weight),
+                Math.max(0.01, hardness),
+                Math.max(0.01, toughness),
+                Math.max(0.01, flexibility),
+                spread
+        );
+    }
 
 }

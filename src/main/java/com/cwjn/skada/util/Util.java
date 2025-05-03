@@ -1,5 +1,7 @@
 package com.cwjn.skada.util;
 
+import com.cwjn.skada.ClientConfig;
+import com.cwjn.skada.CommonConfig;
 import com.cwjn.skada.Skada;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.armour.AccessArmourInfo;
@@ -27,7 +29,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -41,16 +45,15 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 import oshi.util.tuples.Pair;
 
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.lang.Math;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.cwjn.skada.Skada.LOGGER;
 import static com.cwjn.skada.data.SkadaData.*;
@@ -120,8 +123,8 @@ public abstract class Util {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static MutableComponent pixelFontComponent(Component comp) {
-        return pixelFontComponent(comp, false, false);
+    public static MutableComponent pixelFontComponent(MutableComponent comp) {
+        return ClientConfig.USE_MDU_FONT.get()? pixelFontComponent(comp, false, false) : comp;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -146,7 +149,7 @@ public abstract class Util {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static MutableComponent pixelFontComponent(Component comp, boolean useBoldNumbers, boolean useLargeFont) {
+    public static MutableComponent pixelFontComponent(MutableComponent comp, boolean useBoldNumbers, boolean useLargeFont) {
         if (Minecraft.getInstance().getLanguageManager().getSelected().startsWith("en")
          || Minecraft.getInstance().getLanguageManager().getSelected().startsWith("sv")) {
             MutableComponent retComp = Component.empty().withStyle(useLargeFont? PIXEL_LARGE : PIXEL);
@@ -366,7 +369,11 @@ public abstract class Util {
                             Item iItem = ForgeRegistries.ITEMS.getValue(iRL);
                             if (iItem != null) {
                                 AccessWeaponInfo mItem = (AccessWeaponInfo) iItem;
-                                mItem.skada$setWeaponInfo(value);
+                                if (value.getAttackTypes().isEmpty()) {
+                                    LOGGER.error("Weapon info for {} has no attack types, skipping", iRL);
+                                } else {
+                                    mItem.skada$setWeaponInfo(value);
+                                }
                             }
                         });
                     });
@@ -504,6 +511,19 @@ public abstract class Util {
         return end.subtract(start);
     }
 
+    /*
+     * standard function to calculate the chance of a critical fail given a chance 0.0 - 1.0 and a random number generator.
+     * If the critical fail is true, reduce the item's durability by half. Item durability is calculated as the max durability minus the current damage value.
+     */
+    public static void rollCriticalFail(ItemStack item, double chance, RandomSource random, @NotNull ServerPlayer player) {
+        if (!CommonConfig.ENABLE_CRITICAL_FAIL.get()) return;
+        if (player.getAbilities().instabuild) return;
+        if (random.nextDouble() < chance) item.hurtAndBreak(
+                (int)((item.getMaxDamage()-item.getDamageValue()) * (CommonConfig.CRITICAL_FAIL_DURABILITY_LOSS.get())),
+                player,
+                (p) -> p.broadcastBreakEvent(player.getUsedItemHand()));
+    }
+
     //given a pair of numbers, x, y, return 4 vertices that represent a tiny square centered at x, y
     public static void drawPixel(BufferBuilder buffer, PoseStack stack, float x, float y) {
         //buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
@@ -514,7 +534,7 @@ public abstract class Util {
     }
 
     /*
-    function to calculate the percentage reduction in armour for strike attack type. Returns a value between 0 and 1 that should
+    function to calculate the percentage reduction in armour for strike     attack type. Returns a value between 0 and 1 that should
     be multiplied with the target's armour. When lethality is 5x armour toughness, returns 0.5.
     */
     public static double percentReduc(double lethality, double armorToughness, double targetHP) {
@@ -543,14 +563,7 @@ public abstract class Util {
 
     public static double slashLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
         double bonus = weight;
-        bonus += hardness*0.5;
-        return bonus;
-    }
-
-    public static double slashDamageCalculation(double weight, double hardness, double toughness, double flexibility) {
-        double bonus = 0.0;
-        bonus -= toughness*0.5;
-        bonus += flexibility;
+        bonus += flexibility*0.5;
         return bonus;
     }
 
@@ -560,26 +573,27 @@ public abstract class Util {
         return bonus;
     }
 
-    public static double thrustDamageCalculation(double weight, double hardness, double toughness, double flexibility) {
-        double bonus = 0.0;
-        bonus += toughness*0.5;
-        return bonus;
-    }
-
     public static double strikeLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
-        double bonus = weight;
-        bonus += toughness*0.5;
-        return bonus;
+        return weight*1.5;
     }
 
-    public static double strikeDamageCalculation(double weight, double hardness, double toughness, double flexibility) {
-        double bonus = weight*0.5;
-        bonus += hardness*0.5;
-        return bonus;
+    public static double slashAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
+        double denominator = Math.pow(8*weight - 0.05*flexibility, 2);
+        return Math.max((-1)/denominator + 1, 0.25);
+    }
+
+    public static double thrustAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
+        double denominator = 2*hardness - flexibility;
+        return Math.max((-1)/denominator + 1, 0.25);
+    }
+
+    public static double strikeAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
+        return Math.max(1 - 0.2*weight, 0.25);
     }
 
     public static double getCriticalFailChance(double weight, double hardness, double toughness, double flexibility) {
         return 0.01*hardness*hardness/toughness;
     }
+
 
 }

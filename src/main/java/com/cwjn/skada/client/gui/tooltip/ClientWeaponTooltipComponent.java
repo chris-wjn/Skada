@@ -23,6 +23,8 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -58,47 +60,71 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
         attackTypes = Util.getAttackTypes(itemstack);
         AttackTypeInfo currentInfo = Util.getAttackTypeInfo(itemstack);
         int index = itemstack.getOrCreateTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
-        if (attackTypes.length <= index) {
-            //debug
-            System.out.println("item: " + itemstack.getDisplayName());
-            System.out.println("attackTypes.length: " + attackTypes.length);
-            System.out.println("index: " + index);
-            return;
-        }
-        ;
         lines.add(attackTypesComponent(attackTypes[index]));
-        lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.REACH));
+        if (!info.ignoreAttributes()) lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.REACH));
         lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.LETHALITY));
-        lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.ATTACK_SPEED));
-        lines.addAll(attackDamageComponent(info.getSpread()));
+        lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.ACCURACY));
+        lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.CRITICAL_FAIL));
+        if (!info.ignoreAttributes()) lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.ATTACK_SPEED));
+        if (itemstack.getItem() instanceof CrossbowItem) {
+            lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.VELOCITY_CROSSBOW));
+            lines.addAll(attackDamageComponent(info.getSpread(), false));
+        }
+        else if (itemstack.getItem() instanceof BowItem) {
+            lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.VELOCITY_BOW));
+            lines.addAll(attackDamageComponent(info.getSpread(), false));
+        }
+        else {
+            lines.addAll(attackDamageComponent(info.getSpread(), true));
+        }
         //lines.addAll(getAttributeComponents(mainAttributes));
             /*lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.shift_for_weapon_info"), false));
             lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.test_numbers",120495), true));
             lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.test_swedish_characters"), false));*/
     }
 
-    private List<Component> attackDamageComponent(ElementSpread spread) {
+    private List<Component> attackDamageComponent(ElementSpread spread, boolean showFinalDamage) {
         double damage = mainAttributes.get(Attributes.ATTACK_DAMAGE).stream().filter(m -> m.getOperation() == AttributeModifier.Operation.ADDITION).mapToDouble(AttributeModifier::getAmount).sum() + player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
         List<Component> list = new ArrayList<>();
         MutableComponent comp = Component.empty();
         comp.append(Component.translatable("skada.icon.attack_damage").withStyle(ICONS));
-        comp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_damage", df.format(damage*spread.getPowerBudget()))));
+        if (showFinalDamage) comp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_damage", df.format(damage*spread.getPowerBudget()))));
+        else comp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_damage_no_sum")));
         list.add(comp);
         double powerRatio = spread.getPowerBudget()/spread.sumRatio();
-        spread.getRatios().keySet().forEach(key -> list.add(Component.literal("   ")
-                .append(Component.translatable("skada.icon.element." + key.name()).withStyle(ICONS))
-                .append(Util.pixelFontComponent(
-                                Component.translatable("skada.tooltip.info.element." + key.name(),
-                                        (int)(spread.getRatios().get(key)*100/spread.sumRatio()), Util.round(spread.getRatios().get(key)*powerRatio*damage, 1))
-                        ).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(key.colour() & 0xFFFFFF)))
-                )
-        ));
+        if (showFinalDamage) {
+            spread.getRatios().keySet().forEach(key -> list.add(Component.literal("   ")
+                    .append(Component.translatable("skada.icon.element." + key.name()).withStyle(ICONS))
+                    .append(Util.pixelFontComponent(
+                                    Component.translatable("skada.tooltip.info.element." + key.name(),
+                                            (int) (spread.getRatios().get(key) * 100 / spread.sumRatio()), Util.round(spread.getRatios().get(key) * powerRatio * damage, 1))
+                            ).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(key.colour() & 0xFFFFFF)))
+                    )
+            ));
+        }
+        else {
+            spread.getRatios().keySet().forEach(key -> list.add(Component.literal("   ")
+                    .append(Component.translatable("skada.icon.element." + key.name()).withStyle(ICONS))
+                    .append(Util.pixelFontComponent(
+                                    Component.translatable("skada.tooltip.info.element." + key.name() + "_no_sum",
+                                            (int) (spread.getRatios().get(key) * 100 / spread.sumRatio()))
+                            ).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(key.colour() & 0xFFFFFF)))
+                    )
+            ));
+        }
         return list;
     }
 
+    /*
+        * The height of the tooltip is calculated by multiplying the number of lines by the line height of the font, then
+        * adding 2 pixels for each line to account for the padding between lines. If there are multiple attack types,
+        * we add 4 pixels to the height to account for the extra space needed for the attack type selector arrow.
+     */
     @Override
     public int getHeight() {
-        return lines.size()*(Minecraft.getInstance().font.lineHeight+2)+4;
+        int baseSize = lines.size()*(Minecraft.getInstance().font.lineHeight+2);
+        int selectorArrowHeight = attackTypes.length>1 ? 4 : 0;
+        return baseSize + selectorArrowHeight;
     }
 
     @Override
@@ -241,6 +267,22 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
                 retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_speed",
                         Util.round(baseSpeed*attackTypeInfo.attackSpeedMod(), 1))));
                 break;
+            case ACCURACY:
+                retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.accuracy",
+                        df.format(attackTypeInfo.accuracy()*100))));
+                break;
+            case VELOCITY_CROSSBOW:
+                retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
+                        df.format(attackTypeInfo.damageBonus()+3.15))));
+                break;
+            case VELOCITY_BOW:
+                retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
+                        df.format(attackTypeInfo.damageBonus()+3.0))));
+                break;
+            case CRITICAL_FAIL:
+                retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.critical_fail",
+                        df.format(attackTypeInfo.failChance()*100))));
+                break;
         }
         return retComp;
     }
@@ -248,7 +290,11 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     private enum WEAPON_INFO_COMPONENT_TYPE {
         REACH,
         LETHALITY,
-        ATTACK_SPEED
+        ATTACK_SPEED,
+        VELOCITY_CROSSBOW,
+        VELOCITY_BOW,
+        CRITICAL_FAIL,
+        ACCURACY
     }
 
     private void drawHorizontalGradient(GuiGraphics graphics, float pX1, float pY1, float pX2, float pY2, float pZ, int pColorFrom, int pColorTo) {

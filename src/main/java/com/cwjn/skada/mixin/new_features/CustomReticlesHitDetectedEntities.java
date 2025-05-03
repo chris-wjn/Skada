@@ -10,9 +10,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.slf4j.Logger;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +26,7 @@ public class CustomReticlesHitDetectedEntities {
     }
     @Shadow
     protected int missTime;
+    @Final
     @Shadow
     private static Logger LOGGER;
 

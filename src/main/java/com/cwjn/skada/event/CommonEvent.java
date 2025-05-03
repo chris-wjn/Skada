@@ -37,6 +37,7 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -71,8 +72,6 @@ public class CommonEvent {
                 for (Parameter parameter : REGISTRY_PARAMETER.get().getValues()) {
                     e.add(entityType, parameter.attribute());
                 }
-                e.add(entityType, SkadaRegistry.LETHALITY.get());
-                e.add(entityType, SkadaRegistry.EVASIVENESS.get());
             });
         }
 
@@ -123,8 +122,6 @@ public class CommonEvent {
                         new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_reach_mod", attackInfo.maxReach() - 3.0, AttributeModifier.Operation.ADDITION));
                 e.addModifier(Attributes.ATTACK_SPEED,
                         new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_speed_mod", attackInfo.attackSpeedMod() - 1, AttributeModifier.Operation.MULTIPLY_TOTAL));
-                e.addModifier(SkadaRegistry.LETHALITY.get(),
-                        new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_lethality_mod", attackInfo.lethality(), AttributeModifier.Operation.ADDITION));
                 e.addModifier(Attributes.ATTACK_DAMAGE,
                         new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_damage_mod", attackInfo.damageBonus(), AttributeModifier.Operation.ADDITION));
             }

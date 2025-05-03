@@ -3,21 +3,29 @@
   "package": "com.cwjn.skada.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "skada-refmap.json",
+  "plugin": "com.cwjn.skada.mixin.SkadaMixinPlugin",
   "mixins": [
-    "attack_injectors.BowItemUseSkada",
-    "attack_injectors.CrossbowItemUseSkada",
-    "attack_injectors.PlayerAttackUseSkada",
-    "attack_injectors.TridentThrowUseSkada",
+    "attack_injectors.mob.DrownedTridentThrowUseSkada",
+    "attack_injectors.mob.ProjectileUtilGetMobArrowUseSkada",
+    "vanilla_rework.AbstractArrowRemoveCritMechanic",
+    "attack_injectors.player.BowItemUseSkada",
+    "attack_injectors.player.CrossbowItemUseSkada",
+    "attack_injectors.player.PlayerAttackUseSkada",
+    "attack_injectors.player.TridentThrowUseSkada",
     "new_features.AccessRangedAttribute",
     "new_features.FireAttributeCalculationEvent",
     "new_features.ItemInfo",
     "new_features.ProjectileData",
+    "vanilla_rework.ClientboundSetEntityMotionPacketRemoveVelocityClamp",
     "vanilla_rework.RemoveItemstackModifierTooltipLines",
     "vanilla_rework.RemoveKnockbackMixin",
     "vanilla_rework.RemoveVanillaDamageHandling$MixinLivingEntity",
     "vanilla_rework.RemoveVanillaDamageHandling$MixinPlayer"
   ],
   "minVersion": "0.8",
+  "injectors": {
+    "defaultRequire": 1
+  },
   "client": [
     "new_features.CustomReticlesDetectEntities",
     "new_features.CustomReticlesHitDetectedEntities"

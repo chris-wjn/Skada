@@ -50,9 +50,6 @@ public class SkadaRegistry {
     public static final RegistryObject<Parameter> FAITH = parameter("faith");
     public static final RegistryObject<Parameter> AGILITY = parameter("agility");
 
-    public static final RegistryObject<Attribute> LETHALITY = combatAttribute("lethality");
-    public static final RegistryObject<Attribute> EVASIVENESS = combatAttribute("evasion");
-
     private static RegistryObject<AttackType> attackType(String name, LethalityFunction type, AttackTypeGeneratorConfiguration tierStatFunction) {
         Attribute r = new RangedAttribute("attribute.skada." + name + "_resist", 0.0D, -1024.0D, 10.0D).setSyncable(true);
         ForgeRegistries.ATTRIBUTES.register("damage_class." + name + "_resist", r);

@@ -1,17 +1,17 @@
 package com.cwjn.skada.damage;
 
+import com.cwjn.skada.CommonConfig;
 import com.cwjn.skada.Skada;
-import com.cwjn.skada.SkadaRegistry;
 import com.cwjn.skada.data.damage.AccessProjectileData;
 import com.cwjn.skada.data.damage.DamageInfo;
 import com.cwjn.skada.data.damage.ElementSpreadInstance;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.event.custom.PostMitigationEvent;
-import com.cwjn.skada.util.ConsoleColour;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.effect.MobEffects;
@@ -25,6 +25,8 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import static com.cwjn.skada.util.ConsoleColour.*;
+
 @Mod.EventBusSubscriber
 public class DamageHandler {
 
@@ -32,7 +34,8 @@ public class DamageHandler {
     public static void doDamageCalculation(LivingHurtEvent event) {
         SkadaDamageSource source;
         LivingEntity target = event.getEntity();
-        Skada.LOGGER.debug(ConsoleColour.UNDERLINE + "Damage event for entity: {}, initial damage: {}, source: {}", target.getName().getString(), event.getAmount(), event.getSource().getMsgId());
+        boolean isProjectile = false;
+        Skada.LOGGER.debug(UNDERLINE + "Damage event for entity: {}, initial damage: {}, source: {}" + RESET, target.getName().getString(), event.getAmount(), event.getSource().getMsgId());
         double amount = event.getAmount();
         if (event.getSource() instanceof SkadaDamageSource) {
             Skada.LOGGER.debug("Damage source is a SkadaDamageSource.");
@@ -41,6 +44,7 @@ public class DamageHandler {
         else if (event.getSource().getDirectEntity() instanceof Projectile projectile) {
             AccessProjectileData proj = (AccessProjectileData) projectile;
             source = new SkadaDamageSource(event.getSource(), proj.getDamageInfo());
+            isProjectile = true;
             Skada.LOGGER.debug("Damage source is a projectile with damage info: {}", proj.getDamageInfo());
         }
         else {
@@ -61,20 +65,28 @@ public class DamageHandler {
         }
 
         if (!info.isEnvironmental()) {
-            double evasion = target.getAttributeValue(SkadaRegistry.EVASIVENESS.get());
-            double lethality = info.lethality();
-            double toughness = target.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
 
-            Skada.LOGGER.debug("Evasion: {}, Lethality: {}, Toughness: {}", evasion, lethality, toughness);
-
-            Skada.LOGGER.debug("Pre-lethality damage: {}", amount);
-            switch (info.attackType().type().getOperation()) {
-                case SUM_WITH_DAMAGE -> amount += info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
-                case SUM_WITH_ARMOUR -> armour += info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
-                case MULTIPLY_WITH_DAMAGE -> amount *= info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
-                case MULTIPLY_WITH_ARMOUR -> armour *= info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
+            if (CommonConfig.ENABLE_ACCURACY.get() && CommonConfig.ENABLE_ACCURACY_FOR_MELEE.get() && !isProjectile) {
+                Skada.LOGGER.debug("Pre-accuracy damage: {}", amount);
+                amount = getDamageFromAccuracyNormalDistribution(info.accuracy(), amount, event.getEntity().getRandom());
+                Skada.LOGGER.debug("Post-accuracy damage: {}", amount);
             }
-            Skada.LOGGER.debug("Post-lethality damage: {}", amount);
+
+            if (CommonConfig.ENABLE_LETHALITY.get()) {
+                double lethality = info.lethality();
+                double toughness = target.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
+
+                Skada.LOGGER.debug("Lethality: {}, Toughness: {}", lethality, toughness);
+
+                Skada.LOGGER.debug("Pre-lethality damage: {}", amount);
+                switch (info.attackType().type().getOperation()) {
+                    case SUM_WITH_DAMAGE -> amount += info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
+                    case SUM_WITH_ARMOUR -> armour += info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
+                    case MULTIPLY_WITH_DAMAGE -> amount *= info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
+                    case MULTIPLY_WITH_ARMOUR -> armour *= info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
+                }
+                Skada.LOGGER.debug("Post-lethality damage: {}", amount);
+            }
 
             //ATTACK TYPE WEAKNESSES
             AttackType attackType = info.attackType();
@@ -82,11 +94,10 @@ public class DamageHandler {
             amount -= (amount*resistanceReductionFormula(target.getAttributeValue(attackType.resistAttribute())));
             Skada.LOGGER.debug("Post-attack type damage: {}", amount);
 
-
         }
 
         //ARMOUR FORMULA
-        Skada.LOGGER.debug("Pre-armour damage: " + amount);
+        Skada.LOGGER.debug("Pre-armour damage: {}", amount);
         amount = armourReductionFormula(amount, armour);
         Skada.LOGGER.debug("Post-armour damage: {}", amount);
 
@@ -155,6 +166,22 @@ public class DamageHandler {
     private static double resistanceReductionFormula(double resistance) {
         //each point of resistance is 10% reduction, this can also be negative.
         return resistance * 0.1;
+    }
+
+    /*
+        * Get a percentage of damage total based on a normal distribution, where the damage total is the
+        * mean and the accuracy is the standard deviation. Cannot go above the original damage value.
+     */
+    private static double getDamageFromAccuracyNormalDistribution(double accuracy, double damage, RandomSource random) {
+        // Higher accuracy means lower standard deviation (more consistent damage)
+        double standardDeviation = (1.0 - accuracy)*damage;
+
+        // Generate a random number from a normal distribution
+        double z = random.nextGaussian();
+
+        // Calculate final damage using the normal distribution
+        // Clamp the result between 0.5x and the original damage value
+        return Mth.clamp(damage + (standardDeviation * z), damage*0.5, damage);
     }
 
     /*

@@ -25,15 +25,31 @@
   "skada.tooltip.info.aim": "§iAim:§r §e%s",
   "skada.tooltip.info.reach": "§iReach:§r §e%sm§r - §e%sm",
   "skada.tooltip.info.lethality": "§iLethality:§r §e%s",
+  "skada.tooltip.info.accuracy": "§iAccuracy:§r §e%s%%",
+  "skada.tooltip.info.velocity": "§iVelocity:§r §e%sm/s",
+  "skada.tooltip.info.critical_fail": "§iCrit. Fail:§r §e%s%%",
   "skada.tooltip.info.attack_speed": "§iAtk. Speed:§r §e%s",
   "skada.tooltip.info.attack_damage": "§iAtk. Damage:§r §e%s",
+  "skada.tooltip.info.attack_damage_no_sum": "§iElement Split:",
 
   "skada.icon.weight": "\u000B",
   "skada.icon.reach": "\u0011",
-  "skada.icon.aim": "\u001D",
+  "skada.icon.accuracy": "\u001D",
   "skada.icon.lethality": "\u001C",
+  "skada.icon.velocity": "\u0045",
+  "skada.icon.velocity_crossbow": "\u0045",
+  "skada.icon.velocity_bow": "\u0045",
   "skada.icon.attack_speed": "\u0042",
   "skada.icon.attack_damage": "\u0003",
+  "skada.icon.critical_fail": "\u002E",
+
+  "skada.tooltip.info.element.basic_no_sum": "%d%% Basic",
+  "skada.tooltip.info.element.heat_no_sum": "%d%% Heat",
+  "skada.tooltip.info.element.cold_no_sum": "%d%% Cold",
+  "skada.tooltip.info.element.lightning_no_sum": "%d%% Lightning",
+  "skada.tooltip.info.element.ender_no_sum": "%d%% Ender",
+  "skada.tooltip.info.element.wither_no_sum": "%d%% Wither",
+  "skada.tooltip.info.element.aether_no_sum": "%d%% Aether",
 
   "skada.tooltip.info.element.basic": "%d%% Basic (%d)",
   "skada.icon.element.basic": "\u004B",
@@ -84,6 +100,7 @@
   "attribute.skada.parameter.faith": "Faith",
   "attribute.skada.parameter.agility": "Agility",
   "attribute.skada.combat_attribute.lethality": "Lethality",
+  "attribute.skada.combat_attribute.accuracy": "Accuracy",
   "attribute.skada.combat_attribute.evasion": "Evasion"
 
 }
