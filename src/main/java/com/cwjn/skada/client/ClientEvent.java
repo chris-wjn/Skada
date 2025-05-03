@@ -1,5 +1,6 @@
 package com.cwjn.skada.client;
 
+import com.cwjn.skada.ClientConfig;
 import com.cwjn.skada.client.gui.button.OpenStatScreenButton;
 import com.cwjn.skada.client.gui.particles.NumberParticle;
 import com.cwjn.skada.client.gui.screen.StatScreen;
@@ -67,7 +68,7 @@ public class ClientEvent {
         public static void onTooltipRender(RenderTooltipEvent.GatherComponents e) {
             //Only add to items that we consider weapons or armour
             if (e.getItemStack().hasTag() && e.getItemStack().getTag().contains(WEAPON_INFO_TAG_KEY)) {
-                e.getTooltipElements().add(1, Either.right(new WeaponTooltipComponent(e.getItemStack())));
+                e.getTooltipElements().add(Either.right(new WeaponTooltipComponent(e.getItemStack())));
             }
         }
 
@@ -143,39 +144,12 @@ public class ClientEvent {
             }
         }
 
-        //@SubscribeEvent
-        public static void onRenderGuii(RenderGuiOverlayEvent event) {
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder buffer = tesselator.getBuilder();
-            RenderSystem.enableBlend();
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            PoseStack stack = event.getGuiGraphics().pose();
-            stack.pushPose();
-            float middleX = event.getWindow().getGuiScaledWidth()*0.5F;
-            float middleY = event.getWindow().getGuiScaledHeight()*0.5F;
-            stack.translate(middleX-0.5f, middleY, 0);
-            buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
-            for (Pair<Float, Float> pair : ReticleShapes.CirclePerfectCrosshair) {
-                buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
-            }
-            tesselator.end();
-            /*Entity e = Minecraft.getInstance().getCameraEntity();
-            Vec3 rayOrigin = Util.get3DCoordFrom2D(middleX+10f, middleY+10f, event.getPartialTick());
-            Vec3 rayMovement = Util.getMovementVector(e.getEyePosition(event.getPartialTick()), rayOrigin);
-            Vec3 rayEndpoint = rayOrigin.add(rayMovement.x * 10, rayMovement.y * 10, rayMovement.z * 10);
-            AABB aabb = e.getBoundingBox().expandTowards(rayMovement.scale(10)).inflate(1.0D, 1.0D, 1.0D);
-            EntityHitResult secondRayResult = ProjectileUtil.getEntityHitResult(e, rayOrigin, rayEndpoint, aabb, (p_234237_) -> {
-                return !p_234237_.isSpectator() && p_234237_.isPickable();
-            }, 100);
-            if (secondRayResult != null) {
-                //print what entity we hit
-                System.out.println("Second Ray Hit: " + secondRayResult.getEntity().getDisplayName().getString());
-            }*/
-            stack.popPose();
-        }
-
+        /*
+            The visual side of custom reticles. Only draws shape to screen, does not handle ray tracing.
+         */
         @SubscribeEvent
-        public static void onRenderGui(RenderGuiOverlayEvent event) {
+        public static void renderCustomReticles(RenderGuiOverlayEvent event) {
+            if (!ClientConfig.ENABLE_CUSTOM_RETICLES.get()) return;
             ItemStack i = Minecraft.getInstance().player.getMainHandItem();
             WeaponInfo weaponInfo = i.hasTag()? i.getTagElement(WEAPON_INFO_TAG_KEY) != null?
                     WeaponInfo.fromCompoundTag(i.getTagElement(WEAPON_INFO_TAG_KEY)) : WeaponInfo.NO_WEAPON : WeaponInfo.NO_WEAPON;
@@ -191,38 +165,30 @@ public class ClientEvent {
             buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
             AttackType[] types = weaponInfo.getAttackTypes().keySet().toArray(AttackType[]::new);
             AttackType attackType = weaponInfo == WeaponInfo.NO_WEAPON? AttackType.strike() : types[i.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)];
-                    switch (attackType.name()) {
-                        case "slash" -> {
-                            for (Pair<Float, Float> pair : ReticleShapes.getDrawable(ReticleShapes.SlashDefault)) {
-                                buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
-                            }
-                        }
-                        case "strike" -> {
-                            for (Pair<Float, Float> pair : ReticleShapes.getDrawable(ReticleShapes.CircleRad15)) {
-                                buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
-                            }
-                        }
-                        case "thrust" -> {
-                            for (Pair<Float, Float> pair : ReticleShapes.getDrawable(ReticleShapes.CirclePerfectCrosshair)) {
-                                buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
-                            }
-                        }
+            switch (attackType.name()) {
+                case "slash" -> {
+                    for (Pair<Float, Float> pair : ReticleShapes.getDrawable(ReticleShapes.SlashDefault)) {
+                        buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
                     }
-//            Pair<Float, Float>[] filledShape = new Pair[0];
-//            switch (attackType.name()) {
-//                case "slash" -> filledShape = ReticleShapes.getFilledShape(ReticleShapes.SlashDefault, 5.0f);
-//                case "strike" -> filledShape = ReticleShapes.getFilledShape(ReticleShapes.CircleRad15, 5.0f);
-//                case "thrust" -> filledShape = ReticleShapes.getFilledShape(ReticleShapes.CirclePerfectCrosshair, 5.0f);
-//            }
-//            for (Pair<Float, Float> pair : filledShape) {
-//                buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
-//            }
+                }
+                case "strike" -> {
+                    for (Pair<Float, Float> pair : ReticleShapes.getDrawable(ReticleShapes.CircleRad15)) {
+                        buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
+                    }
+                }
+                case "thrust" -> {
+                    for (Pair<Float, Float> pair : ReticleShapes.getDrawable(ReticleShapes.CirclePerfectCrosshair)) {
+                        buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
+                    }
+                }
+            }
             tesselator.end();
             stack.popPose();
         }
 
         @SubscribeEvent
         public static void prepareHealthbar(RenderNameTagEvent event) {
+            if (!ClientConfig.ENABLE_MOB_HEALTHBARS.get()) return;
             if (event.getEntity() instanceof Mob entity) {
                 if (entity.isInvisible()) return;
                 if (entity.isVehicle()) return;
@@ -249,6 +215,7 @@ public class ClientEvent {
 
         @SubscribeEvent
         public static void renderHealthbar(RenderLevelStageEvent event) {
+            if (!ClientConfig.ENABLE_MOB_HEALTHBARS.get()) return;
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
                 Camera c = Minecraft.getInstance().gameRenderer.getMainCamera();
                 MobHealthBar.renderBars(event.getPartialTick(), event.getPoseStack(), c);

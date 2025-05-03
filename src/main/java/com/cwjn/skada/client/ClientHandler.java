@@ -1,5 +1,6 @@
 package com.cwjn.skada.client;
 
+import com.cwjn.skada.ClientConfig;
 import com.cwjn.skada.data.armour.AccessArmourInfo;
 import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
@@ -21,6 +22,8 @@ import org.joml.Vector3f;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.cwjn.skada.Skada.LOGGER;
+
 @OnlyIn(Dist.CLIENT)
 public class ClientHandler {
 
@@ -34,7 +37,11 @@ public class ClientHandler {
                 Item iItem = ForgeRegistries.ITEMS.getValue(iRL);
                 if (iItem != null) {
                     AccessWeaponInfo mItem = (AccessWeaponInfo) iItem;
-                    mItem.skada$setWeaponInfo(value);
+                    if (value.getAttackTypes().isEmpty()) {
+                        LOGGER.error("Weapon info for {} has no attack types, skipping", iRL);
+                    } else {
+                        mItem.skada$setWeaponInfo(value);
+                    }
                 }
             });
         }
@@ -55,6 +62,7 @@ public class ClientHandler {
     }
 
     public static void createDamageIndicator(double x, double y, double z, float f, int col, double horizontalOffset, UUID id) {
+        if (!ClientConfig.ENABLE_DAMAGE_INDICATORS.get()) return;
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
         if (id.equals(player.getUUID())) return;

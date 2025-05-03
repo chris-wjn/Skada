@@ -45,7 +45,8 @@ public class Skada {
         PARTICLES.register(modEventBus);
         SkadaRegistry.ATTRIBUTES.register(modEventBus);
         
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CommonConfig.SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
         Attributes.ATTACK_DAMAGE.setSyncable(true);
         Attributes.ATTACK_KNOCKBACK.setSyncable(true);
         Attributes.KNOCKBACK_RESISTANCE.setSyncable(true);

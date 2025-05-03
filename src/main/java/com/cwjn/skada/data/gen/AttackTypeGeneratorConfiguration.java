@@ -4,16 +4,16 @@ import com.cwjn.skada.util.TierStatFunctionInterface;
 
 public class AttackTypeGeneratorConfiguration {
 
-    private final TierStatFunctionInterface damage;
     private final TierStatFunctionInterface lethality;
+    private final TierStatFunctionInterface accuracy;
 
-    public AttackTypeGeneratorConfiguration(TierStatFunctionInterface damage, TierStatFunctionInterface lethality) {
-        this.damage = damage;
+    public AttackTypeGeneratorConfiguration(TierStatFunctionInterface accuracy, TierStatFunctionInterface lethality) {
         this.lethality = lethality;
+        this.accuracy = accuracy;
     }
 
-    public double getDamageBonus(double weight, double hardness, double toughness, double flexibility) {
-        return damage.apply(weight, hardness, toughness, flexibility);
+    public double getAccuracyBonus(double weight, double hardness, double toughness, double flexibility) {
+        return accuracy.apply(weight, hardness, toughness, flexibility);
     }
 
     public double getLethalityBonus(double weight, double hardness, double toughness, double flexibility) {

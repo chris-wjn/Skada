@@ -71,22 +71,45 @@ public class WeaponInfo {
     /*
         * Construct a new WeaponInfo with a given item by guessing weapon info based on attributes and name.
      */
-    public static WeaponInfo generate(ExtraTierInfo info, NamedInfo nInfo) {
-        double weight = info.weight()*nInfo.size();
+    public static WeaponInfo generate(ExtraTierInfo info, NamedInfo nInfo, boolean ignoreAttributes) {
         ElementSpread spread = info.spread();
         Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
         for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : nInfo.attackTypes().entrySet()) {
             AttackTypeJsonInfo genInfo = entry.getValue();
+            double weight = info.weight()*nInfo.size()*genInfo.effectiveWeight();
             retMap.put(entry.getKey(), new AttackTypeInfo(
-                    Util.round(entry.getKey().tierStatFunction().getLethalityBonus(genInfo.effectiveWeight()*weight, info.hardness(), info.toughness(), info.flexibility()), 1),
+                    Util.round(entry.getKey().tierStatFunction().getLethalityBonus(weight, info.hardness(), info.toughness(), info.flexibility()), 1),
+                    Util.round(entry.getKey().tierStatFunction().getAccuracyBonus(weight, info.hardness(), info.toughness(), info.flexibility()), 2),
                     genInfo.minReach(),
                     genInfo.maxReach(),
                     genInfo.attackSpeedMod(),
-                    Util.round(entry.getKey().tierStatFunction().getDamageBonus(genInfo.effectiveWeight()*weight, info.hardness(), info.toughness(), info.flexibility()), 1),
-                    Util.round(Util.getCriticalFailChance(genInfo.effectiveWeight()*weight, info.hardness(), info.toughness(), info.flexibility()), 1)
+                    0,
+                    Util.round(Util.getCriticalFailChance(weight, info.hardness(), info.toughness(), info.flexibility()), 1)
             ));
         }
-        return new WeaponInfo(retMap, spread, Util.round(weight, 1), false);
+        return new WeaponInfo(retMap, spread, Util.round(info.weight()*nInfo.size(), 1), ignoreAttributes);
+    }
+
+    /*
+        * Construct a new WeaponInfo with a given item by guessing weapon info based on only name, these items should be looked at manually
+     */
+    public static WeaponInfo generate(NamedInfo info, boolean ignoreAttributes) {
+        ElementSpread spread = new ElementSpread();
+        Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
+        for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : info.attackTypes().entrySet()) {
+            AttackTypeJsonInfo genInfo = entry.getValue();
+            double weight = info.size()*0.01* genInfo.effectiveWeight();
+            retMap.put(entry.getKey(), new AttackTypeInfo(
+                    Util.round(entry.getKey().tierStatFunction().getLethalityBonus(weight, 1, 1, 1), 1),
+                    Util.round(entry.getKey().tierStatFunction().getAccuracyBonus(weight, 1, 1, 1), 2),
+                    genInfo.minReach(),
+                    genInfo.maxReach(),
+                    genInfo.attackSpeedMod(),
+                    0,
+                    Util.round(Util.getCriticalFailChance(weight, 1, 1, 1), 1)
+            ));
+        }
+        return new WeaponInfo(retMap, spread, Util.round(info.size()*0.01, 1), ignoreAttributes);
     }
 
     public Map<AttackType, AttackTypeInfo> getAttackTypes() {

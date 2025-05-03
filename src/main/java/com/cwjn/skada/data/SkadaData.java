@@ -22,6 +22,7 @@ import static com.cwjn.skada.data.damage.LethalityFunction.Operation.*;
 */
 public abstract class SkadaData {
 
+    public static final double DEFAULT_ACCURACY = 0.75;
     public static Supplier<IForgeRegistry<AttackType>> REGISTRY_ATTACK_TYPE;
     public static Supplier<IForgeRegistry<Element>> REGISTRY_ELEMENT;
     public static Supplier<IForgeRegistry<Parameter>> REGISTRY_PARAMETER;
@@ -30,9 +31,9 @@ public abstract class SkadaData {
     public static final LethalityFunction PERCENT_DAMAGE_BONUS = new LethalityFunction(Util::percentBonusDamage, SUM_WITH_DAMAGE);
     public static final LethalityFunction PERCENT_HEALTH_DAMAGE = new LethalityFunction(Util::percentHealthDamage, SUM_WITH_DAMAGE);
     public static final LethalityFunction PERCENT_REDUC = new LethalityFunction(Util::percentReduc, SUM_WITH_DAMAGE);
-    public static final AttackTypeGeneratorConfiguration SLASH_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::slashDamageCalculation, Util::slashLethalityCalculation);
-    public static final AttackTypeGeneratorConfiguration STRIKE_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::strikeDamageCalculation, Util::strikeLethalityCalculation);
-    public static final AttackTypeGeneratorConfiguration THRUST_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::thrustDamageCalculation, Util::thrustLethalityCalculation);
+    public static final AttackTypeGeneratorConfiguration SLASH_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::slashAccuracyCalculation, Util::slashLethalityCalculation);
+    public static final AttackTypeGeneratorConfiguration STRIKE_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a, b, c, d) -> 1, Util::strikeLethalityCalculation);
+    public static final AttackTypeGeneratorConfiguration THRUST_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::thrustAccuracyCalculation, Util::thrustLethalityCalculation);
     public static final AttackTypeGeneratorConfiguration NULL_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a, b, c, d) -> 0, (a, b, c, d) -> 0);
     public static final String WEAPON_INFO_TAG_KEY = "skada.weapon_info.tagkey";
     public static final String ARMOUR_INFO_TAG_KEY = "skada.armour_info.tagkey";
