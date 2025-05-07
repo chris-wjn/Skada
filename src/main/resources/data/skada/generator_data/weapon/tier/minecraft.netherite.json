@@ -1,0 +1,12 @@
+{
+  "weight": 0.07,
+  "hardness": 8,
+  "toughness": 7,
+  "flexibility": 3,
+  "spread": {
+    "powerBudget": 1.0,
+    "ratios": {
+      "skada:heat": 0.5
+    }
+  }
+}

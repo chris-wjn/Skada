@@ -70,12 +70,15 @@ public class ClientEvent {
             if (e.getItemStack().hasTag() && e.getItemStack().getTag().contains(WEAPON_INFO_TAG_KEY)) {
                 e.getTooltipElements().add(Either.right(new WeaponTooltipComponent(e.getItemStack())));
             }
+            else if (e.getItemStack().hasTag() && e.getItemStack().getTag().contains(ARMOUR_INFO_TAG_KEY)) {
+                e.getTooltipElements().add(Either.right(new ArmourTooltipComponent(e.getItemStack())));
+            }
         }
 
         @SubscribeEvent
         public static void onTooltipEvent(ItemTooltipEvent e) {
-            //if the item has modifiers but isn't a weapon, use the Vanilla tooltip method in Util to add default modifier tooltip lines
-            if (e.getItemStack().hasTag() && shouldShowInTooltip(getHideFlags(e.getItemStack()), ItemStack.TooltipPart.MODIFIERS) && !e.getItemStack().getTag().contains(WEAPON_INFO_TAG_KEY)) {
+            //if the item has modifiers but isn't a weapon or armour, use the Vanilla tooltip method in Util to add default modifier tooltip lines
+            if (e.getItemStack().hasTag() && shouldShowInTooltip(getHideFlags(e.getItemStack()), ItemStack.TooltipPart.MODIFIERS) && !e.getItemStack().getTag().contains(WEAPON_INFO_TAG_KEY) && !e.getItemStack().getTag().contains(ARMOUR_INFO_TAG_KEY)) {
                 e.getToolTip().addAll(Util.getVanillaTooltip(Minecraft.getInstance().player, e.getItemStack()));
             }
         }
@@ -127,7 +130,8 @@ public class ClientEvent {
             }
         }
 
-        @SubscribeEvent
+        //TODO: actually use this once the stat screen is done!
+        //@SubscribeEvent
         public static void onInitGui(ScreenEvent.Init e) {
             Screen s = e.getScreen();
             if (s instanceof InventoryScreen || s instanceof CreativeModeInventoryScreen) {

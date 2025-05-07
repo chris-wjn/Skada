@@ -14,17 +14,17 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
-public record MobData(String parent, AttackType attackType, Multimap<Attribute, AttributeModifier> extraModifiers) {
+public record MobData(List<String> parents, AttackType attackType, Multimap<Attribute, AttributeModifier> extraModifiers) {
 
     private static final Codec<List<AttributeModifier>> ATTRIBUTE_MODIFIER_LIST_CODEC = Codec.list(Util.ATTRIBUTE_MODIFIER_CODEC);
 
     public static final Codec<MobData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.optionalField("parent", Codec.STRING).forGetter(mobData -> Optional.ofNullable(mobData.parent)),
+            Codec.optionalField("parents", Codec.list(Codec.STRING)).forGetter(mobData -> Optional.ofNullable(mobData.parents)),
             Codec.STRING.fieldOf("attackType").forGetter(mobData -> String.valueOf(mobData.attackType.rl())),
             Codec.unboundedMap(ForgeRegistries.ATTRIBUTES.getCodec(), ATTRIBUTE_MODIFIER_LIST_CODEC)
                     .fieldOf("extraModifiers").forGetter(mobData -> convertToMap(mobData.extraModifiers))
-    ).apply(instance, (parent, attackType, extraModifiers) -> new MobData(
-            parent.orElse(null),
+    ).apply(instance, (parents, attackType, extraModifiers) -> new MobData(
+            parents.orElse(null),
             SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(ResourceLocation.tryParse(attackType)),
             convertToMultimap(extraModifiers))));
 

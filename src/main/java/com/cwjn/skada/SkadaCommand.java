@@ -30,7 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -46,9 +46,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static net.minecraft.commands.Commands.literal;
@@ -99,18 +97,14 @@ public class SkadaCommand {
     private int displayMobInfo(CommandSourceStack source, Holder.Reference<EntityType<?>> entity) {
         ServerPlayer player = source.getPlayer();
         EntityType<?> type = entity.get();
-        System.out.println("got player");
         if (player == null) {
             return 0;
         }
-        System.out.println("player is not null");
         MobData data = SkadaData.MOB_DATA.get(type);
-        System.out.println("got data");
         if (data == null) {
             player.displayClientMessage(Component.translatable("skada.command_get_mobinfo.error.no_info", type.getDescriptionId()), false);
             return 0;
         }
-        System.out.println("data is not null");
         StringBuilder attributes = new StringBuilder("Attributes for " + type.getDescriptionId() + ":\n");
         for (Map.Entry<Attribute, AttributeModifier> entry : data.extraModifiers().entries()) {
             attributes.append(entry.getKey().getDescriptionId())
@@ -163,34 +157,53 @@ public class SkadaCommand {
         HashMap<Tier, ExtraTierInfo> tierMap = new HashMap<>();
         HashMap<String, NamedInfo> namedMap = new HashMap<>();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Path generator_data_item_name = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generator_data", "by_item_name.json");
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(generator_data_item_name.toString()));
-            DataResult<Map<String, NamedInfo>> namedInfo = NamedInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
-            namedInfo.result().ifPresent(namedMap::putAll);
-        }
-        catch (FileNotFoundException e) {
-            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
-            return 0;
-        }
-        File generator_data_tier_info = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generator_data", "tier_info").toFile();
-        File[] listing = generator_data_tier_info.listFiles();
-        if (listing == null) {
-            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
-            return 0;
-        }
-        for (File tier_json : listing) {
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(tier_json));
-                DataResult<ExtraTierInfo> info = ExtraTierInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
-                info.result().ifPresent(tInfo -> {
-                    String[] nameSplit = tier_json.getName().split("\\.");
-                    tierMap.put(TierSortingRegistry.byName(new ResourceLocation(nameSplit[0], nameSplit[1])), tInfo);
-                });
-            } catch (FileNotFoundException e) {
+//        Path generator_data_item_name = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generator_data", "by_item_name.json");
+//        try {
+//            BufferedReader reader = new BufferedReader(new FileReader(generator_data_item_name.toString()));
+//            DataResult<Map<String, NamedInfo>> namedInfo = NamedInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+//            namedInfo.result().ifPresent(namedMap::putAll);
+//        }
+//        catch (FileNotFoundException e) {
+//            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
+//            return 0;
+//        }
+//        File generator_data_tier_info = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generator_data", "tier_info").toFile();
+//        File[] listing = generator_data_tier_info.listFiles();
+//        if (listing == null) {
+//            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
+//            return 0;
+//        }
+//        for (File tier_json : listing) {
+//            try {
+//                BufferedReader reader = new BufferedReader(new FileReader(tier_json));
+//                DataResult<ExtraTierInfo> info = ExtraTierInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+//                info.result().ifPresent(tInfo -> {
+//                    String[] nameSplit = tier_json.getName().split("\\.");
+//                    tierMap.put(TierSortingRegistry.byName(new ResourceLocation(nameSplit[0], nameSplit[1])), tInfo);
+//                });
+//            } catch (FileNotFoundException e) {
+//                player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
+//            }
+//        }
+        source.getServer().getResourceManager().listResources("generator_data/weapon", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
+            try (var reader = resource.openAsReader()) {
+                String path = rl.getPath();
+                if (path.equals("generator_data/weapon/by_item_name.json")) {
+                    DataResult<Map<String, NamedInfo>> namedInfo = NamedInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+                    namedInfo.result().ifPresent(namedMap::putAll);
+                } else if (path.startsWith("generator_data/weapon/tier/")) {
+                    String tierName = path.substring("generator_data/weapon/tier/".length()).replace(".json", "");
+                    DataResult<ExtraTierInfo> info = ExtraTierInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+                    info.result().ifPresent(tInfo -> {
+                        String[] nameSplit = tierName.split("\\.");
+                        tierMap.put(TierSortingRegistry.byName(new ResourceLocation(nameSplit[0], nameSplit[1])), tInfo);
+                    });
+                }
+            } catch (IOException e) {
                 player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
             }
-        }
+        });
+
         for (Item item : ForgeRegistries.ITEMS.getValues()) {
             if (!item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND).isEmpty() ||
                     !item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty() ||
@@ -241,37 +254,54 @@ public class SkadaCommand {
         }
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         player.displayClientMessage(Component.translatable("skada.generate_armour_info.start", namespace), false);
-        Path generator_data_item_name = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generator_data", "by_item_name.json");
         Map<String, ArmourPieceInfo> armourPieceNameMap = new HashMap<>();
         Map<String, ArmourMaterialInfo> armourMaterialInfoMap = new HashMap<>();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(generator_data_item_name.toString()));
-            DataResult<Map<String, ArmourPieceInfo>> armourPieceInfo = ArmourPieceInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
-            armourPieceInfo.result().ifPresent(armourPieceNameMap::putAll);
-        }
-        catch (FileNotFoundException e) {
-            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
-            return 0;
-        }
-        File generator_data_tier_info = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generator_data", "material_info").toFile();
-        File[] listing = generator_data_tier_info.listFiles();
-        if (listing == null) {
-            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
-            return 0;
-        }
-        for (File material_json : listing) {
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(material_json));
-                DataResult<ArmourMaterialInfo> info = ArmourMaterialInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
-                info.result().ifPresent(mInfo -> {
-                    String[] nameSplit = material_json.getName().split("\\.");
-                    armourMaterialInfoMap.put(nameSplit[1], mInfo);
-                    System.out.println(nameSplit[1]);
-                });
-            } catch (FileNotFoundException e) {
+//        Path generator_data_item_name = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generator_data", "by_item_name.json");
+//        try {
+//            BufferedReader reader = new BufferedReader(new FileReader(generator_data_item_name.toString()));
+//            DataResult<Map<String, ArmourPieceInfo>> armourPieceInfo = ArmourPieceInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+//            armourPieceInfo.result().ifPresent(armourPieceNameMap::putAll);
+//        }
+//        catch (FileNotFoundException e) {
+//            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
+//            return 0;
+//        }
+//        File generator_data_tier_info = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generator_data", "material_info").toFile();
+//        File[] listing = generator_data_tier_info.listFiles();
+//        if (listing == null) {
+//            player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
+//            return 0;
+//        }
+//        for (File material_json : listing) {
+//            try {
+//                BufferedReader reader = new BufferedReader(new FileReader(material_json));
+//                DataResult<ArmourMaterialInfo> info = ArmourMaterialInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+//                info.result().ifPresent(mInfo -> {
+//                    String[] nameSplit = material_json.getName().split("\\.");
+//                    armourMaterialInfoMap.put(nameSplit[1], mInfo);
+//                });
+//            } catch (FileNotFoundException e) {
+//                player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
+//            }
+//        }
+        source.getServer().getResourceManager().listResources("generator_data/armour", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
+            try (var reader = resource.openAsReader()) {
+                String path = rl.getPath();
+                if (path.equals("generator_data/armour/by_item_name.json")) {
+                    DataResult<Map<String, ArmourPieceInfo>> namedInfo = ArmourPieceInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+                    namedInfo.result().ifPresent(armourPieceNameMap::putAll);
+                } else if (path.startsWith("generator_data/armour/material/")) {
+                    String materialName = path.substring("generator_data/armour/material/".length()).replace(".json", "");
+                    DataResult<ArmourMaterialInfo> info = ArmourMaterialInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+                    info.result().ifPresent(mInfo -> {
+                        String[] nameSplit = materialName.split("\\.");
+                        armourMaterialInfoMap.put(nameSplit[1], mInfo);
+                    });
+                }
+            } catch (IOException e) {
                 player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
             }
-        }
+        });
         TreeMap<String, ArmourInfo> map = new TreeMap<>();
         for (Item item : ForgeRegistries.ITEMS.getValues()) {
             if (!item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.HEAD).isEmpty() ||
@@ -325,19 +355,10 @@ public class SkadaCommand {
         TreeMap<String, MobData> map = new TreeMap<>();
         player.displayClientMessage(Component.translatable("skada.generate_mob_info.start", namespace), false);
         for (EntityType<?> type : ForgeRegistries.ENTITY_TYPES.getValues()) {
-            if (type.getCategory() != MobCategory.MISC) {
+            if (type.create(player.level()) instanceof LivingEntity && !(type.create(player.level()) instanceof Projectile)) {
                 if (Util.getEntityNamespace(type).equals(namespace)) {
-                    //create empty multimap
-                    if (Util.getEntityPath(type).equals("zombie")) {
-                        Multimap<Attribute, AttributeModifier> multimap = ArrayListMultimap.create();
-                        multimap.put(SkadaRegistry.WITHER.get().resistAttribute(),
-                                new AttributeModifier(SkadaData.SKADA_MOB_MODIFIER, "wither_resist", 1, AttributeModifier.Operation.ADDITION));
-                        map.put(Util.getEntityPath(type), new MobData(null, AttackType.strike(), multimap));
-                    }
-                    else {
-                        Multimap<Attribute, AttributeModifier> multimap = ArrayListMultimap.create();
-                        map.put(Util.getEntityPath(type), new MobData(null, AttackType.strike(), multimap));
-                    }
+                    Multimap<Attribute, AttributeModifier> multimap = ArrayListMultimap.create();
+                    map.put(Util.getEntityPath(type), new MobData(null, AttackType.strike(), multimap));
                 }
             }
         }

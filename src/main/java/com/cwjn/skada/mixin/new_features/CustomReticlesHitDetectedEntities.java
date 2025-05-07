@@ -2,15 +2,17 @@ package com.cwjn.skada.mixin.new_features;
 
 import com.cwjn.skada.client.ClientHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,7 @@ public class CustomReticlesHitDetectedEntities {
     /**
      * @author cwJn
      * @reason custom reticles implementation for hitting entities that have been detected.
-     */
+
     @Overwrite
     private boolean startAttack() {
         if (missTime > 0) {
@@ -91,6 +93,48 @@ public class CustomReticlesHitDetectedEntities {
                     thisMinecraft().player.swing(InteractionHand.MAIN_HAND);
                 return flag;
             }
+        }
+    }
+     */
+
+    @Unique
+    List<Entity> alreadyHit = new ArrayList<>();
+    @Inject(
+            method = "startAttack",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/HitResult;getType()Lnet/minecraft/world/phys/HitResult$Type;", shift = At.Shift.BEFORE)
+    )
+    private void hitDetectedEntities(CallbackInfoReturnable<Boolean> cir) {
+        for (HitResult hitResult : ClientHandler.hitResults) {
+            if (hitResult.getType() == ENTITY) {
+                if (!alreadyHit.contains(((EntityHitResult) hitResult).getEntity())) {
+                    thisMinecraft().gameMode.attack(thisMinecraft().player, ((EntityHitResult) hitResult).getEntity());
+                    alreadyHit.add(((EntityHitResult) hitResult).getEntity());
+                }
+            }
+        }
+    }
+
+    @Redirect(
+            method = "startAttack",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;attack(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;)V")
+    )
+    private void hitDetectedEntities1(MultiPlayerGameMode instance, Player pPlayer, Entity pTargetEntity) {
+        if (!alreadyHit.contains(((EntityHitResult) thisMinecraft().hitResult).getEntity()))
+            thisMinecraft().gameMode.attack(thisMinecraft().player, ((EntityHitResult) thisMinecraft().hitResult).getEntity());
+    }
+
+    @Inject(
+            method = "startAttack",
+            at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/event/InputEvent$InteractionKeyMappingTriggered;shouldSwingHand()Z", shift = At.Shift.BEFORE)
+    )
+    private void hitDetectedEntities2(CallbackInfoReturnable<Boolean> cir) {
+        if (!alreadyHit.isEmpty()) {
+            if (thisMinecraft().gameMode.hasMissTime()) {
+                missTime = 10;
+            }
+            thisMinecraft().player.resetAttackStrengthTicker();
+            net.minecraftforge.common.ForgeHooks.onEmptyLeftClick(thisMinecraft().player);
+            alreadyHit.clear();
         }
     }
 

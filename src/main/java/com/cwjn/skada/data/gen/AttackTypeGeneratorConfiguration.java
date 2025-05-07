@@ -6,10 +6,12 @@ public class AttackTypeGeneratorConfiguration {
 
     private final TierStatFunctionInterface lethality;
     private final TierStatFunctionInterface accuracy;
+    private final TierStatFunctionInterface critFail;
 
-    public AttackTypeGeneratorConfiguration(TierStatFunctionInterface accuracy, TierStatFunctionInterface lethality) {
+    public AttackTypeGeneratorConfiguration(TierStatFunctionInterface accuracy, TierStatFunctionInterface lethality, TierStatFunctionInterface critFail) {
         this.lethality = lethality;
         this.accuracy = accuracy;
+        this.critFail = critFail;
     }
 
     public double getAccuracyBonus(double weight, double hardness, double toughness, double flexibility) {
@@ -18,6 +20,10 @@ public class AttackTypeGeneratorConfiguration {
 
     public double getLethalityBonus(double weight, double hardness, double toughness, double flexibility) {
         return lethality.apply(weight, hardness, toughness, flexibility);
+    }
+
+    public double getCritFailChance(double weight, double hardness, double toughness, double flexibility) {
+        return critFail.apply(weight, hardness, toughness, flexibility);
     }
 
 }

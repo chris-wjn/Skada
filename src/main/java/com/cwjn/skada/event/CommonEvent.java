@@ -1,14 +1,12 @@
 package com.cwjn.skada.event;
 
 import com.cwjn.skada.SkadaCommand;
-import com.cwjn.skada.SkadaRegistry;
 import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
-import com.cwjn.skada.data.registry.Parameter;
 import com.cwjn.skada.event.custom.PostMitigationEvent;
 import com.cwjn.skada.network.SkadaNetwork;
 import com.cwjn.skada.network.server_to_client.S2CCreateDamageIndicator;
@@ -37,7 +35,6 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -69,9 +66,6 @@ public class CommonEvent {
                     e.add(entityType, element.resistAttribute());
                     e.add(entityType, element.baseDamage());
                 }
-                for (Parameter parameter : REGISTRY_PARAMETER.get().getValues()) {
-                    e.add(entityType, parameter.attribute());
-                }
             });
         }
 
@@ -83,9 +77,6 @@ public class CommonEvent {
             RegistryBuilder<Element> eBuilder = new RegistryBuilder<>();
             eBuilder.setName(Util.rl("element"));
             REGISTRY_ELEMENT = e.create(eBuilder);
-            RegistryBuilder<Parameter> pBuilder = new RegistryBuilder<>();
-            pBuilder.setName(Util.rl("parameter"));
-            REGISTRY_PARAMETER = e.create(pBuilder);
         }
 
     }
@@ -100,7 +91,7 @@ public class CommonEvent {
          */
         @SubscribeEvent(priority = EventPriority.HIGHEST)
         public static void addWeaponInfo(ItemAttributeModifierEvent e) {
-            Util.addWeaponInfoTagIfNotExists(e.getItemStack());
+            Util.addWeaponArmourInfoTagIfNotExists(e.getItemStack());
         }
 
         /*
@@ -118,11 +109,11 @@ public class CommonEvent {
                         info.getAttackTypes().get(
                                 info.getAttackTypes().keySet().toArray(AttackType[]::new)[stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
                         );
-                e.addModifier(ForgeMod.ENTITY_REACH.get(),
+                if (attackInfo.maxReach() - 3.0 != 0) e.addModifier(ForgeMod.ENTITY_REACH.get(),
                         new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_reach_mod", attackInfo.maxReach() - 3.0, AttributeModifier.Operation.ADDITION));
-                e.addModifier(Attributes.ATTACK_SPEED,
+                if (attackInfo.attackSpeedMod() - 1 != 0) e.addModifier(Attributes.ATTACK_SPEED,
                         new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_speed_mod", attackInfo.attackSpeedMod() - 1, AttributeModifier.Operation.MULTIPLY_TOTAL));
-                e.addModifier(Attributes.ATTACK_DAMAGE,
+                if (attackInfo.damageBonus() != 0) e.addModifier(Attributes.ATTACK_DAMAGE,
                         new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_damage_mod", attackInfo.damageBonus(), AttributeModifier.Operation.ADDITION));
             }
             if (stack.getTagElement(ARMOUR_INFO_TAG_KEY) != null) {
@@ -135,9 +126,9 @@ public class CommonEvent {
                     e.addModifier(entry.getKey().resistAttribute(),
                             new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, entry.getKey() + "_resist_mod", entry.getValue(), AttributeModifier.Operation.ADDITION));
                 }
-                e.addModifier(Attributes.ARMOR,
+                if (info.armourBonus() != 0) e.addModifier(Attributes.ARMOR,
                         new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, "armour_bonus_mod", info.armourBonus(), AttributeModifier.Operation.ADDITION));
-                e.addModifier(Attributes.ARMOR_TOUGHNESS,
+                if (info.armourToughnessBonus() != 0) e.addModifier(Attributes.ARMOR_TOUGHNESS,
                         new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, "armour_toughness_bonus_mod", info.armourToughnessBonus(), AttributeModifier.Operation.ADDITION));
             }
         }
@@ -160,8 +151,7 @@ public class CommonEvent {
                         }
                         mob.getAttribute(entry.getKey()).addPermanentModifier(
                                 new AttributeModifier(
-                                        SKADA_MOB_MODIFIER,
-                                        entry.getKey().getDescriptionId(),
+                                        "skada.mob_mod." + entry.getKey().getDescriptionId() + ".OP" + entry.getValue().getOperation().toValue(),
                                         entry.getValue().getAmount(),
                                         entry.getValue().getOperation()
                                 )
@@ -247,7 +237,7 @@ public class CommonEvent {
                             ent.getX(),
                             ent.getEyeY(),
                             ent.getZ(),
-                            entry.getValue(),
+                            Math.round(entry.getValue()),
                             min + rand.nextFloat()*(max-min),
                             entry.getKey().colour(),
                             id),

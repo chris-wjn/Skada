@@ -11,6 +11,7 @@ import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -46,9 +47,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
-import oshi.util.tuples.Pair;
 
-import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.lang.Math;
 import java.math.BigDecimal;
@@ -124,7 +123,7 @@ public abstract class Util {
 
     @OnlyIn(Dist.CLIENT)
     public static MutableComponent pixelFontComponent(MutableComponent comp) {
-        return ClientConfig.USE_MDU_FONT.get()? pixelFontComponent(comp, false, false) : comp;
+        return ClientConfig.USE_MDU_FONT.get()? pixelFontComponent(comp, false, false) : comp.copy();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -268,7 +267,63 @@ public abstract class Util {
         return list;
     }
 
-    public static void addWeaponInfoTagIfNotExists(ItemStack i) {
+    public static List<Component> otherAttributesComponent(Multimap<Attribute, AttributeModifier> mainAttributes) {
+        List<Component> list = new ArrayList<>();
+        for (Map.Entry<Attribute, AttributeModifier> attributeAttributeModifierEntry : mainAttributes.entries()) {
+            AttributeModifier attributemodifier = attributeAttributeModifierEntry.getValue();
+            double d0 = attributemodifier.getAmount();
+            boolean flag = false;
+            double d1;
+            if (attributemodifier.getOperation() != AttributeModifier.Operation.MULTIPLY_BASE && attributemodifier.getOperation() != AttributeModifier.Operation.MULTIPLY_TOTAL) {
+                if ((attributeAttributeModifierEntry).getKey().equals(Attributes.KNOCKBACK_RESISTANCE)) {
+                    d1 = d0 * 10.0;
+                } else {
+                    d1 = d0;
+                }
+            } else {
+                d1 = d0 * 100.0;
+            }
+            if (d0 > 0.0) {
+                list.add(Component.translatable("attribute.modifier.plus." + attributemodifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable((attributeAttributeModifierEntry).getKey().getDescriptionId())).withStyle(ChatFormatting.BLUE));
+            } else if (d0 < 0.0) {
+                d1 *= -1.0;
+                list.add(Component.translatable("attribute.modifier.take." + attributemodifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable((attributeAttributeModifierEntry).getKey().getDescriptionId())).withStyle(ChatFormatting.RED));
+            }
+        }
+        return list;
+    }
+
+    public static List<Component> getOtherSlotAttributesAsList(EquipmentSlot slot, Multimap<Attribute, AttributeModifier> multimap) {
+        List<Component> list = new ArrayList<>();
+        list.add(CommonComponents.EMPTY);
+        list.add(Component.translatable("item.modifiers." + slot.getName()).withStyle(ChatFormatting.GRAY));
+        if (!multimap.isEmpty()) {
+            for (Map.Entry<Attribute, AttributeModifier> attributeAttributeModifierEntry : multimap.entries()) {
+                AttributeModifier attributemodifier = attributeAttributeModifierEntry.getValue();
+                double d0 = attributemodifier.getAmount();
+                boolean flag = false;
+                double d1;
+                if (attributemodifier.getOperation() != AttributeModifier.Operation.MULTIPLY_BASE && attributemodifier.getOperation() != AttributeModifier.Operation.MULTIPLY_TOTAL) {
+                    if ((attributeAttributeModifierEntry).getKey().equals(Attributes.KNOCKBACK_RESISTANCE)) {
+                        d1 = d0 * 10.0;
+                    } else {
+                        d1 = d0;
+                    }
+                } else {
+                    d1 = d0 * 100.0;
+                }
+                if (d0 > 0.0) {
+                    list.add(Component.translatable("attribute.modifier.plus." + attributemodifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable((attributeAttributeModifierEntry).getKey().getDescriptionId())).withStyle(ChatFormatting.BLUE));
+                } else if (d0 < 0.0) {
+                    d1 *= -1.0;
+                    list.add(Component.translatable("attribute.modifier.take." + attributemodifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable((attributeAttributeModifierEntry).getKey().getDescriptionId())).withStyle(ChatFormatting.RED));
+                }
+            }
+        }
+        return list;
+    }
+
+    public static void addWeaponArmourInfoTagIfNotExists(ItemStack i) {
         if (((AccessWeaponInfo)i.getItem()).skada$hasWeaponInfo()) {
             if (!i.getOrCreateTag().contains(WEAPON_INFO_TAG_KEY)) {
                 i.getOrCreateTag().put(WEAPON_INFO_TAG_KEY,
@@ -452,25 +507,33 @@ public abstract class Util {
         });
         LOGGER.info("-----------> Finished loading mob info, flattening parents");
         MOB_DATA.forEach((key, value) -> {
-            if (value.parent() != null) flattenParentModifiers(value);
+            if (value.parents() != null) flattenParentModifiers(key, value);
         });
     }
 
-    private static void flattenParentModifiers(MobData mobData) {
-        if (mobData.parent() != null) {
-            MobData parent = MOB_DATA.get(getMobEntityType(ResourceLocation.tryParse(mobData.parent())));
-            if (parent != null) {
-                flattenParentModifiers(parent);
-                Multimap<Attribute, AttributeModifier> parentMods = parent.extraModifiers();
-                Multimap<Attribute, AttributeModifier> childMods = mobData.extraModifiers();
-                for (Attribute a : parentMods.keySet()) {
-                    childMods.putAll(a, parentMods.get(a));
+    private static void flattenParentModifiers(EntityType<?> type, MobData mobData) {
+        LOGGER.debug("Flattening parent modifiers for entity type: {}", type.getDescriptionId());
+        if (mobData.parents() == null || mobData.parents().isEmpty()) return;
+        Multimap<Attribute, AttributeModifier> flattenedModifiers = ArrayListMultimap.create(mobData.extraModifiers());
+
+        for (String parentPath : mobData.parents()) {
+            ResourceLocation parentRL = ResourceLocation.tryParse(parentPath);
+            if (parentRL != null) {
+                EntityType<?> parentEntity = getMobEntityType(parentRL);
+                if (parentEntity != null && MOB_DATA.containsKey(parentEntity)) {
+                    MobData parentData = MOB_DATA.get(parentEntity);
+                    // Recursively flatten parent's modifiers first
+                    flattenParentModifiers(type, parentData);
+                    // Add parent's modifiers to our flattened set
+                    parentData.extraModifiers().entries().forEach(entry -> {
+                        flattenedModifiers.put(entry.getKey(), entry.getValue());
+                    });
                 }
             }
-            else {
-                LOGGER.error("Tried to retrieve mob data for requested parent: {} but result was null", mobData.parent());
-            }
         }
+
+        // Replace the original MobData with a new instance containing flattened modifiers
+        MOB_DATA.put(type, new MobData(null, mobData.attackType(), flattenedModifiers));
     }
 
     private static EntityType<?> getMobEntityType(ResourceLocation iRL) {
@@ -591,8 +654,16 @@ public abstract class Util {
         return Math.max(1 - 0.2*weight, 0.25);
     }
 
-    public static double getCriticalFailChance(double weight, double hardness, double toughness, double flexibility) {
-        return 0.01*hardness*hardness/toughness;
+    public static double slashCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
+        return (0.01*hardness*hardness)/(toughness*flexibility*flexibility);
+    }
+
+    public static double thrustCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
+        return (0.015*hardness*hardness)/(toughness*toughness*flexibility);
+    }
+
+    public static double strikeCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
+        return (0.0075*hardness*hardness)/(toughness*toughness*toughness);
     }
 
 

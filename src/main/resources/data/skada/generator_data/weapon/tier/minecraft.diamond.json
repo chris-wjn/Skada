@@ -1,0 +1,10 @@
+{
+  "weight": 0.06,
+  "hardness": 10,
+  "toughness": 5,
+  "flexibility": 1,
+  "spread": {
+    "powerBudget": 1.0,
+    "ratios": {}
+  }
+}

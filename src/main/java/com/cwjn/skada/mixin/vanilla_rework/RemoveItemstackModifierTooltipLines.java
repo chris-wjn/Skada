@@ -40,7 +40,7 @@ public abstract class RemoveItemstackModifierTooltipLines {
             if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen && screen.getSlotUnderMouse() != null) {
                 SkadaNetwork.playerToServer(new C2SAddWeaponTag(screen.getMenu().containerId, screen.getSlotUnderMouse().index));
             }
-            Util.addWeaponInfoTagIfNotExists((ItemStack) (Object) this);
+            Util.addWeaponArmourInfoTagIfNotExists((ItemStack) (Object) this);
         }
         return false;
     }
