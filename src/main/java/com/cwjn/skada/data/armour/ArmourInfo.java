@@ -35,16 +35,16 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
         Map<Element, Double> elementResists = new HashMap<>();
         Map<AttackType, Double> attackResists = new HashMap<>();
         for (Map.Entry<Element, Double> e : material.elementResists().entrySet()) {
-            elementResists.put(e.getKey(), e.getValue() * info.elementResistRatio());
+            elementResists.put(e.getKey(), Util.round(e.getValue() * info.elementResistRatio(), 2));
         }
         for (Map.Entry<AttackType, Double> e : material.attackResists().entrySet()) {
-            attackResists.put(e.getKey(), e.getValue() * info.attackResistRatio());
+            attackResists.put(e.getKey(), Util.round(e.getValue() * info.attackResistRatio(), 2));
         }
         return new ArmourInfo(
                 elementResists,
                 attackResists,
-                material.armourBonus() * info.armourRatio(),
-                material.armourToughnessBonus() * info.armourToughnessRatio());
+                Util.round(material.armourBonus() * info.armourRatio(), 2),
+                Util.round(material.armourToughnessBonus() * info.armourToughnessRatio(), 2));
     }
 
     public CompoundTag toCompoundTag() {

@@ -4,8 +4,21 @@
     "extraModifiers": {}
   },
   "axolotl": {
-    "attackType": "skada:strike",
-    "extraModifiers": {}
+    "attackType": "skada:thrust",
+    "extraModifiers": {
+        "skada:element.heat_resist": [
+            {
+            "amount": 1.0,
+            "operation": 0
+            }
+        ],
+        "skada:element.cold_resist": [
+            {
+            "amount": -1.0,
+            "operation": 0
+            }
+        ]
+    }
   },
   "bat": {
     "attackType": "skada:strike",
@@ -17,133 +30,439 @@
   },
   "blaze": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "skada:element.heat_resist": [
+        {
+          "amount": 5.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.cold_resist": [
+        {
+          "amount": -3.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor": [
+        {
+          "amount": 6.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 3.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "camel": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "minecraft:generic.armor": [
+        {
+          "amount": 3.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 7.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "cat": {
-    "attackType": "skada:strike",
+    "attackType": "skada:slash",
     "extraModifiers": {}
   },
   "cave_spider": {
-    "attackType": "skada:strike",
-    "extraModifiers": {}
+    "attackType": "skada:thrust",
+    "extraModifiers": {
+      "skada:damage_class.slash_resist": [
+        {
+          "amount": 2.5,
+          "operation": 0
+        }
+      ],
+      "skada:damage_class.thrust_resist": [
+        {
+          "amount": 2.5,
+          "operation": 0
+        }
+      ],
+      "skada:damage_class.strike_resist": [
+        {
+          "amount": -3,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor": [
+        {
+          "amount": 4.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 1,
+          "operation": 0
+        }
+      ]
+    }
   },
   "chicken": {
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "cod": {
+    "parents": [
+      "minecraft:axolotl"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "cow": {
+    "parents": [
+      "minecraft:camel"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "creeper": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "skada:element.lightning_resist": [
+        {
+            "amount": 4.0,
+            "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 2.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "dolphin": {
+    "parents": [
+        "minecraft:axolotl"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "donkey": {
+    "parents": [
+      "minecraft:camel"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "drowned": {
+    "parents": [
+      "minecraft:zombie",
+      "minecraft:axolotl"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "elder_guardian": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "minecraft:generic.armor": [
+        {
+          "amount": 18.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 12.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.heat_resist": [
+        {
+          "amount": 5.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.cold_resist": [
+        {
+          "amount": -1.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "ender_dragon": {
-    "attackType": "skada:strike",
-    "extraModifiers": {}
+    "attackType": "skada:slash",
+    "extraModifiers": {
+      "minecraft:generic.armor": [
+        {
+          "amount": 25.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 15.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.heat_resist": [
+        {
+          "amount": 5.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.cold_resist": [
+        {
+          "amount": -1,
+          "operation": 0
+        }
+      ],
+      "skada:element.lightning_resist": [
+        {
+          "amount": 5.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.aether_resist": [
+        {
+          "amount": 5.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.wither_resist": [
+        {
+          "amount": 5.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.ender_resist": [
+        {
+          "amount": 10.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "enderman": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 3.5,
+          "operation": 0
+        }
+      ],
+      "skada:element.ender_resist": [
+        {
+          "amount": 5.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.cold_resist": [
+        {
+          "amount": -3.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "endermite": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "skada:element.ender_resist": [
+        {
+          "amount": 1.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.cold_resist": [
+        {
+          "amount": -1.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "evoker": {
+    "parents": [
+        "minecraft:pillager"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "fox": {
-    "attackType": "skada:strike",
+    "attackType": "skada:slash",
     "extraModifiers": {}
   },
   "frog": {
+    "parents": [
+        "minecraft:axolotl"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "ghast": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 3.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "giant": {
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "glow_squid": {
+    "parents": [
+      "minecraft:axolotl"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "goat": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 4.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "guardian": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "minecraft:generic.armor": [
+        {
+          "amount": 6.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 4.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.heat_resist": [
+        {
+          "amount": 3.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.cold_resist": [
+        {
+          "amount": -2.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "hoglin": {
+    "parents": [
+        "minecraft:camel"
+    ],
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "skada:element.heat_resist": [
+        {
+          "amount": 3.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "horse": {
+    "parents": [
+      "minecraft:camel"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "husk": {
+    "parents": [
+      "minecraft:zombie"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "illusioner": {
+    "parents": [
+        "minecraft:pillager"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "llama": {
+    "parents": [
+      "minecraft:camel"
+    ],
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "iron_golem": {
+    "parents": [
+      "minecraft:ravager"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "magma_cube": {
+    "parents": [
+      "minecraft:slime"
+    ],
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+        "skada:element.heat_resist": [
+            {
+            "amount": 3.0,
+            "operation": 0
+            }
+        ],
+        "skada:element.cold_resist": [
+            {
+            "amount": -2.0,
+            "operation": 0
+            }
+        ]
+    }
   },
   "mooshroom": {
+    "parents": [
+      "minecraft:cow"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "mule": {
+    "parents": [
+        "minecraft:camel"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "ocelot": {
-    "attackType": "skada:strike",
+    "attackType": "skada:slash",
     "extraModifiers": {}
   },
   "panda": {
+    "parents": [
+        "minecraft:camel"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
@@ -153,29 +472,113 @@
   },
   "phantom": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "skada:element.heat_resist": [
+        {
+          "amount": -1.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.aether_resist": [
+            {
+            "amount": -1.0,
+            "operation": 0
+            }
+      ]
+    }
   },
   "pig": {
+    "parents": [
+      "minecraft:goat"
+    ],
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+        "minecraft:generic.armor": [
+            {
+            "amount": 2.0,
+            "operation": 0
+            }
+        ]
+    }
   },
   "piglin": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "skada:element.heat_resist": [
+        {
+          "amount": 1.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor": [
+        {
+          "amount": 4.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 2.5,
+          "operation": 0
+        }
+      ]
+    }
   },
   "piglin_brute": {
+    "parents": [
+      "minecraft:piglin"
+    ],
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+        "minecraft:generic.armor": [
+            {
+            "amount": 2.0,
+            "operation": 0
+            }
+        ],
+        "minecraft:generic.armor_toughness": [
+            {
+            "amount": 1.5,
+            "operation": 0
+            }
+        ]
+    }
   },
   "pillager": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+        "minecraft:generic.armor": [
+            {
+            "amount": 8.0,
+            "operation": 0
+            }
+        ],
+        "minecraft:generic.armor_toughness": [
+            {
+            "amount": 4.0,
+            "operation": 0
+            }
+        ]
+    }
   },
   "polar_bear": {
+    "parents": [
+        "minecraft:camel"
+    ],
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+        "skada:element.cold_resist": [
+            {
+            "amount": 3.0,
+            "operation": 0
+            }
+        ]
+    }
   },
   "pufferfish": {
+    "parents": [
+        "minecraft:axolotl"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
@@ -185,29 +588,120 @@
   },
   "ravager": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+        "minecraft:generic.armor": [
+            {
+            "amount": 12.0,
+            "operation": 0
+            }
+        ],
+        "minecraft:generic.armor_toughness": [
+            {
+            "amount": 8.0,
+            "operation": 0
+            }
+        ]
+    }
   },
   "salmon": {
+    "parents": [
+      "minecraft:axolotl"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "sheep": {
+    "parents": [
+      "minecraft:goat"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "shulker": {
+    "parents": [
+      "minecraft:endermite"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "silverfish": {
-    "attackType": "skada:strike",
+    "attackType": "skada:thrust",
     "extraModifiers": {}
   },
   "skeleton": {
-    "parent": "minecraft:zombie",
     "attackType": "skada:strike",
     "extraModifiers": {
+      "skada:element.aether_resist": [
+        {
+          "amount": -1.0,
+          "operation": 0
+        }
+      ],
       "skada:damage_class.thrust_resist": [
+        {
+          "amount": 1.0,
+          "operation": 0
+        }
+      ],
+      "skada:damage_class.strike_resist": [
+        {
+          "amount": -1.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 2.0,
+          "operation": 0
+        }
+      ]
+    }
+  },
+  "skeleton_horse": {
+    "parents": [
+     "minecraft:horse",
+     "minecraft:skeleton"
+    ],
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "slime": {
+    "attackType": "skada:strike",
+    "extraModifiers": {
+      "skada:damage_class.strike_resist": [
+        {
+          "amount": 6.0,
+          "operation": 0
+        }
+      ],
+      "skada:damage_class.thrust_resist": [
+        {
+          "amount": 6.0,
+          "operation": 0
+        }
+      ],
+      "skada:damage_class.slash_resist": [
+        {
+          "amount": -5.0,
+          "operation": 0
+        }
+      ]
+    }
+  },
+  "sniffer": {
+    "parents": [
+        "minecraft:camel"
+    ],
+    "attackType": "skada:strike",
+    "extraModifiers": {}
+  },
+  "spider": {
+    "parents": [
+      "minecraft:cave_spider"
+    ],
+    "attackType": "skada:thrust",
+    "extraModifiers": {
+      "minecraft:generic.armor_toughness": [
         {
           "amount": 1.0,
           "operation": 0
@@ -215,83 +709,251 @@
       ]
     }
   },
-  "skeleton_horse": {
-    "attackType": "skada:strike",
-    "extraModifiers": {}
-  },
-  "slime": {
-    "attackType": "skada:strike",
-    "extraModifiers": {}
-  },
-  "sniffer": {
-    "attackType": "skada:strike",
-    "extraModifiers": {}
-  },
-  "spider": {
-    "attackType": "skada:strike",
-    "extraModifiers": {}
-  },
   "squid": {
+    "parents": [
+      "minecraft:axolotl"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "stray": {
+    "parents": [
+      "minecraft:skeleton"
+    ],
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "skada:element.cold_resist": [
+        {
+          "amount": 1.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.heat_resist": [
+        {
+          "amount": -1.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "strider": {
+    "parents": [
+      "minecraft:goat"
+    ],
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "skada:element.heat_resist": [
+        {
+          "amount": 9.25,
+          "operation": 0
+        }
+      ],
+      "skada:element.cold_resist": [
+        {
+          "amount": -5.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "tadpole": {
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "trader_llama": {
+    "parents": [
+      "minecraft:llama"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "tropical_fish": {
+    "parents": [
+      "minecraft:axolotl"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "turtle": {
+    "parents": [
+      "minecraft:axolotl",
+      "minecraft:goat"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "vex": {
+    "parents": [
+      "minecraft:allay"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "vindicator": {
+    "parents": [
+      "minecraft:pillager"
+    ],
+    "attackType": "skada:slash",
+    "extraModifiers": {
+        "minecraft:generic.armor": [
+            {
+            "amount": 0.5,
+            "operation": 2
+            }
+        ],
+        "minecraft:generic.armor_toughness": [
+            {
+            "amount": 0.25,
+            "operation": 2
+            }
+        ]
+    }
+  },
+  "villager": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 2.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "wandering_trader": {
+    "parents": [
+      "minecraft:villager"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "warden": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "minecraft:generic.armor": [
+        {
+          "amount": 20.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 12.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.heat_resist": [
+        {
+          "amount": 6.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.cold_resist": [
+        {
+          "amount": 2.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.lightning_resist": [
+        {
+          "amount": 1.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.aether_resist": [
+        {
+          "amount": -5.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.wither_resist": [
+        {
+          "amount": 9.0,
+          "operation": 0
+        }
+      ]
+    }
   },
   "witch": {
+    "parents": [
+      "minecraft:villager"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "wither": {
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+        "minecraft:generic.armor": [
+            {
+            "amount": 15.0,
+            "operation": 0
+            }
+        ],
+        "minecraft:generic.armor_toughness": [
+            {
+            "amount": 9.0,
+            "operation": 0
+            }
+        ],
+        "skada:element.heat_resist": [
+            {
+            "amount": 5.0,
+            "operation": 0
+            }
+        ],
+        "skada:element.aether_resist": [
+            {
+            "amount": -7.5,
+            "operation": 0
+            }
+        ],
+        "skada:element.wither_resist": [
+            {
+            "amount": 10.0,
+            "operation": 0
+            }
+        ]
+    }
   },
   "wither_skeleton": {
+    "parents": [
+      "minecraft:skeleton"
+    ],
     "attackType": "skada:strike",
-    "extraModifiers": {}
+    "extraModifiers": {
+      "skada:element.heat_resist": [
+        {
+          "amount": 1.0,
+          "operation": 0
+        }
+      ],
+      "skada:element.wither_resist": [
+        {
+          "amount": 3.0,
+          "operation": 0
+        }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 1.5,
+          "operation": 0
+        }
+      ]
+    }
   },
   "wolf": {
+    "parents": [
+      "minecraft:goat"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "zoglin": {
+    "parents": [
+      "minecraft:hoglin",
+      "minecraft:zombie"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
@@ -315,18 +977,35 @@
           "amount": -2.0,
           "operation": 0
         }
+      ],
+      "minecraft:generic.armor_toughness": [
+        {
+          "amount": 2.0,
+          "operation": 0
+        }
       ]
     }
   },
   "zombie_horse": {
+    "parents": [
+      "minecraft:horse",
+      "minecraft:zombie"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "zombie_villager": {
+    "parents": [
+      "minecraft:zombie"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   },
   "zombified_piglin": {
+    "parents": [
+      "minecraft:piglin",
+      "minecraft:zombie"
+    ],
     "attackType": "skada:strike",
     "extraModifiers": {}
   }

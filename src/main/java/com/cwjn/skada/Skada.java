@@ -68,9 +68,6 @@ public class Skada {
         Path dirWeaponGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generated");
         Path dirArmourGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generated");
         Path dirMobsGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs", "generated");
-        Path dirWeaponGenerator = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generator_data");
-        Path dirArmourGenerator = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generator_data");
-        Path dirMobsGenerator = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs", "generator_data");
         try {
             Files.createDirectories(dir);
             Files.createDirectories(dirWeapon);
@@ -78,10 +75,7 @@ public class Skada {
             Files.createDirectories(dirMobs);
             Files.createDirectories(dirWeaponGenerated);
             Files.createDirectories(dirArmourGenerated);
-            Files.createDirectories(dirWeaponGenerator);
-            Files.createDirectories(dirArmourGenerator);
             Files.createDirectories(dirMobsGenerated);
-            Files.createDirectories(dirMobsGenerator);
         }
         catch (IOException e) {
             if (e instanceof FileAlreadyExistsException) {}

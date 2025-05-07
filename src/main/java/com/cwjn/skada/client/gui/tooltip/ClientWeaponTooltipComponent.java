@@ -4,13 +4,16 @@ import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.gen.ElementSpread;
 import com.cwjn.skada.data.registry.AttackType;
+import com.cwjn.skada.util.Keybinds;
 import com.cwjn.skada.util.Util;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -34,18 +37,20 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 import static com.cwjn.skada.data.SkadaData.*;
+import static com.cwjn.skada.util.Util.getOtherSlotAttributesAsList;
+import static com.cwjn.skada.util.Util.otherAttributesComponent;
+import static java.util.stream.Collectors.toList;
 import static net.minecraft.world.item.ItemStack.ATTRIBUTE_MODIFIER_FORMAT;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
 
     private final List<Component> lines = new ArrayList<>();
-    private final Multimap<Attribute, AttributeModifier> mainAttributes;
-    private final List<Multimap<Attribute, AttributeModifier>> otherAttributes;
+    private final HashMultimap<Attribute, AttributeModifier> mainAttributes;
+    private final List<EquipmentSlot> otherSlots;
     private final Player player = Minecraft.getInstance().player;
     private final WeaponInfo info;
     private final AttackType[] attackTypes;
-    private int longest = 0; //the length of the longest line in lines
     private int arrowXCoord = 0; //the coordinate to draw the selector arrow at
 
     private static final Style ICONS = Style.EMPTY.withFont(Util.rl("icons"));
@@ -54,8 +59,8 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
 
     public ClientWeaponTooltipComponent(ItemStack itemstack) {
         EquipmentSlot[] slots = Arrays.stream(EquipmentSlot.values()).filter(s -> !s.equals(LivingEntity.getEquipmentSlotForItem(itemstack))).toArray(EquipmentSlot[]::new);
-        this.mainAttributes = itemstack.getAttributeModifiers(LivingEntity.getEquipmentSlotForItem(itemstack));
-        this.otherAttributes = Arrays.stream(slots).map(itemstack::getAttributeModifiers).toList();
+        this.mainAttributes = HashMultimap.create(itemstack.getAttributeModifiers(LivingEntity.getEquipmentSlotForItem(itemstack)));
+        this.otherSlots = Arrays.stream(slots).filter((x) -> !itemstack.getAttributeModifiers(x).isEmpty()).toList();
         info = Util.getWeaponInfo(itemstack);
         attackTypes = Util.getAttackTypes(itemstack);
         AttackTypeInfo currentInfo = Util.getAttackTypeInfo(itemstack);
@@ -77,7 +82,20 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
         else {
             lines.addAll(attackDamageComponent(info.getSpread(), true));
         }
-        //lines.addAll(getAttributeComponents(mainAttributes));
+        if (!this.mainAttributes.isEmpty()) {
+            lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.shift_for_other_attributes")));
+            if (Screen.hasShiftDown()) {
+                lines.addAll(otherAttributesComponent(mainAttributes));
+            }
+        }
+        if (!otherSlots.isEmpty()) {
+            lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.alt_for_other_slot_attributes")));
+            if (Screen.hasAltDown()) {
+                for (EquipmentSlot slot : otherSlots) {
+                    lines.addAll(getOtherSlotAttributesAsList(slot, itemstack.getAttributeModifiers(slot)));
+                }
+            }
+        }
             /*lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.shift_for_weapon_info"), false));
             lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.test_numbers",120495), true));
             lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.test_swedish_characters"), false));*/
@@ -85,6 +103,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
 
     private List<Component> attackDamageComponent(ElementSpread spread, boolean showFinalDamage) {
         double damage = mainAttributes.get(Attributes.ATTACK_DAMAGE).stream().filter(m -> m.getOperation() == AttributeModifier.Operation.ADDITION).mapToDouble(AttributeModifier::getAmount).sum() + player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
+        this.mainAttributes.get(Attributes.ATTACK_DAMAGE).removeIf(m -> m.getOperation() == AttributeModifier.Operation.ADDITION);
         List<Component> list = new ArrayList<>();
         MutableComponent comp = Component.empty();
         comp.append(Component.translatable("skada.icon.attack_damage").withStyle(ICONS));
@@ -135,8 +154,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
                 longest[0] = pFont.width(l);
             }
         });
-        this.longest = longest[0];
-        return longest[0]+3;
+        return longest[0] +3;
     }
 
     @Override
@@ -159,47 +177,6 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
         //this.drawHorizontalGradient(guiGraphics, x, y+font.lineHeight, x+longest, y+font.lineHeight+0.5f, 0, 0xFFFFFFFF, 0x00FFFFFF);
         //guiGraphics.blit(SPRITES, x+arrowXCoord, y+font.lineHeight-10, 1, 0, 5, 4);
         if (info.getAttackTypes().size() != 1) guiGraphics.blit(SPRITES, x+arrowXCoord, y+font.lineHeight-1, 1, 4, 5, 4);
-    }
-
-    private List<Component> getAttributeComponents(Multimap<Attribute, AttributeModifier> multimap) {
-        List<Component> list = new ArrayList<>();
-        if (!multimap.isEmpty()) {
-            Iterator var11 = multimap.entries().iterator();
-            while (var11.hasNext()) {
-                Map.Entry<Attribute, AttributeModifier> entry = (Map.Entry) var11.next();
-                AttributeModifier attributemodifier = entry.getValue();
-                double d0 = attributemodifier.getAmount();
-                boolean flag = false;
-                if (player != null) {
-                    if (attributemodifier.getId() == BASE_ATTACK_DAMAGE_UUID) {
-                        d0 += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
-                        flag = true;
-                    } else if (attributemodifier.getId() == BASE_ATTACK_SPEED_UUID) {
-                        d0 += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
-                        flag = true;
-                    }
-                }
-                double d1;
-                if (attributemodifier.getOperation() != AttributeModifier.Operation.MULTIPLY_BASE && attributemodifier.getOperation() != AttributeModifier.Operation.MULTIPLY_TOTAL) {
-                    if (entry.getKey().equals(Attributes.KNOCKBACK_RESISTANCE)) {
-                        d1 = d0 * 10.0;
-                    } else {
-                        d1 = d0;
-                    }
-                } else {
-                    d1 = d0 * 100.0;
-                }
-                if (flag) {
-                    list.add(CommonComponents.space().append(Component.translatable("attribute.modifier.equals." + attributemodifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(entry.getKey().getDescriptionId()))).withStyle(ChatFormatting.DARK_GREEN));
-                } else if (d0 > 0.0) {
-                    list.add(Component.translatable("attribute.modifier.plus." + attributemodifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(entry.getKey().getDescriptionId())).withStyle(ChatFormatting.BLUE));
-                } else if (d0 < 0.0) {
-                    d1 *= -1.0;
-                    list.add(Component.translatable("attribute.modifier.take." + attributemodifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(entry.getKey().getDescriptionId())).withStyle(ChatFormatting.RED));
-                }
-            }
-        }
-        return list;
     }
 
     private Component attackTypesComponent(AttackType attackType) {
@@ -264,6 +241,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
             case ATTACK_SPEED:
                 double baseSpeed = player.getAttributeBaseValue(Attributes.ATTACK_SPEED)
                         + mainAttributes.get(Attributes.ATTACK_SPEED).stream().filter(m -> m.getOperation()== AttributeModifier.Operation.ADDITION).mapToDouble(AttributeModifier::getAmount).sum();
+                this.mainAttributes.get(Attributes.ATTACK_SPEED).removeIf(m -> m.getOperation() == AttributeModifier.Operation.ADDITION);
                 retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_speed",
                         Util.round(baseSpeed*attackTypeInfo.attackSpeedMod(), 1))));
                 break;

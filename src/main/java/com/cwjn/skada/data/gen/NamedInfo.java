@@ -12,7 +12,7 @@ import java.util.Map;
 public record NamedInfo(double size, Map<AttackType, AttackTypeJsonInfo> attackTypes) {
 
     private static final Map<AttackType, AttackTypeJsonInfo> DEFAULT_MAP = new HashMap<>(
-            Map.of(AttackType.strike(), new AttackTypeJsonInfo(0.5, 0.0, 2, 1.0))
+            Map.of(AttackType.strike(), new AttackTypeJsonInfo(0.5, 0.0, 3, 1.0))
     );
 
     public static final Codec<NamedInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(

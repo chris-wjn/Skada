@@ -84,7 +84,7 @@ public class WeaponInfo {
                     genInfo.maxReach(),
                     genInfo.attackSpeedMod(),
                     0,
-                    Util.round(Util.getCriticalFailChance(weight, info.hardness(), info.toughness(), info.flexibility()), 1)
+                    Util.round(entry.getKey().tierStatFunction().getCritFailChance(weight, info.hardness(), info.toughness(), info.flexibility()), 1)
             ));
         }
         return new WeaponInfo(retMap, spread, Util.round(info.weight()*nInfo.size(), 1), ignoreAttributes);
@@ -106,7 +106,7 @@ public class WeaponInfo {
                     genInfo.maxReach(),
                     genInfo.attackSpeedMod(),
                     0,
-                    Util.round(Util.getCriticalFailChance(weight, 1, 1, 1), 1)
+                    Util.round(entry.getKey().tierStatFunction().getCritFailChance(weight, 1, 1, 1), 1)
             ));
         }
         return new WeaponInfo(retMap, spread, Util.round(info.size()*0.01, 1), ignoreAttributes);

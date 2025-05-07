@@ -3,7 +3,12 @@
     "minecraft:in_fire",
     "minecraft:on_fire",
     "minecraft:lava",
+    "minecraft:hot_floor",
+    "minecraft:dry_out",
+    "minecraft:fireworks",
     "minecraft:fireball",
-    "minecraft:unattributed_fireball"
+    "minecraft:unattributed_fireball",
+    "minecraft:explosion",
+    "minecraft:player_explosion"
   ]
 }

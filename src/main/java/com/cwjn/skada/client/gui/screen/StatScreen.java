@@ -79,13 +79,13 @@ public class StatScreen extends Screen {
     private final double savedScale;
     private final Screen savedScreen;
     private final TabButton[] tabs = new TabButton[4];
-    private int vitPreview = (int) player.getAttributeBaseValue(SkadaRegistry.VITALITY.get().attribute());
-    private int strPreview = (int) player.getAttributeBaseValue(SkadaRegistry.STRENGTH.get().attribute());
-    private int dexPreview = (int) player.getAttributeBaseValue(SkadaRegistry.DEXTERITY.get().attribute());
-    private int aglPreview = (int) player.getAttributeBaseValue(SkadaRegistry.AGILITY.get().attribute());
-    private int intPreview = (int) player.getAttributeBaseValue(SkadaRegistry.INTELLIGENCE.get().attribute());
-    private int wisPreview = (int) player.getAttributeBaseValue(SkadaRegistry.WISDOM.get().attribute());
-    private int fthPreview = (int) player.getAttributeBaseValue(SkadaRegistry.FAITH.get().attribute());
+    private int vitPreview = 0;
+    private int strPreview = 0;
+    private int dexPreview = 0;
+    private int aglPreview = 0;
+    private int intPreview = 0;
+    private int wisPreview = 0;
+    private int fthPreview = 0;
 
     static {
         OPEN_ANIM.setSoundEffect(SoundEvents.BOOK_PAGE_TURN);

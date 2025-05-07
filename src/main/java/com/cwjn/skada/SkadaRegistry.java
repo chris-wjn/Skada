@@ -42,14 +42,6 @@ public class SkadaRegistry {
     public static final RegistryObject<AttackType> MAGIC = attackType("magic", SkadaData.NONE, SkadaData.NULL_GENERATOR_CONFIG);
     public static final RegistryObject<AttackType> NONE = attackType("none", SkadaData.NONE, SkadaData.NULL_GENERATOR_CONFIG);
 
-    public static final RegistryObject<Parameter> VITALITY = parameter("vitality");
-    public static final RegistryObject<Parameter> STRENGTH = parameter("strength");
-    public static final RegistryObject<Parameter> DEXTERITY = parameter("dexterity");
-    public static final RegistryObject<Parameter> INTELLIGENCE = parameter("intelligence");
-    public static final RegistryObject<Parameter> WISDOM = parameter("wisdom");
-    public static final RegistryObject<Parameter> FAITH = parameter("faith");
-    public static final RegistryObject<Parameter> AGILITY = parameter("agility");
-
     private static RegistryObject<AttackType> attackType(String name, LethalityFunction type, AttackTypeGeneratorConfiguration tierStatFunction) {
         Attribute r = new RangedAttribute("attribute.skada." + name + "_resist", 0.0D, -1024.0D, 10.0D).setSyncable(true);
         ForgeRegistries.ATTRIBUTES.register("damage_class." + name + "_resist", r);
@@ -76,16 +68,6 @@ public class SkadaRegistry {
                         TagKey.create(Registries.DAMAGE_TYPE, Util.rl("convert_" + name))
                 )
         );
-    }
-
-    private static RegistryObject<Parameter> parameter(String name) {
-        Attribute p = new RangedAttribute("attribute.skada.parameter." + name, 0.0D, 0.0D, 99.0D).setSyncable(true);
-        ForgeRegistries.ATTRIBUTES.register("parameter." + name, p);
-        return PARAMETERS.register(name,
-                () -> new Parameter(
-                        name,
-                        p
-                ));
     }
 
     private static RegistryObject<Attribute> combatAttribute(String name) {

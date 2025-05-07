@@ -6,8 +6,6 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-import static com.cwjn.skada.data.SkadaData.CURRENT_ATTACK_TYPE_TAG_KEY;
-
 public class C2SAddWeaponTag {
 
     private final int containerID;
@@ -31,7 +29,7 @@ public class C2SAddWeaponTag {
         NetworkEvent.Context ctx = ctxSupplier.get();
         ctxSupplier.get().enqueueWork(() -> {
             if (ctx.getSender() != null && msg.containerID == ctx.getSender().containerMenu.containerId) {
-                Util.addWeaponInfoTagIfNotExists(ctx.getSender().containerMenu.getSlot(msg.slot).getItem());
+                Util.addWeaponArmourInfoTagIfNotExists(ctx.getSender().containerMenu.getSlot(msg.slot).getItem());
             }
         });
         ctxSupplier.get().setPacketHandled(true);
