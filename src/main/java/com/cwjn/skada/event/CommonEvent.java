@@ -167,6 +167,7 @@ public class CommonEvent {
          */
         @SubscribeEvent
         public static void onPlayerJoin(OnDatapackSyncEvent event) {
+            if (event.getPlayer() == null) return;
             ResourceManager manager = event.getPlayer().server.getResourceManager();
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             HashMap<String, Map<String, WeaponInfo>> weaponMapToSend = new HashMap<>();
