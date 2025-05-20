@@ -65,6 +65,9 @@ public class SkadaCommand {
                                         .executes(stack -> displayMobInfo(stack.getSource(), ResourceArgument.getEntityType(stack, "entity")))
                                 )
                         )
+                        .then(literal("materialName")
+                                .executes(stack -> getTieredItemOrArmourItemMaterialName(stack.getSource()))
+                        )
                 )
                 .then(literal("generate")
                         .then(literal("weapons")
@@ -93,6 +96,27 @@ public class SkadaCommand {
                         )
                 )
         );
+    }
+
+    private int getTieredItemOrArmourItemMaterialName(CommandSourceStack source) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            return 0;
+        }
+        ItemStack stack = player.getMainHandItem();
+        if (stack.isEmpty()) {
+            player.displayClientMessage(Component.translatable("skada.command_get_material_name.error.no_item"), false);
+        }
+        else if (stack.getItem() instanceof TieredItem) {
+            String name = ((TieredItem) stack.getItem()).getTier().toString().toLowerCase();
+            player.displayClientMessage(Component.translatable("skada.command_get_material_name.result", name), false);
+        } else if (stack.getItem() instanceof ArmorItem) {
+            String name = ((ArmorItem) stack.getItem()).getMaterial().toString().toLowerCase();
+            player.displayClientMessage(Component.translatable("skada.command_get_material_name.result", name), false);
+        } else {
+            player.displayClientMessage(Component.translatable("skada.command_get_material_name.error.not_tiered_or_armour"), false);
+        }
+        return 1;
     }
 
     private int displayMobInfo(CommandSourceStack source, Holder.Reference<EntityType<?>> entity) {
@@ -168,6 +192,9 @@ public class SkadaCommand {
                     String tierName = path.substring("generator_data/weapon/tier/".length()).replace(".json", "");
                     DataResult<ExtraTierInfo> info = ExtraTierInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
                     info.result().ifPresent(tInfo -> {
+                        if (tierMap.containsKey(tierName)) {
+                            LOGGER.error("Duplicate tier name found: {}", tierName);
+                        }
                         tierMap.put(tierName, tInfo);
                     });
                 }
@@ -192,24 +219,21 @@ public class SkadaCommand {
                         }
                     }
                     if (item instanceof TieredItem tItem) {
-                        //first check namespace for proper tier
-                        String tierName = tItem.getTier().toString().toLowerCase();
-                        String nameSpace = Util.getItemNamespace(tItem);
-                        if (tierMap.containsKey(nameSpace + "." + tierName)) {
-                            info = WeaponInfo.generate(tierMap.get(nameSpace + "." + tierName), nInfo, ignoreAttributes);
+                        String matName = tItem.getTier().toString().toLowerCase();
+                        //first we'll check the item's namespace for tiers, then any namespace
+                        for (String s : tierMap.keySet().stream().filter(s -> s.startsWith(namespace)).toList()) {
+                            if (s.equals(namespace+"."+matName)) {
+                                info = WeaponInfo.generate(tierMap.get(s), nInfo, ignoreAttributes);
+                                break;
+                            }
                         }
-                        //if not check, if any namespace contains the proper tier
-                        else {
-                            boolean found = false;
+                        if (info == null) { //this checks if we didn't find a match in the previous loop
                             for (String s : tierMap.keySet()) {
-                                if (s.contains(tierName)) {
+                                if (s.contains(matName)) {
                                     info = WeaponInfo.generate(tierMap.get(s), nInfo, ignoreAttributes);
-                                    found = true;
                                     break;
                                 }
                             }
-                            //if no match found, use default
-                            if (!found) info = WeaponInfo.generate(nInfo, ignoreAttributes);
                         }
                     }
                     else {
@@ -257,8 +281,12 @@ public class SkadaCommand {
                     namedInfo.result().ifPresent(armourPieceNameMap::putAll);
                 } else if (path.startsWith("generator_data/armour/material/")) {
                     String materialName = path.substring("generator_data/armour/material/".length()).replace(".json", "");
+                    System.out.println(materialName);
                     DataResult<ArmourMaterialInfo> info = ArmourMaterialInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
                     info.result().ifPresent(mInfo -> {
+                        if (armourMaterialInfoMap.containsKey(materialName)) {
+                            LOGGER.error("Duplicate material name found: {}", materialName);
+                        }
                         armourMaterialInfoMap.put(materialName, mInfo);
                     });
                 }
@@ -283,28 +311,26 @@ public class SkadaCommand {
                     }
                     ArmourMaterialInfo mInfo = ArmourMaterialInfo.DEFAULT;
                     if (item instanceof ArmorItem aItem) {
-                        //first check namespace for proper material
-                        String materialName = aItem.getMaterial().toString().toLowerCase();
-                        String nameSpace = Util.getItemNamespace(aItem);
-                        if (armourMaterialInfoMap.containsKey(nameSpace + "." + materialName)) {
-                            mInfo = armourMaterialInfoMap.get(nameSpace + "." + materialName);
+                        String matName = aItem.getMaterial().toString().toLowerCase();
+                        //first we'll check the item's namespace for materials, then any namespace
+                        for (String s : armourMaterialInfoMap.keySet().stream().filter(s -> s.startsWith(namespace)).toList()) {
+                            System.out.println("check if " + s + " matches " + namespace+"."+matName);
+                            if (s.equals(namespace+"."+matName)) {
+                                mInfo = armourMaterialInfoMap.get(s);
+                                break;
+                            }
                         }
-                        else {
-                            //if not check, if any namespace contains the proper material
-                            boolean found = false;
+                        if (mInfo == ArmourMaterialInfo.DEFAULT) { //this checks if we didn't find a match in the previous loop
                             for (String s : armourMaterialInfoMap.keySet()) {
-                                if (s.contains(materialName)) {
+                                if (s.contains(matName)) {
                                     mInfo = armourMaterialInfoMap.get(s);
-                                    found = true;
                                     break;
                                 }
                             }
-                            //if no match found, use default
-                            if (!found) mInfo = ArmourMaterialInfo.DEFAULT;
                         }
                     }
                     if (mInfo == ArmourMaterialInfo.DEFAULT) {
-                        LOGGER.error("Failed to generate armour info for " + path);
+                        LOGGER.error("No armour material info for " + path);
                     }
                     map.put(path, ArmourInfo.generate(nInfo, mInfo));
                 }
