@@ -13,6 +13,7 @@ import com.cwjn.skada.network.server_to_client.S2CCreateDamageIndicator;
 import com.cwjn.skada.network.server_to_client.S2CSendArmourInfoMap;
 import com.cwjn.skada.network.server_to_client.S2CSendWeaponInfoMap;
 import com.cwjn.skada.util.Util;
+import com.google.common.collect.HashMultimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -170,8 +171,8 @@ public class CommonEvent {
             if (event.getPlayer() == null) return;
             ResourceManager manager = event.getPlayer().server.getResourceManager();
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            HashMap<String, Map<String, WeaponInfo>> weaponMapToSend = new HashMap<>();
-            HashMap<String, Map<String, ArmourInfo>> armourMapToSend = new HashMap<>();
+            HashMultimap<String, Map<String, WeaponInfo>> weaponMapToSend = HashMultimap.create();
+            HashMultimap<String, Map<String, ArmourInfo>> armourMapToSend = HashMultimap.create();
             manager.listResources("weapon_info", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
                 try {
                     BufferedReader reader = new BufferedReader(manager.openAsReader(rl));
@@ -179,7 +180,25 @@ public class CommonEvent {
                     DataResult<Map<String, WeaponInfo>> info = WeaponInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, obj);
                     String[] split = rl.getPath().split("/");
                     String modId = split[split.length-1].substring(0, split[split.length-1].length()-5);
-                    info.result().ifPresent((map) -> weaponMapToSend.put(modId, map));
+                    info.result().ifPresent((map) -> {
+                        if (map.size() > 40) {
+                            LOGGER.info("Weapon info from {} has more than 40 entries, splitting into multiple maps", rl);
+                            Map<String, WeaponInfo> subMap = new HashMap<>();
+                            for (Map.Entry<String, WeaponInfo> entry : map.entrySet()) {
+                                subMap.put(entry.getKey(), entry.getValue());
+                                if (subMap.size() == 40) {
+                                    weaponMapToSend.put(modId, new HashMap<>(subMap));
+                                    subMap.clear();
+                                }
+                            }
+                            if (!subMap.isEmpty()) {
+                                weaponMapToSend.put(modId, subMap);
+                            }
+                        }
+                        else {
+                            weaponMapToSend.put(modId, map);
+                        }
+                    });
                 } catch (Exception e) {
                     LOGGER.error("Failed to read weapon info from " + rl, e);
                 }
@@ -191,13 +210,35 @@ public class CommonEvent {
                     DataResult<Map<String, ArmourInfo>> info = ArmourInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, obj);
                     String[] split = rl.getPath().split("/");
                     String modId = split[split.length-1].substring(0, split[split.length-1].length()-5);
-                    info.result().ifPresent((map) -> armourMapToSend.put(modId, map));
+                    info.result().ifPresent((map) -> {
+                        if (map.size() > 40) {
+                            LOGGER.info("Weapon info from {} has more than 40 entries, splitting into multiple maps", rl);
+                            Map<String, ArmourInfo> subMap = new HashMap<>();
+                            for (Map.Entry<String, ArmourInfo> entry : map.entrySet()) {
+                                subMap.put(entry.getKey(), entry.getValue());
+                                if (subMap.size() == 40) {
+                                    armourMapToSend.put(modId, new HashMap<>(subMap));
+                                    subMap.clear();
+                                }
+                            }
+                            if (!subMap.isEmpty()) {
+                                armourMapToSend.put(modId, subMap);
+                            }
+                        }
+                        else {
+                            armourMapToSend.put(modId, map);
+                        }
+                    });
                 } catch (Exception e) {
                     LOGGER.error("Failed to read armour info from " + rl, e);
                 }
             });
-            SkadaNetwork.serverToPlayer(new S2CSendWeaponInfoMap(weaponMapToSend), event.getPlayer());
-            SkadaNetwork.serverToPlayer(new S2CSendArmourInfoMap(armourMapToSend), event.getPlayer());
+            weaponMapToSend.forEach((key, value) ->
+                    SkadaNetwork.serverToPlayer(new S2CSendWeaponInfoMap(Map.of(key, value)), event.getPlayer())
+            );
+            armourMapToSend.forEach((key, value) ->
+                    SkadaNetwork.serverToPlayer(new S2CSendArmourInfoMap(Map.of(key, value)), event.getPlayer())
+            );
         }
 
 //        @SubscribeEvent
