@@ -234,13 +234,17 @@ public class SkadaCommand {
                                     break;
                                 }
                             }
+                            if (info == null) {
+                                LOGGER.error("No tier info found for {}. Generating on name only.", path);
+                                info = WeaponInfo.generate(nInfo, ignoreAttributes);
+                            }
                         }
                     }
                     else {
-                        info = WeaponInfo.generate(nInfo, ignoreAttributes);
-                    }
-                    if (info == null) {
-                        LOGGER.error("Failed to generate weapon info for " + path);
+                        if (info == null) {
+                            LOGGER.error("No tier info found for {}. Generating on name only.", path);
+                            info = WeaponInfo.generate(nInfo, ignoreAttributes);
+                        }
                     }
                     map.put(path, info);
                 }
