@@ -18,7 +18,7 @@
     "vanilla_rework.AbstractArrowRemoveCritMechanic",
     "vanilla_rework.ClientboundSetEntityMotionPacketRemoveVelocityClamp",
     "vanilla_rework.RemoveItemstackModifierTooltipLines",
-    "vanilla_rework.RemoveKnockbackMixin",
+    "vanilla_rework.RemoveKnockback",
     "vanilla_rework.RemoveSweepAttack",
     "vanilla_rework.RemoveVanillaDamageHandling$MixinLivingEntity",
     "vanilla_rework.RemoveVanillaDamageHandling$MixinPlayer"

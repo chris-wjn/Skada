@@ -7,6 +7,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -86,15 +87,17 @@ public class Skada {
     }
 
     @SubscribeEvent
-    public void attachSkadaWeaponInfos(ServerAboutToStartEvent event) {
+    public void loadResources(ServerAboutToStartEvent event) {
         Util.updateWeaponInfoItemsFromResources(event.getServer().getResourceManager());
         Util.updateArmourInfoItemsFromResources(event.getServer().getResourceManager());
         Util.updateMobInfoFromResources(event.getServer().getResourceManager());
     }
 
     @SubscribeEvent
-    public void loadWeaponInfoForJoiningPlayer(PlayerEvent.PlayerLoggedInEvent event) {
-
+    public void loadResourcesOnReload(OnDatapackSyncEvent event) {
+        Util.updateWeaponInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
+        Util.updateArmourInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
+        Util.updateMobInfoFromResources(event.getPlayerList().getServer().getResourceManager());
     }
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
