@@ -25,9 +25,9 @@ public abstract class SkadaData {
     public static Supplier<IForgeRegistry<Element>> REGISTRY_ELEMENT;
     public static final HashMap<EntityType<?>, MobData> MOB_DATA = new HashMap<>();
     public static final LethalityFunction NONE = new LethalityFunction((lethality, armourToughness, targetHP) -> 0, SUM_WITH_DAMAGE);
-    public static final LethalityFunction PERCENT_DAMAGE_BONUS = new LethalityFunction(Util::percentBonusDamage, SUM_WITH_DAMAGE);
+    public static final LethalityFunction PERCENT_DAMAGE_BONUS = new LethalityFunction(Util::percentBonusDamage, MULTIPLY_WITH_DAMAGE);
     public static final LethalityFunction PERCENT_HEALTH_DAMAGE = new LethalityFunction(Util::percentHealthDamage, SUM_WITH_DAMAGE);
-    public static final LethalityFunction PERCENT_REDUC = new LethalityFunction(Util::percentReduc, SUM_WITH_DAMAGE);
+    public static final LethalityFunction PERCENT_REDUC = new LethalityFunction(Util::percentReduc, MULTIPLY_WITH_ARMOUR);
     public static final AttackTypeGeneratorConfiguration SLASH_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::slashAccuracyCalculation, Util::slashLethalityCalculation, Util::slashCriticalFailCalculation);
     public static final AttackTypeGeneratorConfiguration STRIKE_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::strikeAccuracyCalculation, Util::strikeLethalityCalculation, Util::strikeCriticalFailCalculation);
     public static final AttackTypeGeneratorConfiguration THRUST_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::thrustAccuracyCalculation, Util::thrustLethalityCalculation, Util::thrustCriticalFailCalculation);
