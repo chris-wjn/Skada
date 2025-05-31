@@ -21,6 +21,8 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -36,6 +38,8 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -164,12 +168,11 @@ public class CommonEvent {
         }
 
         /*
-            * Here we listen to when a player joins the server and update their config maps
+            * Here we listen to when a player joins the server or the reload command and update their config maps
          */
         @SubscribeEvent
         public static void onPlayerJoin(OnDatapackSyncEvent event) {
-            if (event.getPlayer() == null) return;
-            ResourceManager manager = event.getPlayer().server.getResourceManager();
+            ResourceManager manager = event.getPlayerList().getServer().getResourceManager();
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             HashMultimap<String, Map<String, WeaponInfo>> weaponMapToSend = HashMultimap.create();
             HashMultimap<String, Map<String, ArmourInfo>> armourMapToSend = HashMultimap.create();
@@ -233,12 +236,25 @@ public class CommonEvent {
                     LOGGER.error("Failed to read armour info from " + rl, e);
                 }
             });
-            weaponMapToSend.forEach((key, value) ->
-                    SkadaNetwork.serverToPlayer(new S2CSendWeaponInfoMap(Map.of(key, value)), event.getPlayer())
-            );
-            armourMapToSend.forEach((key, value) ->
-                    SkadaNetwork.serverToPlayer(new S2CSendArmourInfoMap(Map.of(key, value)), event.getPlayer())
-            );
+            // If the player isn't null, it means a player is joining the server, so we send the maps to that player.
+            if (event.getPlayer() != null) {
+                weaponMapToSend.forEach((key, value) ->
+                        SkadaNetwork.serverToPlayer(new S2CSendWeaponInfoMap(Map.of(key, value)), event.getPlayer())
+                );
+                armourMapToSend.forEach((key, value) ->
+                        SkadaNetwork.serverToPlayer(new S2CSendArmourInfoMap(Map.of(key, value)), event.getPlayer())
+                );
+            }
+            // If the player is null, it means the reload command was run, so we send the maps to all players.
+            else {
+                weaponMapToSend.forEach((key, value) ->
+                        SkadaNetwork.serverToAll(new S2CSendWeaponInfoMap(Map.of(key, value)))
+                );
+                armourMapToSend.forEach((key, value) ->
+                        SkadaNetwork.serverToAll(new S2CSendArmourInfoMap(Map.of(key, value)))
+                );
+            }
+
         }
 
 //        @SubscribeEvent
@@ -293,12 +309,6 @@ public class CommonEvent {
                 max = (max+step)*-1;
                 step*=-1;
             }
-        }
-
-        @SubscribeEvent
-        public static void onProjectileImpact(ProjectileImpactEvent e) {
-
-
         }
 
     }
