@@ -9,6 +9,7 @@ import com.cwjn.skada.client.gui.tooltip.ClientArmourTooltipComponent;
 import com.cwjn.skada.client.gui.tooltip.ClientWeaponTooltipComponent;
 import com.cwjn.skada.client.gui.tooltip.WeaponTooltipComponent;
 import com.cwjn.skada.client.hud.MobHealthBar;
+import com.cwjn.skada.client.hud.ReticleCoordinate;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.network.SkadaNetwork;
@@ -171,8 +172,8 @@ public class ClientEvent {
             AttackType attackType = weaponInfo == WeaponInfo.NO_WEAPON? AttackType.strike() : types[i.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)];
             switch (attackType.name()) {
                 case "slash" -> {
-                    for (Pair<Float, Float> pair : ReticleShapes.getDrawable(ReticleShapes.SlashDefault)) {
-                        buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
+                    for (ReticleCoordinate coord : RETICLES.get("slash_default").getDrawable()) {
+                        buffer.vertex(stack.last().pose(), coord.x(), coord.y(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
                     }
                 }
                 case "strike" -> {

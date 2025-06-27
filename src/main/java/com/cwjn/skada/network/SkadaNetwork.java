@@ -3,10 +3,7 @@ package com.cwjn.skada.network;
 import com.cwjn.skada.network.client_to_server.C2SAddWeaponTag;
 import com.cwjn.skada.network.client_to_server.C2SUpdateAttackIndex;
 import com.cwjn.skada.network.client_to_server.C2SUpdateAttackIndexFromMenu;
-import com.cwjn.skada.network.server_to_client.S2CCreateDamageIndicator;
-import com.cwjn.skada.network.server_to_client.S2CSendArmourInfoMap;
-import com.cwjn.skada.network.server_to_client.S2CSendWeaponInfoMap;
-import com.cwjn.skada.network.server_to_client.S2CUpdateWeaponInfo;
+import com.cwjn.skada.network.server_to_client.*;
 import com.cwjn.skada.util.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,6 +59,11 @@ public class SkadaNetwork {
                 S2CUpdateWeaponInfo::encode,
                 S2CUpdateWeaponInfo::decode,
                 S2CUpdateWeaponInfo::handle);
+        INSTANCE.registerMessage(id++,
+                S2CSendReticles.class,
+                S2CSendReticles::encode,
+                S2CSendReticles::decode,
+                S2CSendReticles::handle);
     }
 
     public static void serverToPlayer(Object packet, ServerPlayer player) {
