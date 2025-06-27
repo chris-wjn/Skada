@@ -1,6 +1,8 @@
 package com.cwjn.skada.client;
 
 import com.cwjn.skada.ClientConfig;
+import com.cwjn.skada.client.hud.ReticleShape;
+import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.armour.AccessArmourInfo;
 import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
@@ -19,10 +21,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Vector3f;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static com.cwjn.skada.Skada.LOGGER;
+import static com.cwjn.skada.data.SkadaData.RETICLES;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientHandler {
@@ -78,6 +82,12 @@ public class ClientHandler {
     public static void updateClientWeaponInfo(CompoundTag info, int id) {
         if (Minecraft.getInstance().player.getCommandSenderWorld().getEntity(id) instanceof LivingEntity e) {
             ((SkadaEntity)e).setWeaponInfo(WeaponInfo.fromCompoundTag(info));
+        }
+    }
+
+    public static void updateReticles(List<ReticleShape> reticles) {
+        for (ReticleShape r : reticles) {
+            RETICLES.put(r.getName(), r);
         }
     }
 

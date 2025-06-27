@@ -1,5 +1,6 @@
 package com.cwjn.skada.data;
 
+import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.damage.LethalityFunction;
 import com.cwjn.skada.data.gen.AttackTypeGeneratorConfiguration;
 import com.cwjn.skada.data.mob.MobData;
@@ -9,8 +10,7 @@ import com.cwjn.skada.util.Util;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.IForgeRegistry;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static com.cwjn.skada.data.damage.LethalityFunction.Operation.*;
@@ -24,6 +24,7 @@ public abstract class SkadaData {
     public static Supplier<IForgeRegistry<AttackType>> REGISTRY_ATTACK_TYPE;
     public static Supplier<IForgeRegistry<Element>> REGISTRY_ELEMENT;
     public static final HashMap<EntityType<?>, MobData> MOB_DATA = new HashMap<>();
+    public static Map<String, ReticleShape> RETICLES = new HashMap<>();
     public static final LethalityFunction NONE = new LethalityFunction((lethality, armourToughness, targetHP) -> 0, SUM_WITH_DAMAGE);
     public static final LethalityFunction PERCENT_DAMAGE_BONUS = new LethalityFunction(Util::percentBonusDamage, MULTIPLY_WITH_DAMAGE);
     public static final LethalityFunction PERCENT_HEALTH_DAMAGE = new LethalityFunction(Util::percentHealthDamage, SUM_WITH_DAMAGE);

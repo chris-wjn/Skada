@@ -179,9 +179,14 @@ public class DamageHandler {
         // Generate a random number from a normal distribution
         double z = random.nextGaussian();
 
+        // Since the mean is the original damage value, any damage value beyond the mean should
+        // be treated as a negative number. We'll take the absolute value of z to ensure
+        // we're always reducing the damage.
+        double normalDistributionModifier = Math.abs(z) * standardDeviation;
+
         // Calculate final damage using the normal distribution
         // Clamp the result between 0.5x and the original damage value
-        return Mth.clamp(damage + (standardDeviation * z), damage*0.5, damage);
+        return Math.max(damage*0.5, damage - normalDistributionModifier);
     }
 
     /*

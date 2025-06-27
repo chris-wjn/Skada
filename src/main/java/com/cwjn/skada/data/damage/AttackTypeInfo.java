@@ -1,5 +1,6 @@
 package com.cwjn.skada.data.damage;
 
+import com.cwjn.skada.client.hud.ReticleShape;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
@@ -21,6 +22,7 @@ public record AttackTypeInfo(double lethality,
             Codec.DOUBLE.fieldOf("attackSpeedMod").forGetter(AttackTypeInfo::attackSpeedMod),
             Codec.DOUBLE.fieldOf("damageBonus").forGetter(AttackTypeInfo::damageBonus),
             Codec.DOUBLE.fieldOf("failChance").forGetter(AttackTypeInfo::failChance)
+
     ).apply(instance, AttackTypeInfo::new));
 
     public static final AttackTypeInfo DEFAULT = new AttackTypeInfo(0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);

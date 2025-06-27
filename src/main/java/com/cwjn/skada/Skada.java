@@ -8,7 +8,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -91,6 +90,7 @@ public class Skada {
         Util.updateWeaponInfoItemsFromResources(event.getServer().getResourceManager());
         Util.updateArmourInfoItemsFromResources(event.getServer().getResourceManager());
         Util.updateMobInfoFromResources(event.getServer().getResourceManager());
+        Util.updateReticleListFromResources(event.getServer().getResourceManager());
     }
 
     @SubscribeEvent
@@ -98,6 +98,7 @@ public class Skada {
         Util.updateWeaponInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
         Util.updateArmourInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
         Util.updateMobInfoFromResources(event.getPlayerList().getServer().getResourceManager());
+        Util.updateReticleListFromResources(event.getPlayerList().getServer().getResourceManager());
     }
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

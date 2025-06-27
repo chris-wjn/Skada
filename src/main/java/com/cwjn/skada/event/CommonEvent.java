@@ -1,6 +1,7 @@
 package com.cwjn.skada.event;
 
 import com.cwjn.skada.SkadaCommand;
+import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
@@ -231,6 +232,18 @@ public class CommonEvent {
                         else {
                             armourMapToSend.put(modId, map);
                         }
+                    });
+                } catch (Exception e) {
+                    LOGGER.error("Failed to read armour info from " + rl, e);
+                }
+            });
+            manager.listResources("reticles", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
+                try {
+                    BufferedReader reader = new BufferedReader(manager.openAsReader(rl));
+                    JsonObject obj = gson.fromJson(reader, JsonObject.class);
+                    DataResult<ReticleShape> info = ReticleShape.CODEC.parse(JsonOps.INSTANCE, obj);
+                    info.result().ifPresent((rs) -> {
+
                     });
                 } catch (Exception e) {
                     LOGGER.error("Failed to read armour info from " + rl, e);

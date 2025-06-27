@@ -3,6 +3,7 @@ package com.cwjn.skada.util;
 import com.cwjn.skada.ClientConfig;
 import com.cwjn.skada.CommonConfig;
 import com.cwjn.skada.Skada;
+import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.armour.AccessArmourInfo;
 import com.cwjn.skada.data.armour.ArmourInfo;
@@ -405,6 +406,26 @@ public abstract class Util {
         }
     }
 
+    public static void updateReticleListFromResources(ResourceManager manager) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        LOGGER.info("------------------> Reading reticle json files");
+        manager.listResources("reticles", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
+            LOGGER.info("--------------> " + rl.toString());
+            try {
+                BufferedReader reader = new BufferedReader(manager.openAsReader(rl));
+                JsonObject obj = gson.fromJson(reader, JsonObject.class);
+                DataResult<ReticleShape> info = ReticleShape.CODEC.parse(JsonOps.INSTANCE, obj);
+                info.result().ifPresent((x) -> RETICLES.put(x.getName(), x));
+            } catch (Exception e) {
+                LOGGER.error("Failed to read reticle info from " + rl, e);
+            }
+        });
+        for (ReticleShape r : RETICLES.values()) {
+            LOGGER.info("----------> " + r.getName());
+            LOGGER.info("-------> " + r.getOutline().size());
+        }
+    }
+
     public static void updateWeaponInfoItemsFromResources(ResourceManager manager) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         LOGGER.info("------------------> Reading Weapon Info json files");
@@ -665,6 +686,5 @@ public abstract class Util {
     public static double strikeCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
         return (0.0075*hardness*hardness)/(toughness*toughness*toughness);
     }
-
 
 }
