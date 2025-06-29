@@ -28,6 +28,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
@@ -40,6 +41,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 import oshi.util.tuples.Pair;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static com.cwjn.skada.data.SkadaData.*;
 
@@ -162,33 +168,37 @@ public class ClientEvent {
             BufferBuilder buffer = tesselator.getBuilder();
             RenderSystem.enableBlend();
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.lineWidth(1f);
             PoseStack stack = event.getGuiGraphics().pose();
             stack.pushPose();
             float middleX = event.getWindow().getGuiScaledWidth() * 0.5F;
             float middleY = event.getWindow().getGuiScaledHeight() * 0.5F;
             stack.translate(middleX - 0.5f, middleY, 0);
-            buffer.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
-            AttackType[] types = weaponInfo.getAttackTypes().keySet().toArray(AttackType[]::new);
-            AttackType attackType = weaponInfo == WeaponInfo.NO_WEAPON? AttackType.strike() : types[i.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)];
-            switch (attackType.name()) {
-                case "slash" -> {
-                    for (ReticleCoordinate coord : RETICLES.get("slash_default").getDrawable()) {
-                        buffer.vertex(stack.last().pose(), coord.x(), coord.y(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
-                    }
-                }
-                case "strike" -> {
-                    for (Pair<Float, Float> pair : ReticleShapes.getDrawable(ReticleShapes.CircleRad15)) {
-                        buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
-                    }
-                }
-                case "thrust" -> {
-                    for (Pair<Float, Float> pair : ReticleShapes.getDrawable(ReticleShapes.CirclePerfectCrosshair)) {
-                        buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
-                    }
-                }
+            buffer.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+            AttackType attackType = Util.getAttackType(Minecraft.getInstance().player);
+            List<ReticleCoordinate> shape = RETICLES.get(attackType.name() + "_default").getOutline();
+            for (ReticleCoordinate coord : shape) {
+                buffer.vertex(stack.last().pose(), coord.x(), coord.y(), 0).color(1f, 1f, 1f, 1f).endVertex();
             }
             tesselator.end();
+            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            for (Map.Entry<Float, Collection<Float>> map : RETICLES.get(attackType.name() + "_default").getFilledShape().asMap().entrySet()) {
+                for (Float coord : map.getValue()) {
+                    buffer.vertex(stack.last().pose(), map.getKey()-0.4f, coord-0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                    buffer.vertex(stack.last().pose(), map.getKey()-0.4f, coord+0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                    buffer.vertex(stack.last().pose(), map.getKey()+0.4f, coord+0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                    buffer.vertex(stack.last().pose(), map.getKey()+0.4f, coord-0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                }
+            }
+//            for (Pair<Float, Float> coord : ReticleShapes.filledCircleRad15) {
+//                buffer.vertex(stack.last().pose(), coord.getA()-0.3f, coord.getB()-0.3f, 0).color(1f, 0f, 0f, 1f).endVertex();
+//                buffer.vertex(stack.last().pose(), coord.getA()-0.3f, coord.getB()+0.3f, 0).color(1f, 0f, 0f, 1f).endVertex();
+//                buffer.vertex(stack.last().pose(), coord.getA()+0.3f, coord.getB()+0.3f, 0).color(1f, 0f, 0f, 1f).endVertex();
+//                buffer.vertex(stack.last().pose(), coord.getA()+0.3f, coord.getB()-0.3f, 0).color(1f, 0f, 0f, 1f).endVertex();
+//            }
             stack.popPose();
+            tesselator.end();
         }
 
         @SubscribeEvent
