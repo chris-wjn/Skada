@@ -1,6 +1,7 @@
 {
   "skada.command_get_weaponinfo.error.no_info": "No weapon info available for this item.",
   "skada.command_get_weaponinfo.error.no_item": "Not holding a weapon.",
+  "skada.command_debug.toggle": "Debug %s",
   "skada.generate_weapon_info.error.no_generator_data": "Couldn't find generator data!",
   "skada.generate_weapon_info.start": "§eGenerating weapon info for§r §b%s...",
   "skada.generate_weapon_info.error.no_items": "§cNo valid items in namespace:§r §b%s",

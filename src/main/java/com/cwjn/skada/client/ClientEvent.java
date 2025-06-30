@@ -185,16 +185,18 @@ public class ClientEvent {
                         buffer.vertex(stack.last().pose(), coord.x(), coord.y(), 0).color(1f, 1f, 1f, 1f).endVertex();
                     }
                     tesselator.end();
-                    buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                    for (Map.Entry<Float, Collection<Float>> map : rs.getFilledShape().asMap().entrySet()) {
-                        for (Float coord : map.getValue()) {
-                            buffer.vertex(stack.last().pose(), map.getKey()-0.4f, coord-0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                            buffer.vertex(stack.last().pose(), map.getKey()-0.4f, coord+0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                            buffer.vertex(stack.last().pose(), map.getKey()+0.4f, coord+0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                            buffer.vertex(stack.last().pose(), map.getKey()+0.4f, coord-0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                    if (DEBUG_ENABLED) {
+                        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                        for (Map.Entry<Float, Collection<Float>> map : rs.getFilledShape().asMap().entrySet()) {
+                            for (Float coord : map.getValue()) {
+                                buffer.vertex(stack.last().pose(), map.getKey() - 0.4f, coord - 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                                buffer.vertex(stack.last().pose(), map.getKey() - 0.4f, coord + 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                                buffer.vertex(stack.last().pose(), map.getKey() + 0.4f, coord + 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                                buffer.vertex(stack.last().pose(), map.getKey() + 0.4f, coord - 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            }
                         }
+                        tesselator.end();
                     }
-                    tesselator.end();
                 }
             }
             else {
@@ -204,16 +206,18 @@ public class ClientEvent {
                     buffer.vertex(stack.last().pose(), coord.x(), coord.y(), 0).color(1f, 1f, 1f, 1f).endVertex();
                 }
                 tesselator.end();
-                buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                for (Map.Entry<Float, Collection<Float>> map : RETICLES.get(attackType.name() + "_default").getFilledShape().asMap().entrySet()) {
-                    for (Float coord : map.getValue()) {
-                        buffer.vertex(stack.last().pose(), map.getKey()-0.4f, coord-0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                        buffer.vertex(stack.last().pose(), map.getKey()-0.4f, coord+0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                        buffer.vertex(stack.last().pose(), map.getKey()+0.4f, coord+0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                        buffer.vertex(stack.last().pose(), map.getKey()+0.4f, coord-0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                if (DEBUG_ENABLED) {
+                    buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                    for (Map.Entry<Float, Collection<Float>> map : RETICLES.get(attackType.name() + "_default").getFilledShape().asMap().entrySet()) {
+                        for (Float coord : map.getValue()) {
+                            buffer.vertex(stack.last().pose(), map.getKey() - 0.4f, coord - 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            buffer.vertex(stack.last().pose(), map.getKey() - 0.4f, coord + 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            buffer.vertex(stack.last().pose(), map.getKey() + 0.4f, coord + 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            buffer.vertex(stack.last().pose(), map.getKey() + 0.4f, coord - 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                        }
                     }
+                    tesselator.end();
                 }
-                tesselator.end();
             }
             stack.popPose();
         }
