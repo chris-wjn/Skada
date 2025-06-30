@@ -44,10 +44,8 @@ public class ReticleShape {
     }
 
     private Multimap<Float, Float> getFilledShape(List<ReticleCoordinate> outline, float spacing) {
+
          ImmutableMultimap.Builder<Float, Float> points = ImmutableMultimap.builder();
-         for (ReticleCoordinate coord : outline) {
-             points.put(coord.x(), coord.y());
-         }
 
         // Find bounding box
         float minX = Float.MAX_VALUE;
@@ -60,6 +58,17 @@ public class ReticleShape {
             minY = Math.min(minY, coord.y());
             maxX = Math.max(maxX, coord.x());
             maxY = Math.max(maxY, coord.y());
+        }
+
+         /*
+            We don't want to add the entire outline if the shape has a lot of vertices,
+         */
+        int increment = 1 + (int) Math.floor(outline.size() / 10f);
+        int index = 0;
+        while (index < outline.size()) {
+            ReticleCoordinate coord = outline.get(index);
+            points.put(coord.x(), coord.y());
+            index += increment;
         }
 
         // Scan the bounding box with the specified spacing
