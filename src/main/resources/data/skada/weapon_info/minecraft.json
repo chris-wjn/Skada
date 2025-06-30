@@ -690,7 +690,12 @@
         "failChance": 0.0,
         "lethality": 0.6,
         "accuracy": 0.25,
-        "minReach": 2.0
+        "minReach": 2.0,
+        "reticleShapes": [
+          "trident_1",
+          "thrust_default",
+          "trident_2"
+        ]
       }
     },
     "spread": {
