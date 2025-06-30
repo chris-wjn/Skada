@@ -25,6 +25,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import static com.cwjn.skada.data.SkadaData.DEBUG_ENABLED;
 import static com.cwjn.skada.util.ConsoleColour.*;
 
 @Mod.EventBusSubscriber
@@ -34,31 +35,32 @@ public class DamageHandler {
     public static void doDamageCalculation(LivingHurtEvent event) {
         SkadaDamageSource source;
         LivingEntity target = event.getEntity();
+        if (target.getServer() != null) target.getServer().getProfiler().push("SkadaDamageHandler");
         boolean isProjectile = false;
-        Skada.LOGGER.debug(UNDERLINE + "Damage event for entity: {}, initial damage: {}, source: {}" + RESET, target.getName().getString(), event.getAmount(), event.getSource().getMsgId());
+        if (DEBUG_ENABLED) Skada.LOGGER.debug(UNDERLINE + "Damage event for entity: {}, initial damage: {}, source: {}" + RESET, target.getName().getString(), event.getAmount(), event.getSource().getMsgId());
         double amount = event.getAmount();
         if (event.getSource() instanceof SkadaDamageSource) {
-            Skada.LOGGER.debug("Damage source is a SkadaDamageSource.");
+            if (DEBUG_ENABLED) Skada.LOGGER.debug("Damage source is a SkadaDamageSource.");
             source = (SkadaDamageSource) event.getSource();
         }
         else if (event.getSource().getDirectEntity() instanceof Projectile projectile) {
             AccessProjectileData proj = (AccessProjectileData) projectile;
             source = new SkadaDamageSource(event.getSource(), proj.getDamageInfo());
             isProjectile = true;
-            Skada.LOGGER.debug("Damage source is a projectile with damage info: {}", proj.getDamageInfo());
+            if (DEBUG_ENABLED) Skada.LOGGER.debug("Damage source is a projectile with damage info: {}", proj.getDamageInfo());
         }
         else {
-            Skada.LOGGER.debug("Damage source is not a SkadaDamageSource, creating environmental source.");
+            if (DEBUG_ENABLED) Skada.LOGGER.debug("Damage source is not a SkadaDamageSource, creating environmental source.");
             source = SkadaDamageSource.environmental(event.getSource());
         }
         DamageInfo info = source.getInfo();
         ElementSpreadInstance spread = info.elementSpreadInstance();
         double armour = target.getAttributeValue(Attributes.ARMOR);
-        Skada.LOGGER.debug("Damage info: {}, Element spread: {}, Armour: {}", info, spread, armour);
+        if (DEBUG_ENABLED) Skada.LOGGER.debug("Damage info: {}, Element spread: {}, Armour: {}", info, spread, armour);
 
         if (source.is(SkadaDamageTypeTags.CANCELLED_BY_ARMOUR)) {
             if (armour != 0) {
-                Skada.LOGGER.debug("Damage is cancelled by armour, cancelling event.");
+                if (DEBUG_ENABLED) Skada.LOGGER.debug("Damage is cancelled by armour, cancelling event.");
                 event.setCanceled(true);
                 return;
             }
@@ -67,39 +69,39 @@ public class DamageHandler {
         if (!info.isEnvironmental()) {
 
             if (CommonConfig.ENABLE_ACCURACY.get() && CommonConfig.ENABLE_ACCURACY_FOR_MELEE.get() && !isProjectile) {
-                Skada.LOGGER.debug("Pre-accuracy damage: {}", amount);
+                if (DEBUG_ENABLED) Skada.LOGGER.debug("Pre-accuracy damage: {}", amount);
                 amount = getDamageFromAccuracyNormalDistribution(info.accuracy(), amount, event.getEntity().getRandom());
-                Skada.LOGGER.debug("Post-accuracy damage: {}", amount);
+                if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-accuracy damage: {}", amount);
             }
 
             if (CommonConfig.ENABLE_LETHALITY.get()) {
                 double lethality = info.lethality();
                 double toughness = target.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
 
-                Skada.LOGGER.debug("Lethality: {}, Toughness: {}", lethality, toughness);
+                if (DEBUG_ENABLED) Skada.LOGGER.debug("Lethality: {}, Toughness: {}", lethality, toughness);
 
-                Skada.LOGGER.debug("Pre-lethality damage: {}", amount);
+                if (DEBUG_ENABLED) Skada.LOGGER.debug("Pre-lethality damage: {}", amount);
                 switch (info.attackType().type().getOperation()) {
                     case SUM_WITH_DAMAGE -> amount += info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
                     case SUM_WITH_ARMOUR -> armour += info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
                     case MULTIPLY_WITH_DAMAGE -> amount *= info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
                     case MULTIPLY_WITH_ARMOUR -> armour *= info.attackType().type().apply(lethality, toughness, target.getMaxHealth());
                 }
-                Skada.LOGGER.debug("Post-lethality damage: {}", amount);
+                if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-lethality damage: {}", amount);
             }
 
             //ATTACK TYPE WEAKNESSES
             AttackType attackType = info.attackType();
-            Skada.LOGGER.debug("Pre-attack type damage: {}", amount);
+            if (DEBUG_ENABLED) Skada.LOGGER.debug("Pre-attack type damage: {}", amount);
             amount -= (amount*resistanceReductionFormula(target.getAttributeValue(attackType.resistAttribute())));
-            Skada.LOGGER.debug("Post-attack type damage: {}", amount);
+            if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-attack type damage: {}", amount);
 
         }
 
         //ARMOUR FORMULA
-        Skada.LOGGER.debug("Pre-armour damage: {}", amount);
+        if (DEBUG_ENABLED) Skada.LOGGER.debug("Pre-armour damage: {}", amount);
         amount = armourReductionFormula(amount, armour);
-        Skada.LOGGER.debug("Post-armour damage: {}", amount);
+        if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-armour damage: {}", amount);
 
         if (!source.is(DamageTypeTags.BYPASSES_EFFECTS)) {
             if (target.hasEffect(MobEffects.DAMAGE_RESISTANCE) && !source.is(DamageTypeTags.BYPASSES_RESISTANCE)) {
@@ -116,14 +118,14 @@ public class DamageHandler {
                         ((ServerPlayer) source.getEntity()).awardStat(Stats.DAMAGE_RESISTED, (int) Math.round(f2 * 10.0F));
                     }
                 }
-                Skada.LOGGER.debug("Post-resistance damage: {}", amount);
+                if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-resistance damage: {}", amount);
             }
             if (!source.is(DamageTypeTags.BYPASSES_ENCHANTMENTS)) {
                 int k = EnchantmentHelper.getDamageProtection(target.getArmorSlots(), source);
                 if (k > 0) {
                     amount = CombatRules.getDamageAfterMagicAbsorb((float) amount, (float) k);
                 }
-                Skada.LOGGER.debug("Post-enchantment damage: {}", amount);
+                if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-enchantment damage: {}", amount);
             }
         }
 
@@ -131,7 +133,7 @@ public class DamageHandler {
         spread.transform(amount);
         for (Element element : spread.getElements().keySet()) {
             if (source.getEntity() instanceof LivingEntity le) {
-                Skada.LOGGER.debug("Element: {}, Base damage: {}, Affinity: {}, Pre-resistance damage: {}, Target Resistance: {}",
+                if (DEBUG_ENABLED) Skada.LOGGER.debug("Element: {}, Base damage: {}, Affinity: {}, Pre-resistance damage: {}, Target Resistance: {}",
                         element.name(),
                         le.getAttributeValue(element.baseDamage()),
                         (1 + le.getAttributeValue(element.affinityAttribute())),
@@ -141,11 +143,12 @@ public class DamageHandler {
                 spread.applyFunctionToElement(element, x -> x * (1 + le.getAttributeValue(element.affinityAttribute())));
             }
             spread.applyFunctionToElement(element, x -> x - (x * resistanceReductionFormula(target.getAttributeValue(element.resistAttribute()))));
-            Skada.LOGGER.debug("Element: {}, Final damage: {}", element.name(), spread.getElements().get(element));
+            if (DEBUG_ENABLED) Skada.LOGGER.debug("Element: {}, Final damage: {}", element.name(), spread.getElements().get(element));
         }
         PostMitigationEvent evt = new PostMitigationEvent(target, spread.getElements());
         MinecraftForge.EVENT_BUS.post(evt);
         event.setAmount(evt.getTotalDamage());
+        if (target.getServer() != null) target.getServer().getProfiler().pop();
     }
 
     /*

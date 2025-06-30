@@ -36,7 +36,7 @@ public class CustomReticlesDetectEntities {
     @Inject(method = "pick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", shift = At.Shift.AFTER))
     private void pickEntity(float pPartialTicks, CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.getProfiler().push("skada reticle extension");
+        minecraft.getProfiler().push("SkadaCustomReticlesDetectEntities");
         Player player = minecraft.player;
         Entity entity = minecraft.getCameraEntity();
         AttackType attackType = Util.getAttackType(player);

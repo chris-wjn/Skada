@@ -20,6 +20,7 @@ import static com.cwjn.skada.data.damage.LethalityFunction.Operation.*;
 */
 public abstract class SkadaData {
 
+    public static boolean DEBUG_ENABLED = false;
     public static final double DEFAULT_ACCURACY = 0.75;
     public static Supplier<IForgeRegistry<AttackType>> REGISTRY_ATTACK_TYPE;
     public static Supplier<IForgeRegistry<Element>> REGISTRY_ELEMENT;

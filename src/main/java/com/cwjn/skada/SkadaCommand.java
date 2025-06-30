@@ -50,12 +50,13 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.cwjn.skada.Skada.LOGGER;
+import static com.cwjn.skada.data.SkadaData.DEBUG_ENABLED;
 import static net.minecraft.commands.Commands.literal;
 
 public class SkadaCommand {
 
     public SkadaCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext ctx) {
-        dispatcher.register(literal("skada")
+        dispatcher.register(literal("skada").requires(source -> source.hasPermission(2))
                 .then(literal("get")
                         .then(literal("weaponInfo")
                                 .executes(stack -> getWeaponInfo(stack.getSource()))
@@ -95,7 +96,18 @@ public class SkadaCommand {
                                 )
                         )
                 )
+                .then(literal("debug").executes(stack -> toggleDebug(stack.getSource())))
         );
+    }
+
+    private int toggleDebug(CommandSourceStack source) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            return 0;
+        }
+        DEBUG_ENABLED = !DEBUG_ENABLED;
+        player.sendSystemMessage(Component.translatable("skada.command_debug.toggle", DEBUG_ENABLED ? "enabled" : "disabled"));
+        return 1;
     }
 
     private int getTieredItemOrArmourItemMaterialName(CommandSourceStack source) {

@@ -420,10 +420,6 @@ public abstract class Util {
                 LOGGER.error("Failed to read reticle info from " + rl, e);
             }
         });
-        for (ReticleShape r : RETICLES.values()) {
-            LOGGER.info("----------> " + r.getName());
-            LOGGER.info("-------> " + r.getOutline().size());
-        }
     }
 
     public static void updateWeaponInfoItemsFromResources(ResourceManager manager) {
@@ -533,7 +529,6 @@ public abstract class Util {
     }
 
     private static void flattenParentModifiers(EntityType<?> type, MobData mobData) {
-        LOGGER.debug("Flattening parent modifiers for entity type: {}", type.getDescriptionId());
         if (mobData.parents() == null || mobData.parents().isEmpty()) return;
         Multimap<Attribute, AttributeModifier> flattenedModifiers = ArrayListMultimap.create(mobData.extraModifiers());
 
