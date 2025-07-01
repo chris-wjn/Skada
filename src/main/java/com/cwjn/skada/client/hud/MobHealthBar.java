@@ -81,7 +81,8 @@ public class MobHealthBar {
             stack.popPose();
         }
 
-        RenderSystem.disableBlend();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.defaultBlendFunc();
         renderables.clear();
     }
 
@@ -108,7 +109,6 @@ public class MobHealthBar {
         float half = (float) MAX_BAR_WIDTH / 2;
         float zOffsetAmount = -0.1F;
         double size = percent * (float) MAX_BAR_WIDTH;
-
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, HEALTH_GUI);
         RenderSystem.enableBlend();
@@ -151,20 +151,20 @@ public class MobHealthBar {
         if (!background) {
             //Border
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            buffer.vertex(matrix, -half - 2.7f, -3, (zOffset+1)*zOffsetAmount) //top left
-                    .uv(72*CONSTANT, 38*CONSTANT).endVertex();
-            buffer.vertex(matrix, -half - 2.7f, -3 + 10, (zOffset+1)*zOffsetAmount) //bottom left
-                    .uv(72*CONSTANT, 48*CONSTANT).endVertex();
-            buffer.vertex(matrix, -half + MAX_BAR_WIDTH + 2.6f, -3 + 10, (zOffset+1)*zOffsetAmount) //bottom right
-                    .uv(159*CONSTANT, 48*CONSTANT).endVertex();
-            buffer.vertex(matrix, -half + MAX_BAR_WIDTH + 2.6f, -3, (zOffset+1)*zOffsetAmount) //top right
-                    .uv(159*CONSTANT, 38*CONSTANT).endVertex();
+            buffer.vertex(matrix, -half - 2.7f, -3, (zOffset + 1) * zOffsetAmount) //top left
+                    .uv(72 * CONSTANT, 38 * CONSTANT).endVertex();
+            buffer.vertex(matrix, -half - 2.7f, -3 + 10, (zOffset + 1) * zOffsetAmount) //bottom left
+                    .uv(72 * CONSTANT, 48 * CONSTANT).endVertex();
+            buffer.vertex(matrix, -half + MAX_BAR_WIDTH + 2.6f, -3 + 10, (zOffset + 1) * zOffsetAmount) //bottom right
+                    .uv(159 * CONSTANT, 48 * CONSTANT).endVertex();
+            buffer.vertex(matrix, -half + MAX_BAR_WIDTH + 2.6f, -3, (zOffset + 1) * zOffsetAmount) //top right
+                    .uv(159 * CONSTANT, 38 * CONSTANT).endVertex();
             tesselator.end();
 
             //Dividers
-            float dividerSpacing = MAX_BAR_WIDTH*percentOfMax;
+            float dividerSpacing = MAX_BAR_WIDTH * percentOfMax;
             float f = -half + dividerSpacing;
-            float dividerWidth = (float) Mth.clamp(dividerSpacing*0.1, 0.25f, 0.5f);
+            float dividerWidth = (float) Mth.clamp(dividerSpacing * 0.1, 0.25f, 0.5f);
             while (f < (MAX_BAR_WIDTH - half)) {
                 buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
                 buffer.vertex(matrix, f, 0, (zOffset + 1) * zOffsetAmount) //top left
@@ -179,9 +179,7 @@ public class MobHealthBar {
                 f += dividerSpacing;
             }
         }
-
         RenderSystem.disableBlend();
-
     }
 
 }

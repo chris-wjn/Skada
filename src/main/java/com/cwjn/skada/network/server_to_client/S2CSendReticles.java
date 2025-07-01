@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public class S2CSendReticles {
 
-    private List<ReticleShape> reticles = new ArrayList<>();
+    private final List<ReticleShape> reticles;
 
     public S2CSendReticles(List<ReticleShape> reticles) {
         this.reticles = reticles;

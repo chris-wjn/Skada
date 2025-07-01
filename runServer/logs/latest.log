@@ -1,56 +1,55 @@
-[28Mar.2024 11:48:38.625] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserveruserdev, --gameDir, ., --fml.forgeVersion, 47.1.100, --fml.fmlVersion, 47.2.2, --fml.mcVersion, 1.20.1, --fml.mcpVersion, 20230612.114412, --nogui, --mixin.config, skada.mixin.json]
-[28Mar.2024 11:48:38.631] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 10.0.10+10.0.10+main.22f00f84 starting: java version 17.0.6 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
-[28Mar.2024 11:48:38.730] [main/INFO] [net.minecraftforge.fml.loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserveruserdev
-[28Mar.2024 11:48:38.772] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/C:/Users/chris/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23128!/ Service=ModLauncher Env=SERVER
-[28Mar.2024 11:48:39.062] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\chris\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-java\47.2.2\8fdb1b51a9e5cb1ca82634263039012601b32317\language-java-47.2.2.jar is missing mods.toml file
-[28Mar.2024 11:48:39.064] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\chris\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-lowcode\47.2.2\e8f72140a147fea3ca0d75e6548cc505c0b9cc9e\language-lowcode-47.2.2.jar is missing mods.toml file
-[28Mar.2024 11:48:39.066] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\chris\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-minecraft\47.2.2\6b986e48b9fc90aaf550a0445e635983398a41c1\language-minecraft-47.2.2.jar is missing mods.toml file
-[28Mar.2024 11:48:39.068] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\chris\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\core\47.2.2\27c66a2985d8f0226d2b397fdd4bc5f6a5923ac2\core-47.2.2.jar is missing mods.toml file
-[28Mar.2024 11:48:39.079] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-java-47.2.2.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3aaf4f07
-[28Mar.2024 11:48:39.079] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-lowcode-47.2.2.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3aaf4f07
-[28Mar.2024 11:48:39.080] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-minecraft-47.2.2.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3aaf4f07
-[28Mar.2024 11:48:39.080] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "core-47.2.2.jar" of type LIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3aaf4f07
-[28Mar.2024 11:48:39.080] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3aaf4f07
-[28Mar.2024 11:48:39.080] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "main" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3aaf4f07
-[28Mar.2024 11:48:39.080] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3aaf4f07
-[28Mar.2024 11:48:39.137] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "spark-1.10.53-forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@60222fd8
-[28Mar.2024 11:48:39.137] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "simply-swords-1.54.0-1.20.1-forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@60222fd8
-[28Mar.2024 11:48:39.138] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "architectury-api-9.2.14+forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@60222fd8
-[28Mar.2024 11:48:39.138] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "cloth-config-11.1.118+forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@60222fd8
-[28Mar.2024 11:48:39.138] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "spark-1.10.53-forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@60222fd8
-[28Mar.2024 11:48:39.138] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "simply-swords-1.54.0-1.20.1-forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@60222fd8
-[28Mar.2024 11:48:39.138] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "architectury-api-9.2.14+forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@60222fd8
-[28Mar.2024 11:48:39.138] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "cloth-config-11.1.118+forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@60222fd8
-[28Mar.2024 11:48:39.142] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "events-47.2.2.jar" of type GAMELIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.BuiltinGameLibraryLocator@cda4919
-[28Mar.2024 11:48:39.181] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
-[28Mar.2024 11:48:40.477] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
-[28Mar.2024 11:48:40.482] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserveruserdev' with arguments [--gameDir, ., --nogui]
-[28Mar.2024 11:48:40.538] [main/WARN] [mixin/]: Reference map 'skada-refmap.json' for skada.mixin.json could not be read. If this is a development environment you can ignore this message
-[28Mar.2024 11:48:40.701] [main/INFO] [mixin/]: Remapping refMap simplyswords-common-refmap.json using D:\MODDING\Minecraft Modding\Skada/build/createSrgToMcp/output.srg
-[28Mar.2024 11:48:40.703] [main/WARN] [mixin/]: Reference map 'simplyswords-forge-refmap.json' for simplyswords.mixins.json could not be read. If this is a development environment you can ignore this message
-[28Mar.2024 11:48:40.711] [main/INFO] [mixin/]: Remapping refMap architectury-forge-refmap.json using D:\MODDING\Minecraft Modding\Skada/build/createSrgToMcp/output.srg
-[28Mar.2024 11:48:40.712] [main/INFO] [mixin/]: Remapping refMap architectury-common-refmap.json using D:\MODDING\Minecraft Modding\Skada/build/createSrgToMcp/output.srg
-[28Mar.2024 11:48:41.570] [main/WARN] [oshi.driver.windows.perfmon.PerfmonDisabled/]: Invalid registry value type detected for PerfOS counters. Should be REG_DWORD. Ignoring: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PerfOS\Performance\Disable Performance Counters.
-[28Mar.2024 11:48:45.982] [modloading-worker-0/INFO] [net.minecraftforge.common.ForgeMod/FORGEMOD]: NeoForge mod loading, version 47.1.100, for MC 1.20.1 with MCP 20230612.114412
-[28Mar.2024 11:48:45.982] [modloading-worker-0/INFO] [net.minecraftforge.common.MinecraftForge/FORGE]: NeoForge v47.1.100 Initialized
-[28Mar.2024 11:48:46.094] [modloading-worker-0/INFO] [dev.architectury.networking.forge.NetworkManagerImpl/]: Registering C2S receiver with id architectury:sync_ids
-[28Mar.2024 11:48:47.551] [main/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
-[28Mar.2024 11:48:47.651] [main/INFO] [net.minecraftforge.registries.GameData/REGISTRIES]: Injecting existing registry data into this CLIENT instance
-[28Mar.2024 11:48:48.118] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/chris/.gradle/caches/forge_gradle/minecraft_user_repo/net/neoforged/forge/1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1/forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/assets/.mcassetsroot' uses unexpected schema
-[28Mar.2024 11:48:48.118] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/chris/.gradle/caches/forge_gradle/minecraft_user_repo/net/neoforged/forge/1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1/forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/data/.mcassetsroot' uses unexpected schema
-[28Mar.2024 11:48:49.486] [Worker-Main-2/ERROR] [net.minecraftforge.common.ForgeHooks/]: Couldn't parse element loot_tables:simplyswords:grant_book_on_first_join
+[01Jul.2025 12:53:40.524] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserveruserdev, --gameDir, ., --fml.forgeVersion, 47.1.103, --fml.fmlVersion, 47.2.2, --fml.mcVersion, 1.20.1, --fml.mcpVersion, 20230612.114412, --nogui, --mixin.config, skada.mixin.json]
+[01Jul.2025 12:53:40.527] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 10.0.10+10.0.10+main.22f00f84 starting: java version 17.0.10 by JetBrains s.r.o.; OS Windows 11 arch amd64 version 10.0
+[01Jul.2025 12:53:40.626] [main/INFO] [net.minecraftforge.fml.loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserveruserdev
+[01Jul.2025 12:53:40.657] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/C:/Users/chris/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23128!/ Service=ModLauncher Env=SERVER
+[01Jul.2025 12:53:40.856] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\chris\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-java\47.2.2\8fdb1b51a9e5cb1ca82634263039012601b32317\language-java-47.2.2.jar is missing mods.toml file
+[01Jul.2025 12:53:40.858] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\chris\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-lowcode\47.2.2\e8f72140a147fea3ca0d75e6548cc505c0b9cc9e\language-lowcode-47.2.2.jar is missing mods.toml file
+[01Jul.2025 12:53:40.860] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\chris\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-minecraft\47.2.2\6b986e48b9fc90aaf550a0445e635983398a41c1\language-minecraft-47.2.2.jar is missing mods.toml file
+[01Jul.2025 12:53:40.861] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\chris\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\core\47.2.2\27c66a2985d8f0226d2b397fdd4bc5f6a5923ac2\core-47.2.2.jar is missing mods.toml file
+[01Jul.2025 12:53:40.870] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-java-47.2.2.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@272a179c
+[01Jul.2025 12:53:40.871] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-lowcode-47.2.2.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@272a179c
+[01Jul.2025 12:53:40.871] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-minecraft-47.2.2.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@272a179c
+[01Jul.2025 12:53:40.871] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "core-47.2.2.jar" of type LIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@272a179c
+[01Jul.2025 12:53:40.871] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@272a179c
+[01Jul.2025 12:53:40.871] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "main" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@272a179c
+[01Jul.2025 12:53:40.871] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@272a179c
+[01Jul.2025 12:53:40.899] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "spark-1.10.53-forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@160396db
+[01Jul.2025 12:53:40.899] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "simply-swords-1.54.0-1.20.1-forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@160396db
+[01Jul.2025 12:53:40.899] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "architectury-api-9.2.14+forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@160396db
+[01Jul.2025 12:53:40.899] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "cloth-config-11.1.118+forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@160396db
+[01Jul.2025 12:53:40.899] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "spark-1.10.53-forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@160396db
+[01Jul.2025 12:53:40.899] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "simply-swords-1.54.0-1.20.1-forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@160396db
+[01Jul.2025 12:53:40.899] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "architectury-api-9.2.14+forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@160396db
+[01Jul.2025 12:53:40.899] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "cloth-config-11.1.118+forge_mapped_parchment_2023.09.03-1.20.1.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@160396db
+[01Jul.2025 12:53:40.902] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "events-47.2.2.jar" of type GAMELIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.BuiltinGameLibraryLocator@3e83c18
+[01Jul.2025 12:53:40.939] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
+[01Jul.2025 12:53:41.910] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[01Jul.2025 12:53:41.914] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserveruserdev' with arguments [--gameDir, ., --nogui]
+[01Jul.2025 12:53:41.969] [main/WARN] [mixin/]: Reference map 'skada.mixin-refmap.json' for skada.mixin.json could not be read. If this is a development environment you can ignore this message
+[01Jul.2025 12:53:42.102] [main/INFO] [mixin/]: Remapping refMap simplyswords-common-refmap.json using D:\MODDING\Minecraft Modding\Skada/build/createSrgToMcp/output.srg
+[01Jul.2025 12:53:42.104] [main/WARN] [mixin/]: Reference map 'simplyswords-forge-refmap.json' for simplyswords.mixins.json could not be read. If this is a development environment you can ignore this message
+[01Jul.2025 12:53:42.105] [main/INFO] [mixin/]: Remapping refMap architectury-forge-refmap.json using D:\MODDING\Minecraft Modding\Skada/build/createSrgToMcp/output.srg
+[01Jul.2025 12:53:42.105] [main/INFO] [mixin/]: Remapping refMap architectury-common-refmap.json using D:\MODDING\Minecraft Modding\Skada/build/createSrgToMcp/output.srg
+[01Jul.2025 12:53:42.951] [main/WARN] [oshi.driver.windows.perfmon.PerfmonDisabled/]: Invalid registry value type detected for PerfOS counters. Should be REG_DWORD. Ignoring: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\PerfOS\Performance\Disable Performance Counters.
+[01Jul.2025 12:53:46.350] [modloading-worker-0/INFO] [net.minecraftforge.common.ForgeMod/FORGEMOD]: NeoForge mod loading, version 47.1.103, for MC 1.20.1 with MCP 20230612.114412
+[01Jul.2025 12:53:46.350] [modloading-worker-0/INFO] [net.minecraftforge.common.MinecraftForge/FORGE]: NeoForge v47.1.103 Initialized
+[01Jul.2025 12:53:46.418] [modloading-worker-0/INFO] [dev.architectury.networking.forge.NetworkManagerImpl/]: Registering C2S receiver with id architectury:sync_ids
+[01Jul.2025 12:53:47.505] [main/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[01Jul.2025 12:53:47.535] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/chris/.gradle/caches/forge_gradle/minecraft_user_repo/net/neoforged/forge/1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1/forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/assets/.mcassetsroot' uses unexpected schema
+[01Jul.2025 12:53:47.535] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/chris/.gradle/caches/forge_gradle/minecraft_user_repo/net/neoforged/forge/1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1/forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/data/.mcassetsroot' uses unexpected schema
+[01Jul.2025 12:53:48.850] [Worker-Main-2/ERROR] [net.minecraftforge.common.ForgeHooks/]: Couldn't parse element loot_tables:simplyswords:grant_book_on_first_join
 com.google.gson.JsonSyntaxException: Expected name to be an item, was unknown string 'patchouli:guide_book'
-	at net.minecraft.util.GsonHelper.lambda$convertToItem$0(GsonHelper.java:143) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.util.GsonHelper.lambda$convertToItem$0(GsonHelper.java:143) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
 	at java.util.Optional.orElseThrow(Optional.java:403) ~[?:?]
-	at net.minecraft.util.GsonHelper.convertToItem(GsonHelper.java:142) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.util.GsonHelper.getAsItem(GsonHelper.java:152) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.entries.LootItem$Serializer.deserialize(LootItem.java:59) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.entries.LootItem$Serializer.deserialize(LootItem.java:47) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:165) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:145) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:94) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:77) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.GsonAdapterFactory$JsonAdapter.deserialize(GsonAdapterFactory.java:113) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.util.GsonHelper.convertToItem(GsonHelper.java:142) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.util.GsonHelper.getAsItem(GsonHelper.java:152) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.entries.LootItem$Serializer.deserialize(LootItem.java:59) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.entries.LootItem$Serializer.deserialize(LootItem.java:47) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:165) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer$Serializer.deserializeCustom(LootPoolSingletonContainer.java:145) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:94) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer$Serializer.deserialize(LootPoolEntryContainer.java:77) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.GsonAdapterFactory$JsonAdapter.deserialize(GsonAdapterFactory.java:113) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
 	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23130!/:?]
@@ -58,10 +57,10 @@ com.google.gson.JsonSyntaxException: Expected name to be an item, was unknown st
 	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23130!/:?]
-	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:468) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:476) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:201) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:198) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:468) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:476) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:201) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.LootPool$Serializer.deserialize(LootPool.java:198) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
 	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:40) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.internal.bind.ArrayTypeAdapter.read(ArrayTypeAdapter.java:72) ~[gson-2.10.jar%23130!/:?]
@@ -69,20 +68,20 @@ com.google.gson.JsonSyntaxException: Expected name to be an item, was unknown st
 	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.Gson.fromJson(Gson.java:1290) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:179) ~[gson-2.10.jar%23130!/:?]
-	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:468) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:485) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:312) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:309) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.util.GsonHelper.convertToObject(GsonHelper.java:468) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.util.GsonHelper.getAsObject(GsonHelper.java:485) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:312) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.LootTable$Serializer.deserialize(LootTable.java:309) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
 	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:76) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.Gson.fromJson(Gson.java:1319) ~[gson-2.10.jar%23130!/:?]
 	at com.google.gson.Gson.fromJson(Gson.java:1261) ~[gson-2.10.jar%23130!/:?]
-	at net.minecraftforge.common.ForgeHooks.loadLootTable(ForgeHooks.java:877) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23190%23197!/:?]
-	at net.minecraftforge.common.ForgeHooks.lambda$getLootTableDeserializer$3(ForgeHooks.java:854) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23190%23197!/:?]
-	at net.minecraft.world.level.storage.loot.LootDataType.deserialize(LootDataType.java:45) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
-	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$4(LootDataManager.java:56) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraftforge.common.ForgeHooks.loadLootTable(ForgeHooks.java:877) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23190%23197!/:?]
+	at net.minecraftforge.common.ForgeHooks.lambda$getLootTableDeserializer$3(ForgeHooks.java:854) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23190%23197!/:?]
+	at net.minecraft.world.level.storage.loot.LootDataType.deserialize(LootDataType.java:45) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$4(LootDataManager.java:56) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
 	at java.util.HashMap.forEach(HashMap.java:1421) ~[?:?]
-	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$5(LootDataManager.java:55) ~[forge-1.20.1-47.1.100_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
+	at net.minecraft.world.level.storage.loot.LootDataManager.lambda$scheduleElementParse$5(LootDataManager.java:55) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?]
 	at java.util.concurrent.CompletableFuture$AsyncRun.run(CompletableFuture.java:1804) ~[?:?]
 	at java.util.concurrent.CompletableFuture$AsyncRun.exec(CompletableFuture.java:1796) ~[?:?]
 	at java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:373) ~[?:?]
@@ -90,70 +89,392 @@ com.google.gson.JsonSyntaxException: Expected name to be an item, was unknown st
 	at java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655) ~[?:?]
 	at java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622) ~[?:?]
 	at java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165) ~[?:?]
-[28Mar.2024 11:48:50.033] [main/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 7 recipes
-[28Mar.2024 11:48:50.114] [main/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 1309 advancements
-[28Mar.2024 11:48:50.540] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting minecraft server version 1.20.1
-[28Mar.2024 11:48:50.541] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Loading properties
-[28Mar.2024 11:48:50.541] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Default game type: SURVIVAL
-[28Mar.2024 11:48:50.541] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
-[28Mar.2024 11:48:50.592] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting Minecraft server on *:25565
-[28Mar.2024 11:48:50.604] [Server thread/INFO] [net.minecraft.server.network.ServerConnectionListener/]: Using default channel type
-[28Mar.2024 11:48:50.714] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
-[28Mar.2024 11:48:50.714] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: The server will make no attempt to authenticate usernames. Beware.
-[28Mar.2024 11:48:50.714] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
-[28Mar.2024 11:48:50.714] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: To change this, set "online-mode" to "true" in the server.properties file.
-[28Mar.2024 11:48:50.749] [Server thread/INFO] [com.cwjn.skada.Skada/]: ------------------> Reading Weapon Info json files
-[28Mar.2024 11:48:50.750] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:weapon_info/minecraft.json
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_axe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_hoe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_pickaxe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_shovel
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_sword
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_axe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_hoe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_pickaxe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_shovel
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_sword
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_axe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_hoe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_pickaxe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_shovel
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_sword
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_axe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_hoe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_pickaxe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_shovel
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_sword
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_axe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_hoe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_pickaxe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_shovel
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_sword
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> trident
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_axe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_hoe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_pickaxe
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_shovel
-[28Mar.2024 11:48:50.757] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_sword
-[28Mar.2024 11:48:50.864] [Server thread/INFO] [spark/]: Starting background profiler...
-[28Mar.2024 11:48:50.875] [Server thread/INFO] [spark/]: The async-profiler engine is not supported for your os/arch (windows11/amd64), so the built-in Java engine will be used instead.
-[28Mar.2024 11:48:50.927] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Preparing level "world"
-[28Mar.2024 11:48:52.007] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
-[28Mar.2024 11:48:53.641] [Worker-Main-4/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[28Mar.2024 11:48:53.663] [Worker-Main-7/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[28Mar.2024 11:48:53.671] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[28Mar.2024 11:48:53.672] [Worker-Main-5/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[28Mar.2024 11:48:54.008] [Worker-Main-4/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
-[28Mar.2024 11:48:54.507] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 84%
-[28Mar.2024 11:48:54.562] [Server thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 2555 ms
-[28Mar.2024 11:48:54.562] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Done (3.840s)! For help, type "help"
-[28Mar.2024 11:48:54.578] [Server thread/INFO] [net.minecraftforge.gametest.ForgeGameTestHooks/]: Enabled Gametest Namespaces: [skada]
-[28Mar.2024 11:48:54.582] [Server thread/INFO] [net.minecraftforge.server.permission.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
-[28Mar.2024 11:49:50.627] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Unknown or incomplete command, see below for error
-[28Mar.2024 11:49:50.627] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: <--[HERE]
-[28Mar.2024 11:50:05.279] [Server thread/INFO] [net.minecraft.server.network.ServerLoginPacketListenerImpl/]: com.mojang.authlib.GameProfile@949b28f[id=<null>,name=Dev,properties={},legacy=false] (/[::1]:51974) lost connection: Disconnected
-[28Mar.2024 11:50:08.350] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[/[fd00:fc:8d34:2952:988f:1b30:e238:626b]:52016] logged in with entity id 242 at (-18.989801770132964, 78.0, -7.791322162134377)
-[28Mar.2024 11:50:08.476] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
-[28Mar.2024 11:53:03.086] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev has made the advancement [Monster Hunter]
-[28Mar.2024 11:54:50.679] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
-[28Mar.2024 11:54:50.679] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game
+[01Jul.2025 12:53:49.420] [main/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 7 recipes
+[01Jul.2025 12:53:49.486] [main/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 1309 advancements
+[01Jul.2025 12:53:49.789] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting minecraft server version 1.20.1
+[01Jul.2025 12:53:49.790] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Loading properties
+[01Jul.2025 12:53:49.790] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Default game type: SURVIVAL
+[01Jul.2025 12:53:49.790] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[01Jul.2025 12:53:49.837] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting Minecraft server on *:25565
+[01Jul.2025 12:53:49.846] [Server thread/INFO] [net.minecraft.server.network.ServerConnectionListener/]: Using default channel type
+[01Jul.2025 12:53:49.965] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[01Jul.2025 12:53:49.966] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: The server will make no attempt to authenticate usernames. Beware.
+[01Jul.2025 12:53:49.966] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[01Jul.2025 12:53:49.966] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: To change this, set "online-mode" to "true" in the server.properties file.
+[01Jul.2025 12:53:49.976] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Configuration file .\world\serverconfig\forge-server.toml is not correct. Correcting
+[01Jul.2025 12:53:49.977] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server was corrected from null to its default, SimpleCommentedConfig:{}. 
+[01Jul.2025 12:53:49.977] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringBlockEntities was corrected from null to its default, false. 
+[01Jul.2025 12:53:49.977] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.removeErroringEntities was corrected from null to its default, false. 
+[01Jul.2025 12:53:49.977] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.fullBoundingBoxLadders was corrected from null to its default, false. 
+[01Jul.2025 12:53:49.977] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.zombieBaseSummonChance was corrected from null to its default, 0.1. 
+[01Jul.2025 12:53:49.977] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.zombieBabyChance was corrected from null to its default, 0.05. 
+[01Jul.2025 12:53:49.977] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.permissionHandler was corrected from null to its default, forge:default_handler. 
+[01Jul.2025 12:53:49.977] [Server thread/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key server.advertiseDedicatedServerToLan was corrected from null to its default, true. 
+[01Jul.2025 12:53:49.992] [Server thread/INFO] [com.cwjn.skada.Skada/]: ------------------> Reading Weapon Info json files
+[01Jul.2025 12:53:49.992] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:weapon_info/minecraft.json
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> bow
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> crossbow
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_axe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_hoe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_pickaxe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_shovel
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_sword
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_axe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_hoe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_pickaxe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_shovel
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_sword
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_axe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_hoe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_pickaxe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_shovel
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_sword
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_axe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_hoe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_pickaxe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_shovel
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_sword
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_axe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_hoe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_pickaxe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_shovel
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_sword
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> trident
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_axe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_hoe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_pickaxe
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_shovel
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_sword
+[01Jul.2025 12:53:50.003] [Server thread/INFO] [com.cwjn.skada.Skada/]: ------------------> Reading Armour Info json files
+[01Jul.2025 12:53:50.004] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:armour_info/minecraft.json
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> chainmail_boots
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> chainmail_chestplate
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> chainmail_helmet
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> chainmail_leggings
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_boots
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_chestplate
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_helmet
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_leggings
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_boots
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_chestplate
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_helmet
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_leggings
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_boots
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_chestplate
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_helmet
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_leggings
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> leather_boots
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> leather_chestplate
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> leather_helmet
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> leather_leggings
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_boots
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_chestplate
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_helmet
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_leggings
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> turtle_helmet
+[01Jul.2025 12:53:50.007] [Server thread/INFO] [com.cwjn.skada.Skada/]: ------------------> Reading Mob Info json files
+[01Jul.2025 12:53:50.008] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:mob_info/minecraft.json
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> allay
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> axolotl
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> bat
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> bee
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> blaze
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> camel
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> cat
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> cave_spider
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> chicken
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> cod
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> cow
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> creeper
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> dolphin
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> donkey
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> drowned
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> elder_guardian
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> ender_dragon
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> enderman
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> endermite
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> evoker
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> fox
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> frog
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> ghast
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> giant
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> glow_squid
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> goat
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> guardian
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> hoglin
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> horse
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> husk
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> illusioner
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> llama
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_golem
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> magma_cube
+[01Jul.2025 12:53:50.014] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> mooshroom
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> mule
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> ocelot
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> panda
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> parrot
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> phantom
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> pig
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> piglin
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> piglin_brute
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> pillager
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> polar_bear
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> pufferfish
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> rabbit
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> ravager
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> salmon
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> sheep
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> shulker
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> silverfish
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> skeleton
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> skeleton_horse
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> slime
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> sniffer
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> spider
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> squid
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stray
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> strider
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> tadpole
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> trader_llama
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> tropical_fish
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> turtle
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> vex
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> vindicator
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> villager
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wandering_trader
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> warden
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> witch
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wither
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wither_skeleton
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wolf
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> zoglin
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> zombie
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> zombie_horse
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> zombie_villager
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> zombified_piglin
+[01Jul.2025 12:53:50.015] [Server thread/INFO] [com.cwjn.skada.Skada/]: -----------> Finished loading mob info, flattening parents
+[01Jul.2025 12:53:50.016] [Server thread/INFO] [com.cwjn.skada.Skada/]: ------------------> Reading reticle json files
+[01Jul.2025 12:53:50.016] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:reticles/slash_default.json
+[01Jul.2025 12:53:50.020] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:reticles/strike_default.json
+[01Jul.2025 12:53:50.020] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:reticles/thrust_default.json
+[01Jul.2025 12:53:50.020] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:reticles/trident_1.json
+[01Jul.2025 12:53:50.021] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:reticles/trident_2.json
+[01Jul.2025 12:53:50.082] [Server thread/INFO] [spark/]: Starting background profiler...
+[01Jul.2025 12:53:50.090] [Server thread/INFO] [spark/]: The async-profiler engine is not supported for your os/arch (windows11/amd64), so the built-in Java engine will be used instead.
+[01Jul.2025 12:53:50.138] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Preparing level "world"
+[01Jul.2025 12:53:52.609] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[01Jul.2025 12:53:53.102] [Worker-Main-5/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[01Jul.2025 12:53:53.124] [Worker-Main-6/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[01Jul.2025 12:53:53.612] [Worker-Main-6/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[01Jul.2025 12:53:54.111] [Worker-Main-6/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 2%
+[01Jul.2025 12:53:54.610] [Worker-Main-6/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 6%
+[01Jul.2025 12:53:55.111] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 10%
+[01Jul.2025 12:53:55.617] [Worker-Main-5/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 13%
+[01Jul.2025 12:53:56.110] [Worker-Main-2/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 17%
+[01Jul.2025 12:53:56.609] [Worker-Main-4/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 22%
+[01Jul.2025 12:53:57.110] [Worker-Main-4/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 28%
+[01Jul.2025 12:53:57.609] [Worker-Main-7/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 32%
+[01Jul.2025 12:53:58.109] [Worker-Main-4/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 39%
+[01Jul.2025 12:53:58.612] [Worker-Main-7/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 45%
+[01Jul.2025 12:53:59.112] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 53%
+[01Jul.2025 12:53:59.610] [Worker-Main-6/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 58%
+[01Jul.2025 12:54:00.048] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:00.111] [Worker-Main-7/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 66%
+[01Jul.2025 12:54:00.622] [Worker-Main-6/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 72%
+[01Jul.2025 12:54:00.810] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:00.811] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:00.812] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:01.113] [Worker-Main-5/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 80%
+[01Jul.2025 12:54:01.263] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:01.264] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:01.609] [Worker-Main-5/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 86%
+[01Jul.2025 12:54:02.112] [Worker-Main-3/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 89%
+[01Jul.2025 12:54:02.610] [Worker-Main-5/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 97%
+[01Jul.2025 12:54:02.671] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:02.705] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:02.760] [Server thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 10152 ms
+[01Jul.2025 12:54:02.760] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Done (12.786s)! For help, type "help"
+[01Jul.2025 12:54:02.770] [LanServerPinger #1/WARN] [net.minecraft.client.server.LanServerPinger/]: LanServerPinger: Invalid argument: no further information
+[01Jul.2025 12:54:02.772] [Server thread/INFO] [net.minecraftforge.gametest.ForgeGameTestHooks/]: Enabled Gametest Namespaces: [skada]
+[01Jul.2025 12:54:02.776] [Server thread/INFO] [net.minecraftforge.server.permission.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[01Jul.2025 12:54:42.394] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[/[::1]:60174] logged in with entity id 402 at (170.5, 70.0, -66.5)
+[01Jul.2025 12:54:42.402] [Server thread/INFO] [com.cwjn.skada.Skada/]: ------------------> Reading Weapon Info json files
+[01Jul.2025 12:54:42.402] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:weapon_info/minecraft.json
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> bow
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> crossbow
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_axe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_hoe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_pickaxe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_shovel
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_sword
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_axe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_hoe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_pickaxe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_shovel
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_sword
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_axe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_hoe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_pickaxe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_shovel
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_sword
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_axe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_hoe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_pickaxe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_shovel
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_sword
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_axe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_hoe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_pickaxe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_shovel
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stone_sword
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> trident
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_axe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_hoe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_pickaxe
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_shovel
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wooden_sword
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ------------------> Reading Armour Info json files
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:armour_info/minecraft.json
+[01Jul.2025 12:54:42.404] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> chainmail_boots
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> chainmail_chestplate
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> chainmail_helmet
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> chainmail_leggings
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_boots
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_chestplate
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_helmet
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> diamond_leggings
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_boots
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_chestplate
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_helmet
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> golden_leggings
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_boots
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_chestplate
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_helmet
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_leggings
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> leather_boots
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> leather_chestplate
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> leather_helmet
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> leather_leggings
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_boots
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_chestplate
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_helmet
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> netherite_leggings
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> turtle_helmet
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: ------------------> Reading Mob Info json files
+[01Jul.2025 12:54:42.406] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:mob_info/minecraft.json
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> allay
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> axolotl
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> bat
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> bee
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> blaze
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> camel
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> cat
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> cave_spider
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> chicken
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> cod
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> cow
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> creeper
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> dolphin
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> donkey
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> drowned
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> elder_guardian
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> ender_dragon
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> enderman
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> endermite
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> evoker
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> fox
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> frog
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> ghast
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> giant
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> glow_squid
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> goat
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> guardian
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> hoglin
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> horse
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> husk
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> illusioner
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> llama
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> iron_golem
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> magma_cube
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> mooshroom
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> mule
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> ocelot
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> panda
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> parrot
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> phantom
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> pig
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> piglin
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> piglin_brute
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> pillager
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> polar_bear
+[01Jul.2025 12:54:42.408] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> pufferfish
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> rabbit
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> ravager
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> salmon
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> sheep
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> shulker
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> silverfish
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> skeleton
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> skeleton_horse
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> slime
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> sniffer
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> spider
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> squid
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> stray
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> strider
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> tadpole
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> trader_llama
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> tropical_fish
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> turtle
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> vex
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> vindicator
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> villager
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wandering_trader
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> warden
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> witch
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wither
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wither_skeleton
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> wolf
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> zoglin
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> zombie
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> zombie_horse
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> zombie_villager
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ----------> zombified_piglin
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: -----------> Finished loading mob info, flattening parents
+[01Jul.2025 12:54:42.409] [Server thread/INFO] [com.cwjn.skada.Skada/]: ------------------> Reading reticle json files
+[01Jul.2025 12:54:42.410] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:reticles/slash_default.json
+[01Jul.2025 12:54:42.410] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:reticles/strike_default.json
+[01Jul.2025 12:54:42.410] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:reticles/thrust_default.json
+[01Jul.2025 12:54:42.410] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:reticles/trident_1.json
+[01Jul.2025 12:54:42.410] [Server thread/INFO] [com.cwjn.skada.Skada/]: --------------> skada:reticles/trident_2.json
+[01Jul.2025 12:54:42.463] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
+[01Jul.2025 12:54:46.788] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:46.790] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:46.791] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:46.900] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:46.904] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:51.520] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:51.521] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:51.521] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:51.548] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:51.548] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:58.009] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:58.009] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:58.009] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:58.009] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:54:58.009] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:55:00.681] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:55:00.681] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:55:00.681] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:57:09.140] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:57:09.141] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:57:09.141] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:57:09.141] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:57:09.141] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:58:05.082] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:58:05.082] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:58:05.082] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:58:05.082] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:58:05.082] [Server thread/ERROR] [com.cwjn.skada.Skada/]: No mob data found for entity.minecraft.villager
+[01Jul.2025 12:58:17.479] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
+[01Jul.2025 12:58:17.480] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game

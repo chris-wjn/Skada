@@ -17,7 +17,6 @@
     "new_features.ProjectileData",
     "vanilla_rework.AbstractArrowRemoveCritMechanic",
     "vanilla_rework.ClientboundSetEntityMotionPacketRemoveVelocityClamp",
-    "vanilla_rework.RemoveItemstackModifierTooltipLines",
     "vanilla_rework.RemoveKnockback",
     "vanilla_rework.RemoveSweepAttack",
     "vanilla_rework.RemoveVanillaDamageHandling$MixinLivingEntity",
@@ -29,6 +28,7 @@
   },
   "client": [
     "new_features.CustomReticlesDetectEntities",
-    "new_features.CustomReticlesHitDetectedEntities"
+    "new_features.CustomReticlesHitDetectedEntities",
+    "vanilla_rework.RemoveItemstackModifierTooltipLines"
   ]
 }

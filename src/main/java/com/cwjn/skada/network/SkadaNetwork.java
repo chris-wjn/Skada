@@ -64,6 +64,11 @@ public class SkadaNetwork {
                 S2CSendReticles::encode,
                 S2CSendReticles::decode,
                 S2CSendReticles::handle);
+        INSTANCE.registerMessage(id++,
+                S2CSyncSkyDarken.class,
+                S2CSyncSkyDarken::encode,
+                S2CSyncSkyDarken::decode,
+                S2CSyncSkyDarken::handle);
     }
 
     public static void serverToPlayer(Object packet, ServerPlayer player) {
