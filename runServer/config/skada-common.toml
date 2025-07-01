@@ -1,0 +1,24 @@
+
+#Combat Settings
+[combat]
+	#Enable lethality damage modifier
+	enableLethality = true
+	#The damage modifier applied to attacks that are not in the effective range of an attack
+	#Range: 0.0 ~ 1.0
+	ineffectiveReachDamageModifier = 0.25
+
+	[combat."Accuracy Settings"]
+		#Enable accuracy in general. All the following settings in this section will be ignored if this is false
+		enableAccuracy = true
+		#Enable accuracy damage modifier for melee attacks
+		enableAccuracyForMelee = true
+		#Enable accuracy projectile deviation modifier for bow and crossbow attacks
+		enableAccuracyForRanged = true
+
+	[combat."Critical Fail Settings"]
+		#Enable critical fail mechanic
+		enableCriticalFail = true
+		#The durability loss from a critical fail if it is enabled. The item loses this percentage of it's durability on critical fail.
+		#Range: 0.0 ~ 1.0
+		criticalFailDurabilityLoss = 0.5
+

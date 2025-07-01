@@ -560,6 +560,15 @@ public abstract class Util {
         return null; // or handle the case where it's not a Mob
     }
 
+    public static String getEntityRegistryName(EntityType<?> type) {
+        ResourceLocation rl = ForgeRegistries.ENTITY_TYPES.getKey(type);
+        if (rl != null) {
+            return rl.toString();
+        } else {
+            return "unknown_entity";
+        }
+    }
+
     private static Vec3 getFirstViewPlayerHandPos(Player player, boolean isLeftHand, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
         double d4 = 960.0 / mc.options.fov().get();
@@ -601,15 +610,6 @@ public abstract class Util {
                 (int)((item.getMaxDamage()-item.getDamageValue()) * (CommonConfig.CRITICAL_FAIL_DURABILITY_LOSS.get())),
                 player,
                 (p) -> p.broadcastBreakEvent(player.getUsedItemHand()));
-    }
-
-    //given a pair of numbers, x, y, return 4 vertices that represent a tiny square centered at x, y
-    public static void drawPixel(BufferBuilder buffer, PoseStack stack, float x, float y) {
-        //buffer.vertex(stack.last().pose(), pair.getA(), pair.getB(), 0).color(0.4f, 0.4f, 0.4f, 1f).endVertex();
-        buffer.vertex(x+0.5f, y-0.5f, 0).color(0.7f, 0.4f, 0.4f, 1f).endVertex();
-        buffer.vertex(x+0.5f, y+0.5f, 0).color(0.7f, 0.4f, 0.4f, 1f).endVertex();
-        buffer.vertex(x-0.5f, y+0.5f, 0).color(0.7f, 0.4f, 0.4f, 1f).endVertex();
-        buffer.vertex(x-0.5f, y-0.5f, 0).color(0.7f, 0.4f, 0.4f, 1f).endVertex();
     }
 
     /*
@@ -681,5 +681,4 @@ public abstract class Util {
     public static double strikeCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
         return (0.0075*hardness*hardness)/(toughness*toughness*toughness);
     }
-
 }

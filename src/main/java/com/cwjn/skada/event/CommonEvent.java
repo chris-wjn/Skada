@@ -13,6 +13,7 @@ import com.cwjn.skada.network.SkadaNetwork;
 import com.cwjn.skada.network.server_to_client.S2CCreateDamageIndicator;
 import com.cwjn.skada.network.server_to_client.S2CSendArmourInfoMap;
 import com.cwjn.skada.network.server_to_client.S2CSendWeaponInfoMap;
+import com.cwjn.skada.network.server_to_client.S2CSyncSkyDarken;
 import com.cwjn.skada.util.Util;
 import com.google.common.collect.HashMultimap;
 import com.google.gson.Gson;
@@ -36,6 +37,7 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.ItemAttributeModifierEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
@@ -43,6 +45,7 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -268,6 +271,19 @@ public class CommonEvent {
                 );
             }
 
+        }
+
+        /*
+            This syncs the sky darken value to all players every 5 seconds.
+         */
+        @SubscribeEvent
+        public static void onServerTick(TickEvent.LevelTickEvent event) {
+            if (event.phase == TickEvent.Phase.END && event.side == LogicalSide.SERVER) {
+                if (event.haveTime()) {
+                    int skyDarken = event.level.getSkyDarken();
+                    SkadaNetwork.serverToAll(new S2CSyncSkyDarken(skyDarken));
+                }
+            }
         }
 
 //        @SubscribeEvent

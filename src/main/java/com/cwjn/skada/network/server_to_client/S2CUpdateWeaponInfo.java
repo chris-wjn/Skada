@@ -4,7 +4,6 @@ import com.cwjn.skada.client.ClientHandler;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;

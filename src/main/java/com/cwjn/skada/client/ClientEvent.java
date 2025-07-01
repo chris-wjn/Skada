@@ -12,13 +12,11 @@ import com.cwjn.skada.client.hud.MobHealthBar;
 import com.cwjn.skada.client.hud.ReticleCoordinate;
 import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
-import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.network.SkadaNetwork;
 import com.cwjn.skada.network.client_to_server.C2SUpdateAttackIndex;
 import com.cwjn.skada.network.client_to_server.C2SUpdateAttackIndexFromMenu;
 import com.cwjn.skada.util.Keybinds;
-import com.cwjn.skada.util.ReticleShapes;
 import com.cwjn.skada.util.Util;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -30,7 +28,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
@@ -42,17 +40,15 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
-import oshi.util.tuples.Pair;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.cwjn.skada.data.SkadaData.*;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientEvent {
+
+    private static final HashMap<Mob, Integer> displayHealthbarTicksForMob = new HashMap<>();
 
     @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModBusEvent {
@@ -228,24 +224,23 @@ public class ClientEvent {
             if (event.getEntity() instanceof Mob entity) {
                 if (entity.isInvisible()) return;
                 if (entity.isVehicle()) return;
-                /*if (ClientConfig.BLACKLISTED_HEALTHBAR_ENTITIES.get().contains(Util.getEntityRegistryName(entity.getType()).toString()))
-                    return;*/
-                /*if (DISPLAY_HEALTHBAR_ONLY_ON_DAMAGE.get()) {
-                    if (displayHealthbarTicks.containsKey(entity)) {
-                        int unpackedLight = Math.max(LightTexture.sky(event.getPackedLight()) - ClientData.skyDarken, LightTexture.block(event.getPackedLight()));
+                if (ClientConfig.BLACKLISTED_HEALTHBAR_ENTITIES.get().contains(Util.getEntityRegistryName(entity.getType())))
+                    return;
+                if (ClientConfig.HEALTHBAR_ONLY_ON_DAMAGE.get()) {
+                    if (displayHealthbarTicksForMob.containsKey(entity)) {
+                        int unpackedLight = Math.max(LightTexture.sky(event.getPackedLight()) - ClientHandler.skyDarken, LightTexture.block(event.getPackedLight()));
                         float distance = entity.distanceTo(Minecraft.getInstance().player) - unpackedLight + 15;
-                        float minAlpha = distance < MOB_HEALTH_BAR_DISTANCE_FACTOR * 0.5 ? 1 : (1 - (distance / MOB_HEALTH_BAR_DISTANCE_FACTOR));
-                        float alpha = (float) Math.min(minAlpha, ((float) displayHealthbarTicks.get(entity) / (HEALTHBAR_ON_DAMAGE_DISPLAY_TIME.get() * 0.5)));
-                        MobHealthbar.prepare(entity, alpha);
+                        float minAlpha = distance < 30 * 0.5 ? 1 : (1 - (distance / 30));
+                        float alpha = (float) Math.min(minAlpha, ((float) displayHealthbarTicksForMob.get(entity) / (ClientConfig.HEALTHBAR_ON_DAMAGE_DISPLAY_TIME.get() * 0.5)));
+                        MobHealthBar.prepare(entity, alpha);
                     }
-                }*/
-                //else {
-                    //int unpackedLight = Math.max(LightTexture.sky(event.getPackedLight()) - ClientData.skyDarken, LightTexture.block(event.getPackedLight()));
-                    //int unpackedLight = 15;
-                    //float distance = entity.distanceTo(Minecraft.getInstance().player) - unpackedLight + 15;
-                    //float alpha = distance < MOB_HEALTH_BAR_DISTANCE_FACTOR*0.5 ? 1 : (1 - (distance/MOB_HEALTH_BAR_DISTANCE_FACTOR));
-                    MobHealthBar.prepare(entity, 1);
-                //}
+                }
+                else {
+                    int unpackedLight = Math.max(LightTexture.sky(event.getPackedLight()) - ClientHandler.skyDarken, LightTexture.block(event.getPackedLight()));
+                    float distance = entity.distanceTo(Minecraft.getInstance().player) - unpackedLight + 15;
+                    float alpha = distance < 30*0.5 ? 1 : (1 - (distance/30));
+                    MobHealthBar.prepare(entity, alpha);
+                }
             }
         }
 

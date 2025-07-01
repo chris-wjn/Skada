@@ -32,6 +32,7 @@ import static com.cwjn.skada.data.SkadaData.RETICLES;
 public class ClientHandler {
 
     public static HitResult[] hitResults;
+    public static int skyDarken;
 
     public static void updateWeaponInfos(Map<String, Map<String, WeaponInfo>> map) {
         for (Map.Entry<String,Map<String, WeaponInfo>> submap : map.entrySet()) {
