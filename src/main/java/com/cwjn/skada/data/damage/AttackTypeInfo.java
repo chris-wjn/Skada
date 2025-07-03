@@ -31,7 +31,7 @@ public record AttackTypeInfo(double lethality,
             Codec.list(Codec.STRING).optionalFieldOf("reticleShapes", new ArrayList<>()).forGetter(AttackTypeInfo::reticleShapes)
     ).apply(instance, AttackTypeInfo::new));
 
-    public static final AttackTypeInfo DEFAULT = new AttackTypeInfo(0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, null);
+    public static final AttackTypeInfo DEFAULT = new AttackTypeInfo(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, null);
 
     public CompoundTag toCompoundTag() {
         CompoundTag tag = new CompoundTag();
