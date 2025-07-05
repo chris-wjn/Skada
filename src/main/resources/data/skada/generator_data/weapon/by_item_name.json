@@ -90,7 +90,12 @@
         "effectiveWeight": 1.0,
         "minReach": 2.0,
         "maxReach": 4.0,
-        "attackSpeedMod": 1.0
+        "attackSpeedMod": 1.0,
+        "reticleShapes": [
+          "trident_1",
+          "thrust_default",
+          "trident_2"
+        ]
       }
     }
   }

@@ -7,12 +7,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public record NamedInfo(double size, Map<AttackType, AttackTypeJsonInfo> attackTypes) {
 
     private static final Map<AttackType, AttackTypeJsonInfo> DEFAULT_MAP = new HashMap<>(
-            Map.of(AttackType.strike(), new AttackTypeJsonInfo(0.5, 0.0, 3, 1.0))
+            Map.of(AttackType.strike(), new AttackTypeJsonInfo(0.5, 0.0, 3, 1.0, List.of()))
     );
 
     public static final Codec<NamedInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
