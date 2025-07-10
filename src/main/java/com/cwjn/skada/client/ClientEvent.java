@@ -171,6 +171,8 @@ public class ClientEvent {
             float middleX = event.getWindow().getGuiScaledWidth() * 0.5F;
             float middleY = event.getWindow().getGuiScaledHeight() * 0.5F;
             stack.translate(middleX - 0.5f, middleY, 0);
+            double guiScale = event.getWindow().getGuiScale();
+            stack.scale((float)(1.0/guiScale), (float)(1.0/guiScale), 1.0f);
             AttackType attackType = Util.getAttackType(Minecraft.getInstance().player);
             AttackTypeInfo attackTypeInfo = Util.getAttackTypeInfo(Minecraft.getInstance().player);
 
@@ -185,10 +187,10 @@ public class ClientEvent {
                         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
                         for (Map.Entry<Float, Collection<Float>> map : rs.getFilledShape().asMap().entrySet()) {
                             for (Float coord : map.getValue()) {
-                                buffer.vertex(stack.last().pose(), map.getKey() - 0.4f, coord - 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                                buffer.vertex(stack.last().pose(), map.getKey() - 0.4f, coord + 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                                buffer.vertex(stack.last().pose(), map.getKey() + 0.4f, coord + 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                                buffer.vertex(stack.last().pose(), map.getKey() + 0.4f, coord - 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                                buffer.vertex(stack.last().pose(), map.getKey() - 0.5f, coord - 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                                buffer.vertex(stack.last().pose(), map.getKey() - 0.5f, coord + 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                                buffer.vertex(stack.last().pose(), map.getKey() + 0.5f, coord + 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                                buffer.vertex(stack.last().pose(), map.getKey() + 0.5f, coord - 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
                             }
                         }
                         tesselator.end();
@@ -206,10 +208,10 @@ public class ClientEvent {
                     buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
                     for (Map.Entry<Float, Collection<Float>> map : RETICLES.get(attackType.name() + "_default").getFilledShape().asMap().entrySet()) {
                         for (Float coord : map.getValue()) {
-                            buffer.vertex(stack.last().pose(), map.getKey() - 0.4f, coord - 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                            buffer.vertex(stack.last().pose(), map.getKey() - 0.4f, coord + 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                            buffer.vertex(stack.last().pose(), map.getKey() + 0.4f, coord + 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                            buffer.vertex(stack.last().pose(), map.getKey() + 0.4f, coord - 0.4f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            buffer.vertex(stack.last().pose(), map.getKey() - 0.5f, coord - 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            buffer.vertex(stack.last().pose(), map.getKey() - 0.5f, coord + 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            buffer.vertex(stack.last().pose(), map.getKey() + 0.5f, coord + 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            buffer.vertex(stack.last().pose(), map.getKey() + 0.5f, coord - 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
                         }
                     }
                     tesselator.end();

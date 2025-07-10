@@ -39,7 +39,7 @@ public class ReticleShape {
             ReticleCoordinate.sortByPlace(outline);
             shape = new ArrayList<>(outline);
             shape.add(outline.get(0)); // Close the shape by adding the first vertex at the end
-            this.filledShape = getFilledShape(outline, 3f);
+            this.filledShape = getFilledShape(outline, 8f);
         }
     }
 
