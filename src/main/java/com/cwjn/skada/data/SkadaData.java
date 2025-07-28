@@ -42,7 +42,15 @@ public abstract class SkadaData {
     public static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
     public static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
     public static final UUID SKADA_ATTACK_TYPE_BASE_MOD_UUID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
-    public static final UUID SKADA_ARMOUR_BASE_MOD_UUID = UUID.fromString("e4eaaaf2-d142-11e1-b3e4-080027620cdd");
+    public static final UUID SKADA_ATTACK_TYPE_DAMAGE_UUID = UUID.fromString("7b8e9f2a-3c4d-5e6f-7890-1a2b3c4d5e6f");
+    public static final UUID SKADA_ATTACK_TYPE_REACH_UUID = UUID.fromString("8c9f0a3b-4d5e-6f70-8901-2b3c4d5e6f70");
+    public static final UUID SKADA_ATTACK_TYPE_SPEED_UUID = UUID.fromString("9d0a1b4c-5e6f-7081-9012-3c4d5e6f7081");
+    public static final UUID[] SKADA_ARMOUR_BASE_MOD_UUID = {
+            UUID.fromString("a7b3c4d5-e6f7-8901-2345-6789abcdef01"),
+            UUID.fromString("b8c4d5e6-f7a8-9012-3456-789abcdef012"),
+            UUID.fromString("c9d5e6f7-a8b9-0123-4567-89abcdef0123"),
+            UUID.fromString("dae6f7a8-b9c0-1234-5678-9abcdef01234")
+    };
     public static final UUID SKADA_MOB_MODIFIER_OPERATION_0 = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
     public static final UUID SKADA_MOB_MODIFIER_OPERATION_1 = UUID.fromString("5520c08a-21d8-4b25-bfb4-a7b69fb96040");
     public static final UUID SKADA_MOB_MODIFIER_OPERATION_2 = UUID.fromString("ea5398cc-9f9d-43ac-bf3f-1ee0ab6c5dc4");

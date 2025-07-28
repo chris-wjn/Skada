@@ -41,7 +41,6 @@ public class Skada {
         MinecraftForge.EVENT_BUS.register(this);
         ATTACK_TYPES.register(modEventBus);
         ELEMENTS.register(modEventBus);
-        PARAMETERS.register(modEventBus);
         PARTICLES.register(modEventBus);
         SkadaRegistry.ATTRIBUTES.register(modEventBus);
         
@@ -95,10 +94,12 @@ public class Skada {
 
     @SubscribeEvent
     public void loadResourcesOnReload(OnDatapackSyncEvent event) {
-        Util.updateWeaponInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
-        Util.updateArmourInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
-        Util.updateMobInfoFromResources(event.getPlayerList().getServer().getResourceManager());
-        Util.updateReticleListFromResources(event.getPlayerList().getServer().getResourceManager());
+        if (event.getPlayer() == null) {
+            Util.updateWeaponInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
+            Util.updateArmourInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
+            Util.updateMobInfoFromResources(event.getPlayerList().getServer().getResourceManager());
+            Util.updateReticleListFromResources(event.getPlayerList().getServer().getResourceManager());
+        }
     }
 
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

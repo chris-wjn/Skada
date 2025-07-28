@@ -4,7 +4,6 @@ import com.cwjn.skada.SkadaRegistry;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.LethalityFunction;
 import com.cwjn.skada.data.gen.AttackTypeGeneratorConfiguration;
-import com.cwjn.skada.util.SkadaAttributeHolder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
@@ -14,9 +13,8 @@ import org.jetbrains.annotations.NotNull;
 public record AttackType(String name,
                          LethalityFunction type,
                          AttackTypeGeneratorConfiguration tierStatFunction,
-                         Attribute resistAttribute) implements SkadaAttributeHolder, Comparable<AttackType> {
+                         Attribute resistAttribute) implements Comparable<AttackType> {
 
-    @Override
     public Attribute getAttribute() {
         return resistAttribute;
     }

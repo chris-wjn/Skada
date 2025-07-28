@@ -136,7 +136,7 @@ public class ClientEvent {
         }
 
         //TODO: actually use this once the stat screen is done!
-        //@SubscribeEvent
+        @SubscribeEvent
         public static void onInitGui(ScreenEvent.Init e) {
             Screen s = e.getScreen();
             if (s instanceof InventoryScreen || s instanceof CreativeModeInventoryScreen) {

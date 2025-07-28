@@ -1,7 +1,6 @@
 package com.cwjn.skada.data.registry;
 
 import com.cwjn.skada.data.SkadaData;
-import com.cwjn.skada.util.SkadaAttributeHolder;
 import com.cwjn.skada.util.Util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -13,15 +12,14 @@ import org.jetbrains.annotations.NotNull;
 
 public record Element(String name,
                       Attribute baseDamage,
-                      Attribute affinityAttribute,
-                      Attribute resistAttribute,
+                      Attribute affinity,
+                      Attribute resist,
                       int colour,
                       ResourceLocation icon,
-                      TagKey<DamageType> tagKey) implements SkadaAttributeHolder, Comparable<Element> {
+                      TagKey<DamageType> tagKey) implements Comparable<Element> {
 
-    @Override
     public Attribute getAttribute() {
-        return resistAttribute;
+        return resist;
     }
 
     public ResourceLocation rl() {

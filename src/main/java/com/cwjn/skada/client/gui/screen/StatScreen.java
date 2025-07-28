@@ -1,110 +1,87 @@
 package com.cwjn.skada.client.gui.screen;
 
-import com.cwjn.skada.SkadaRegistry;
 import com.cwjn.skada.client.gui.button.TabButton;
+import com.cwjn.skada.client.gui.screen.pages.DamageInfoPage;
+import com.cwjn.skada.client.gui.screen.pages.InfoPage;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.AttackType;
-import com.cwjn.skada.data.registry.Element;
-import com.cwjn.skada.util.SkadaEntity;
 import com.cwjn.skada.util.Keybinds;
 import com.cwjn.skada.util.Util;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.FastColor;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.registries.RegistryObject;
-import org.apache.commons.lang3.StringUtils;
-import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
 
-import static com.cwjn.skada.SkadaRegistry.ELEMENTS;
-import static com.cwjn.skada.data.SkadaData.WEAPON_INFO_TAG_KEY;
-
+@OnlyIn(Dist.CLIENT)
 public class StatScreen extends Screen {
 
     private final Minecraft minecraft = Minecraft.getInstance();
-    private final Player player = Minecraft.getInstance().player;
     private final WeaponInfo weaponInfo;
     private final AttackType attackType;
     private final AttackTypeInfo attackTypeInfo;
-    private final static int BOOK_WIDTH = 695;
-    private final static int BOOK_HEIGHT = 417;
-    private final static int BOOK_TURNING_HEIGHT = 457;
-    private final static int BOOK_OPENING_HEIGHT = 507;
-    private final static int BOOK_TEXTURE_OFFSET_X = 118;
-    private static final Animation FLIP_LEFT_ANIM = new Animation("textures/gui/book_flip_left/", 8, 24, 140, -41, BOOK_TURNING_HEIGHT);
-    private static final Animation FLIP_RIGHT_ANIM = new Animation("textures/gui/book_flip_right/", 8, 24, 140, -41, BOOK_TURNING_HEIGHT);
-    private static final Animation OPEN_ANIM = new Animation("textures/gui/book_open/", 5, 24, 85, -96, BOOK_OPENING_HEIGHT);
-    private static final Animation CONTENT_APPEAR_ANIM = new Animation("textures/gui/book_content_appear/", 24, 6, 181, 0, BOOK_HEIGHT);
-    private static final Animation TABS_APPEAR_ANIM = new Animation("textures/gui/book_tabs_appear/", 13, 16, 181, 0, BOOK_HEIGHT);
-    private static final ResourceLocation[] GUI_BOOK = new ResourceLocation[]{
-            Util.rl("textures/gui/book_idle/none_selected.png"),
-            Util.rl("textures/gui/book_idle/1.png"),
-            Util.rl("textures/gui/book_idle/2.png"),
-            Util.rl("textures/gui/book_idle/3.png"),
-            Util.rl("textures/gui/book_idle/4.png"),
-            Util.rl("textures/gui/book_idle/5.png"),
-            Util.rl("textures/gui/book_idle/6.png")
-    };
-    private static final ResourceLocation ELEMENT_INFO_PANEL = Util.rl("textures/gui/book_idle/element_info_panel.png");
-    private static final ResourceLocation SCROLLBAR = Util.rl("textures/gui/book_idle/scrollbar.png");
-    private Animation anim = OPEN_ANIM;
-    private ResourceLocation currentFrame;
-    private int DISPLAY_STATE = 0; //0=stats, 1=offensive, 2=defensive, 3=info
-    private int w, h, left, top, timer = 0;
-    private final int SCROLLBOX_HEIGHT = 273;
-    private int scrollBoxTop, scrollBoxBot;
-    private static final List<Element> elements = new ArrayList<>();
-    static {
-        for (RegistryObject<Element> element : ELEMENTS.getEntries()) {
-            elements.add(element.get());
-        }
-        elements.sort(Element::compareTo);
-    }
-    private final int damageInfoHeight = 48*elements.size()-4;
-    private int currentScrollPos = 0; //btwn 0 and maxScrollPos
-    private int maxScrollPos;
+    public final static int BOOK_WIDTH = 695;
+    public final static int BOOK_HEIGHT = 417;
+    public final static int BOOK_TURNING_HEIGHT = 457;
+    public final static int BOOK_OPENING_HEIGHT = 507;
+    public final static int BOOK_TEXTURE_OFFSET_X = 118;
+    public final static int BOOK_RIGHT_PAGE_OFFSET_X = 380;
+    public final static int SCROLLBOX_HEIGHT = 273;
+    private static final Animation FLIP_LEFT_ANIM = new Animation("textures/gui/book_flip_left/", 9, 500, 140, -41, BOOK_TURNING_HEIGHT); // 500ms duration
+    private static final Animation FLIP_RIGHT_ANIM = new Animation("textures/gui/book_flip_right/", 9, 500, 140, -41, BOOK_TURNING_HEIGHT);
+    private static final Animation OPEN_ANIM = new Animation("textures/gui/book_open/", 5, 300, 85, -96, BOOK_OPENING_HEIGHT); // 300ms duration
+    private static final Animation CONTENT_APPEAR_ANIM = new Animation("textures/gui/book_content_appear/", 36, 800, 181, 0, BOOK_HEIGHT); // 800ms duration
+    public static final Animation CONTENT_APPEAR_ANIM_RIGHT_PAGE_ONLY = new Animation("textures/gui/book_content_appear/", 36, 800, 181, 0, BOOK_HEIGHT); // 800ms duration
+    private static final Animation TABS_APPEAR_ANIM = new Animation("textures/gui/book_tabs_appear/", 17, 600, 181, 0, BOOK_HEIGHT); // 600ms duration
+    private static final ResourceLocation BOOK_NO_TAB_SELECTED = Util.rl("textures/gui/book_idle/none_selected.png");
+    private static final ResourceLocation BOOK_TAB_1 = Util.rl("textures/gui/book_idle/1.png");
+    private static final ResourceLocation BOOK_TAB_2 = Util.rl("textures/gui/book_idle/2.png");
+    private static final ResourceLocation BOOK_TAB_3 = Util.rl("textures/gui/book_idle/3.png");
+    private static final ResourceLocation BOOK_TAB_4 = Util.rl("textures/gui/book_idle/4.png");
+    private static final ResourceLocation BOOK_TAB_5 = Util.rl("textures/gui/book_idle/5.png");
+    private static final ResourceLocation BOOK_TAB_6 = Util.rl("textures/gui/book_idle/6.png");
+    public static final ResourceLocation DAMAGE_PAGE_SCROLLBOX_BORDER = Util.rl("textures/gui/damage_page/scrollbox_border.png");
+    public static final ResourceLocation SCROLLBAR = Util.rl("textures/gui/book_idle/scrollbar.png");
+    public Animation anim = OPEN_ANIM;
+    private static final ResourceLocation DAMAGE_ICON = Util.rl("textures/gui/book_page_icons/damage_page_icon.png");
+    private static final ResourceLocation ARMOUR_ICON = Util.rl("textures/gui/book_page_icons/armour_icon.png");
+    private static final ResourceLocation INFO_ICON = Util.rl("textures/gui/book_page_icons/info_page_icon.png");
+    private JournalPage[] pages = new JournalPage[] {
+            new DamageInfoPage(DAMAGE_ICON, BOOK_TAB_1, this),
+            new InfoPage(INFO_ICON, BOOK_TAB_2, this)
+    }; //max 6 pages, but only 2 for now
+    private int DISPLAY_STATE = 0; //index of the currently displayed page
+    private int BOOK_LEFT_X;
+    private int BOOK_TOP_Y;
     private final double savedScale;
     private final Screen savedScreen;
-    private final TabButton[] tabs = new TabButton[4];
-    private int vitPreview = 0;
-    private int strPreview = 0;
-    private int dexPreview = 0;
-    private int aglPreview = 0;
-    private int intPreview = 0;
-    private int wisPreview = 0;
-    private int fthPreview = 0;
 
     static {
         OPEN_ANIM.setSoundEffect(SoundEvents.BOOK_PAGE_TURN);
         FLIP_LEFT_ANIM.setSoundEffect(SoundEvents.BOOK_PAGE_TURN);
-        FLIP_LEFT_ANIM.setNextAnim(CONTENT_APPEAR_ANIM);
-        FLIP_RIGHT_ANIM.setNextAnim(CONTENT_APPEAR_ANIM);
+        FLIP_LEFT_ANIM.setNextAnim(TABS_APPEAR_ANIM);
+        FLIP_RIGHT_ANIM.setNextAnim(TABS_APPEAR_ANIM);
         FLIP_RIGHT_ANIM.setSoundEffect(SoundEvents.BOOK_PAGE_TURN);
         OPEN_ANIM.setNextAnim(TABS_APPEAR_ANIM);
         TABS_APPEAR_ANIM.setNextAnim(CONTENT_APPEAR_ANIM);
-        OPEN_ANIM.addDelay(160);
-        TABS_APPEAR_ANIM.addDelay(130);
+        OPEN_ANIM.addDelay(250);
+        TABS_APPEAR_ANIM.addDelay(100);
     }
 
     public StatScreen(WeaponInfo info, AttackType type, AttackTypeInfo attackTypeInfo) {
         super(Component.literal("Stat Screen"));
-        savedScale = minecraft.getWindow().getGuiScale();
-        savedScreen = minecraft.screen;
-        weaponInfo = info;
-        attackType = type;
+        this.savedScale = minecraft.getWindow().getGuiScale();
+        this.savedScreen = minecraft.screen;
+        this.weaponInfo = info;
+        this.attackType = type;
         this.attackTypeInfo = attackTypeInfo;
     }
 
@@ -116,6 +93,15 @@ public class StatScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
+        for (JournalPage page : pages) {
+            page.clearButtons();
+        }
+        OPEN_ANIM.reset();
+        FLIP_LEFT_ANIM.reset();
+        FLIP_RIGHT_ANIM.reset();
+        TABS_APPEAR_ANIM.reset();
+        CONTENT_APPEAR_ANIM.reset();
+        CONTENT_APPEAR_ANIM_RIGHT_PAGE_ONLY.reset();
         minecraft.getWindow().setGuiScale(savedScale);
         minecraft.setScreen(savedScreen);
     }
@@ -123,6 +109,15 @@ public class StatScreen extends Screen {
     @Override
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         if (pKeyCode == Keybinds.statScreen.getKey().getValue() || pKeyCode == KeyEvent.VK_E) {
+            for (JournalPage page : pages) {
+                page.clearButtons();
+            }
+            OPEN_ANIM.reset();
+            FLIP_LEFT_ANIM.reset();
+            FLIP_RIGHT_ANIM.reset();
+            TABS_APPEAR_ANIM.reset();
+            CONTENT_APPEAR_ANIM.reset();
+            CONTENT_APPEAR_ANIM_RIGHT_PAGE_ONLY.reset();
             minecraft.getWindow().setGuiScale(savedScale);
             minecraft.setScreen(savedScreen);
             return true;
@@ -133,27 +128,42 @@ public class StatScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+
         minecraft.getWindow().setGuiScale(2);
-        w = minecraft.getWindow().getGuiScaledWidth();
-        h = minecraft.getWindow().getGuiScaledHeight();
-        left = (w - BOOK_WIDTH)/2;
-        top = (h - BOOK_HEIGHT)/2;
-        scrollBoxTop = top+65;
-        scrollBoxBot = scrollBoxTop+SCROLLBOX_HEIGHT-3;
-        maxScrollPos = Math.max(0,damageInfoHeight-SCROLLBOX_HEIGHT)+6;
-        tabs[0] = new TabButton(left+654, top+66, Component.empty(), b -> setDisplayState(0));
-        tabs[1] = new TabButton(left+654, top+66+38, Component.empty(), b -> setDisplayState(1));
-        tabs[2] = new TabButton(left+654, top+66+38+38, Component.empty(), b -> setDisplayState(2));
-        tabs[3] = new TabButton(left+654, top+66+38+38+38, Component.empty(), b -> setDisplayState(3));
-        for (TabButton tab : tabs) addRenderableWidget(tab);
-        tabs[DISPLAY_STATE].active = false;
+        BOOK_LEFT_X = (minecraft.getWindow().getGuiScaledWidth() - BOOK_WIDTH)/2;
+        BOOK_TOP_Y = (minecraft.getWindow().getGuiScaledHeight() - BOOK_HEIGHT)/2;
+
+        createTabButtons();
+        for (JournalPage page : pages) {
+            page.init();
+        }
+        pages[DISPLAY_STATE].isRender(true);
+    }
+
+    private void createTabButtons() {
+        int yOffset = 0;
+        for (int i = 0; i < pages.length; i++) {
+            int finalI = i;
+            TabButton bt = new TabButton(BOOK_LEFT_X +654, BOOK_TOP_Y +66+yOffset, Component.empty(), b -> setDisplayState(finalI));
+            addRenderableWidget(bt);
+            bt.setIcon(pages[i].getIcon());
+            bt.setRenderIcon(false);
+            pages[i].setButton(bt);
+            yOffset+= 38;
+        }
+        pages[DISPLAY_STATE].setTabButtonVisible(false);
     }
 
     private void setDisplayState(int newState) {
+        CONTENT_APPEAR_ANIM.reset();
         if (DISPLAY_STATE == newState) return;
-        tabs[DISPLAY_STATE].active = true;
-        tabs[newState].active = false;
+        for (JournalPage page : pages) {
+            page.setTabButtonActive(false);
+            page.setTabButtonVisible(false);
+        }
         anim = DISPLAY_STATE < newState? FLIP_RIGHT_ANIM : FLIP_LEFT_ANIM;
+        pages[DISPLAY_STATE].isRender(false);
+        pages[newState].isRender(true);
         DISPLAY_STATE = newState;
     }
 
@@ -164,28 +174,44 @@ public class StatScreen extends Screen {
 
     @Override
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        timer++;
         if (anim == null) {
-            drawFromState(pGuiGraphics);
+            drawFromState(pGuiGraphics, pMouseX, pMouseY);
         }
         else if (anim == CONTENT_APPEAR_ANIM) {
-            drawFromState(pGuiGraphics);
+            drawFromState(pGuiGraphics, pMouseX, pMouseY);
             pGuiGraphics.pose().pushPose();
             pGuiGraphics.pose().translate(0, 0, 1);
-            pGuiGraphics.blit(anim.getCurrentFrameThenIterate(timer), left, top+anim.getYOffset(), BOOK_TEXTURE_OFFSET_X, anim.getVOffset(), BOOK_WIDTH, anim.getHeight(), 896, 720);
+            pGuiGraphics.blit(anim.getCurrentFrame(), BOOK_LEFT_X, BOOK_TOP_Y +anim.getYOffset(), BOOK_TEXTURE_OFFSET_X, anim.getVOffset(), BOOK_WIDTH, anim.getHeight(), 896, 720);
             pGuiGraphics.pose().popPose();
             if (anim.isComplete()) {
-                timer = 0;
+                anim.reset();
+                if (anim.getNextAnim() != null) anim = anim.getNextAnim();
+                else anim = null;
+            }
+        }
+        else if (anim == CONTENT_APPEAR_ANIM_RIGHT_PAGE_ONLY) {
+            drawFromState(pGuiGraphics, pMouseX, pMouseY);
+            pGuiGraphics.pose().pushPose();
+            pGuiGraphics.pose().translate(0, 0, 1);
+            pGuiGraphics.blit(anim.getCurrentFrame(), BOOK_LEFT_X + BOOK_RIGHT_PAGE_OFFSET_X, BOOK_TOP_Y + anim.getYOffset(), BOOK_TEXTURE_OFFSET_X+BOOK_RIGHT_PAGE_OFFSET_X, anim.getVOffset(), BOOK_WIDTH/2, anim.getHeight(), 896, 720);
+            pGuiGraphics.pose().popPose();
+            if (anim.isComplete()) {
                 anim.reset();
                 if (anim.getNextAnim() != null) anim = anim.getNextAnim();
                 else anim = null;
             }
         }
         else {
-            pGuiGraphics.blit(anim.getCurrentFrameThenIterate(timer), left, top+anim.getYOffset(), BOOK_TEXTURE_OFFSET_X, anim.getVOffset(), BOOK_WIDTH, anim.getHeight(), 896, 720);
+            pGuiGraphics.blit(anim.getCurrentFrame(), BOOK_LEFT_X, BOOK_TOP_Y +anim.getYOffset(), BOOK_TEXTURE_OFFSET_X, anim.getVOffset(), BOOK_WIDTH, anim.getHeight(), 896, 720);
             if (anim.isComplete()) {
-                timer = 0;
                 anim.reset();
+                if (anim == TABS_APPEAR_ANIM) {
+                    for (JournalPage page : pages) {
+                        page.setTabButtonActive(true);
+                        page.setTabButtonVisible(true);
+                    }
+                    pages[DISPLAY_STATE].setTabButtonActive(false);
+                }
                 if (anim.getNextAnim() != null) anim = anim.getNextAnim();
                 else anim = null;
             }
@@ -193,91 +219,34 @@ public class StatScreen extends Screen {
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
     }
 
-    private void drawFromState(GuiGraphics pGuiGraphics) {
-        switch (DISPLAY_STATE) {
-            case 0:
-                statPage(pGuiGraphics);
-                break;
-            case 1:
-                damagePage(pGuiGraphics);
-                break;
-            case 2:
-                pGuiGraphics.blit(GUI_BOOK[3], left, top, BOOK_TEXTURE_OFFSET_X, 181, BOOK_WIDTH, BOOK_HEIGHT, 896, 720);
-                break;
-            case 3:
-                pGuiGraphics.blit(GUI_BOOK[4], left, top, BOOK_TEXTURE_OFFSET_X, 181, BOOK_WIDTH, BOOK_HEIGHT, 896, 720);
-                break;
-        }
-    }
-
-    private void statPage(GuiGraphics pGuiGraphics) {
-        pGuiGraphics.blit(GUI_BOOK[1], left, top, BOOK_TEXTURE_OFFSET_X, 181, BOOK_WIDTH, BOOK_HEIGHT, 896, 720);
-        int y = top+47;
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent(String.format("%02d", vitPreview), true, true), left+256, y, 0xCA8E61, false);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent("Vitality", false, true), left+50, y+1, 0xCA8E61);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent(String.format("%02d", strPreview), true, true), left+256, y+=24, 0xCA8E61, false);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent("Strength", false, true), left+50, y+1, 0xCA8E61);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent(String.format("%02d", dexPreview), true, true), left+256, y+=24, 0xCA8E61, false);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent("Dexterity", false, true), left+50, y+1, 0xCA8E61);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent(String.format("%02d", aglPreview), true, true), left+256, y+=24, 0xCA8E61, false);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent("Agility", false, true), left+50, y+1, 0xCA8E61);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent(String.format("%02d", intPreview), true, true), left+256, y+=24, 0xCA8E61, false);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent("Intelligence", false, true), left+50, y+1, 0xCA8E61);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent(String.format("%02d", wisPreview), true, true), left+256, y+=24, 0xCA8E61, false);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent("Wisdom", false, true), left+50, y+1, 0xCA8E61);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent(String.format("%02d", fthPreview), true, true), left+256, y+=24, 0xCA8E61, false);
-        pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent("Faith", false, true), left+50, y+1, 0xCA8E61);
-    }
-
-    private void damagePage(GuiGraphics pGuiGraphics) {
-        pGuiGraphics.blit(GUI_BOOK[2], left, top, BOOK_TEXTURE_OFFSET_X, 181, BOOK_WIDTH, BOOK_HEIGHT, 896, 720);
-        int startIndex = currentScrollPos/44;
-        int endIndex = Math.min(startIndex+(SCROLLBOX_HEIGHT+44)/44, elements.size());
-        double scrollPercentage = (double) currentScrollPos/maxScrollPos;
-        pGuiGraphics.blit(SCROLLBAR, left+274, (scrollBoxTop-2) + (int)(scrollPercentage*(SCROLLBOX_HEIGHT-25)), 0, 0, 5, 23, 5, 23);
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        int scale = (int) minecraft.getWindow().getGuiScale();
-        GL11.glScissor(left*scale, minecraft.getWindow().getScreenHeight() - scrollBoxBot*scale, BOOK_WIDTH*scale, SCROLLBOX_HEIGHT*scale);
-        for (int i = startIndex; i < endIndex; i++) {
-            int itemTop = scrollBoxTop+(i*48-currentScrollPos);
-            pGuiGraphics.blit(ELEMENT_INFO_PANEL, left+80, itemTop, 0, 0, 171, 44, 171, 44);
-            pGuiGraphics.blit(elements.get(i).icon(), left+80+10, itemTop+14, 0, 0, 16, 16, 16, 16);
-            pGuiGraphics.drawString(minecraft.font,
-                    Util.pixelFontComponent(StringUtils.capitalize(elements.get(i).name()), false, true),
-                    left+80+28, itemTop+15, elements.get(i).colour(), true);
-            pGuiGraphics.drawString(minecraft.font,
-                    Util.pixelFontComponent(Util.roundToString(
-                            player.getAttributeValue(elements.get(i).baseDamage()) + weaponInfo.getSpread().getDamageFromElementRatio(player.getAttributeValue(Attributes.ATTACK_DAMAGE), elements.get(i)),
-                                    1),
-                            false, true), left+80+130, itemTop+15, elements.get(i).colour(), true);
-        }
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+    private void drawFromState(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
+        pGuiGraphics.blit(pages[DISPLAY_STATE].getPageResource(), BOOK_LEFT_X, BOOK_TOP_Y, BOOK_TEXTURE_OFFSET_X, 181, BOOK_WIDTH, BOOK_HEIGHT, 896, 720);
+        if (pages[DISPLAY_STATE].isRender) pages[DISPLAY_STATE].renderExtraDrawables(pGuiGraphics, pMouseX, pMouseY);
     }
 
     @Override
     public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
-        int actualDelta = (int) (pDelta * -10);
-        if (currentScrollPos + actualDelta <= 0) currentScrollPos = 0;
-        else if (currentScrollPos + actualDelta >= maxScrollPos) currentScrollPos = maxScrollPos;
-        else currentScrollPos += actualDelta;
-        return true;
+        return pages[DISPLAY_STATE].handleMouseScrolled(pMouseX, pMouseY, pDelta);
     }
 
-    private void drawHorizontalGradient(GuiGraphics graphics, float pX1, float pY1, float pX2, float pY2, float pZ, int pColorFrom, int pColorTo) {
-        VertexConsumer vertexConsumer = graphics.bufferSource().getBuffer(RenderType.gui());
-        float f = (float) FastColor.ARGB32.alpha(pColorFrom) / 255.0F;
-        float f1 = (float) FastColor.ARGB32.red(pColorFrom) / 255.0F;
-        float f2 = (float) FastColor.ARGB32.green(pColorFrom) / 255.0F;
-        float f3 = (float) FastColor.ARGB32.blue(pColorFrom) / 255.0F;
-        float f4 = (float) FastColor.ARGB32.alpha(pColorTo) / 255.0F;
-        float f5 = (float) FastColor.ARGB32.red(pColorTo) / 255.0F;
-        float f6 = (float) FastColor.ARGB32.green(pColorTo) / 255.0F;
-        float f7 = (float) FastColor.ARGB32.blue(pColorTo) / 255.0F;
-        Matrix4f matrix4f = graphics.pose().last().pose();
-        vertexConsumer.vertex(matrix4f, pX1, pY1, pZ).color(f1, f2, f3, f).endVertex();//top left
-        vertexConsumer.vertex(matrix4f, pX1, pY2, pZ).color(f1, f2, f3, f).endVertex();//bottom left
-        vertexConsumer.vertex(matrix4f, pX2, pY2, pZ).color(f5, f6, f7, f4).endVertex();//bottom right
-        vertexConsumer.vertex(matrix4f, pX2, pY1, pZ).color(f5, f6, f7, f4).endVertex();//top right
+    public void addRenderableWidget(AbstractWidget widget) {
+        super.addRenderableWidget(widget);
+    }
+
+    public Renderable addRenderableOnly(Renderable renderable) {
+        return super.addRenderableOnly(renderable);
+    }
+
+    public int getBookX() {
+        return BOOK_LEFT_X;
+    }
+
+    public int getBookY() {
+        return BOOK_TOP_Y;
+    }
+
+    public WeaponInfo getWeaponInfo() {
+        return weaponInfo;
     }
 
 }

@@ -1,20 +1,16 @@
 package com.cwjn.skada.client.gui.tooltip;
 
-import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
-import com.cwjn.skada.data.registry.Parameter;
 import com.cwjn.skada.util.Util;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -31,13 +27,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static com.cwjn.skada.data.SkadaData.*;
-import static com.cwjn.skada.data.SkadaData.BASE_ATTACK_SPEED_UUID;
 import static com.cwjn.skada.util.Util.getOtherSlotAttributesAsList;
 import static com.cwjn.skada.util.Util.otherAttributesComponent;
-import static net.minecraft.world.item.ItemStack.ATTRIBUTE_MODIFIER_FORMAT;
 
 public class ClientArmourTooltipComponent implements ClientTooltipComponent {
 

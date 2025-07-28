@@ -1,0 +1,98 @@
+---- Minecraft Crash Report ----
+// This doesn't make any sense!
+
+Time: 2025-07-17 17:53:15
+Description: Exception in server tick loop
+
+java.lang.NoClassDefFoundError: com/cwjn/skada/data/damage/WeaponInfo
+	at com.cwjn.skada.util.Util.lambda$updateWeaponInfoItemsFromResources$9(Util.java:438) ~[%23196!/:?] {re:mixin,pl:runtimedistcleaner:A,re:classloading,pl:runtimedistcleaner:A}
+	at java.util.TreeMap.forEach(TreeMap.java:1282) ~[?:?] {}
+	at com.cwjn.skada.util.Util.updateWeaponInfoItemsFromResources(Util.java:430) ~[%23196!/:?] {re:mixin,pl:runtimedistcleaner:A,re:classloading,pl:runtimedistcleaner:A}
+	at com.cwjn.skada.Skada.loadResources(Skada.java:89) ~[%23196!/:?] {re:mixin,re:classloading}
+	at com.cwjn.skada.__Skada_loadResources_ServerAboutToStartEvent.invoke(.dynamic) ~[%23196!/:?] {re:classloading,pl:eventbus:B}
+	at net.minecraftforge.eventbus.ASMEventHandler.invoke(ASMEventHandler.java:73) ~[eventbus-6.0.5.jar%23115!/:?] {}
+	at net.minecraftforge.eventbus.EventBus.post(EventBus.java:315) ~[eventbus-6.0.5.jar%23115!/:?] {}
+	at net.minecraftforge.eventbus.EventBus.post(EventBus.java:296) ~[eventbus-6.0.5.jar%23115!/:?] {}
+	at net.minecraftforge.server.ServerLifecycleHooks.handleServerAboutToStart(ServerLifecycleHooks.java:98) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23190%23197!/:?] {re:classloading}
+	at net.minecraft.server.dedicated.DedicatedServer.initServer(DedicatedServer.java:165) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:652) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?] {re:classloading,pl:accesstransformer:B}
+	at net.minecraft.server.MinecraftServer.lambda$spin$2(MinecraftServer.java:251) ~[forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-1.20.1-recomp.jar%23191!/:?] {re:classloading,pl:accesstransformer:B}
+	at java.lang.Thread.run(Thread.java:840) ~[?:?] {}
+Caused by: java.lang.ClassNotFoundException: com.cwjn.skada.data.damage.WeaponInfo
+	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:141) ~[securejarhandler-2.1.10.jar:?] {}
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?] {}
+	... 13 more
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- System Details --
+Details:
+	Minecraft Version: 1.20.1
+	Minecraft Version ID: 1.20.1
+	Operating System: Windows 11 (amd64) version 10.0
+	Java Version: 17.0.10, JetBrains s.r.o.
+	Java VM Version: OpenJDK 64-Bit Server VM (mixed mode), JetBrains s.r.o.
+	Memory: 231362768 bytes (220 MiB) / 557842432 bytes (532 MiB) up to 8573157376 bytes (8176 MiB)
+	CPUs: 8
+	Processor Vendor: AuthenticAMD
+	Processor Name: AMD Ryzen 7 5800X 8-Core Processor             
+	Identifier: AuthenticAMD Family 25 Model 33 Stepping 0
+	Microarchitecture: Zen 3
+	Frequency (GHz): 3.80
+	Number of physical packages: 1
+	Number of physical CPUs: 8
+	Number of logical CPUs: 8
+	Graphics card #0 name: AMD Radeon RX 6800
+	Graphics card #0 vendor: Advanced Micro Devices, Inc. (0x1002)
+	Graphics card #0 VRAM (MB): 4095.00
+	Graphics card #0 deviceId: 0x73bf
+	Graphics card #0 versionInfo: DriverVersion=32.0.21013.1000
+	Memory slot #0 capacity (MB): 16384.00
+	Memory slot #0 clockSpeed (GHz): 3.20
+	Memory slot #0 type: DDR4
+	Memory slot #1 capacity (MB): 16384.00
+	Memory slot #1 clockSpeed (GHz): 3.20
+	Memory slot #1 type: DDR4
+	Virtual memory max (MB): 44977.84
+	Virtual memory used (MB): 25017.59
+	Swap memory total (MB): 12288.00
+	Swap memory used (MB): 139.23
+	JVM Flags: 0 total; 
+	Server Running: true
+	Player Count: 0 / 20; []
+	Data Packs: vanilla, mod:skada, mod:cloth_config (incompatible), mod:spark (incompatible), mod:forge, mod:architectury (incompatible), mod:simplyswords (incompatible)
+	Enabled Feature Flags: minecraft:vanilla
+	World Generation: Stable
+	Is Modded: Definitely; Server brand changed to 'forge'
+	Type: Dedicated Server (map_server.txt)
+	ModLauncher: 10.0.10+10.0.10+main.22f00f84
+	ModLauncher launch target: forgeserveruserdev
+	ModLauncher naming: mcp
+	ModLauncher services: 
+		mixin-0.8.5.jar mixin PLUGINSERVICE 
+		eventbus-6.0.5.jar eventbus PLUGINSERVICE 
+		loader-47.2.2.jar slf4jfixer PLUGINSERVICE 
+		loader-47.2.2.jar object_holder_definalize PLUGINSERVICE 
+		loader-47.2.2.jar runtime_enum_extender PLUGINSERVICE 
+		loader-47.2.2.jar capability_token_subclass PLUGINSERVICE 
+		accesstransformers-8.0.4.jar accesstransformer PLUGINSERVICE 
+		loader-47.2.2.jar runtimedistcleaner PLUGINSERVICE 
+		modlauncher-10.0.10.jar mixin TRANSFORMATIONSERVICE 
+		modlauncher-10.0.10.jar fml TRANSFORMATIONSERVICE 
+	FML Language Providers: 
+		lowcodefml@47.2
+		minecraft@47.2
+		javafml@47.2
+	Mod List: 
+		main                                              |Skada                         |skada                         |0.0.6               |DONE      |Manifest: NOSIGNATURE
+		forge-1.20.1-47.1.103_mapped_parchment_2023.09.03-|Minecraft                     |minecraft                     |1.20.1              |DONE      |Manifest: a1:d4:5e:04:4f:d3:d6:e0:7b:37:97:cf:77:b0:de:ad:4a:47:ce:8c:96:49:5f:0a:cf:8c:ae:b2:6d:4b:8a:3f
+		cloth-config-11.1.118+forge_mapped_parchment_2023.|Cloth Config v10 API          |cloth_config                  |11.1.118            |DONE      |Manifest: NOSIGNATURE
+		spark-1.10.53-forge_mapped_parchment_2023.09.03-1.|spark                         |spark                         |1.10.53             |DONE      |Manifest: NOSIGNATURE
+		                                                  |NeoForge                      |forge                         |47.1.103            |DONE      |Manifest: NOSIGNATURE
+		architectury-api-9.2.14+forge_mapped_parchment_202|Architectury                  |architectury                  |9.2.14              |DONE      |Manifest: NOSIGNATURE
+		simply-swords-1.54.0-1.20.1-forge_mapped_parchment|Simply Swords                 |simplyswords                  |1.54.0-1.20.1       |DONE      |Manifest: NOSIGNATURE
+	Crash Report UUID: 6f24a406-5062-477a-be47-6653ba8e0cd0
+	FML: 47.1
+	NeoForge: net.neoforged:47.1.103

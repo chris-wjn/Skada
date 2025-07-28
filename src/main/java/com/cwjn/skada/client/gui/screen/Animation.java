@@ -7,87 +7,95 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 
 public class Animation {
+  private final ResourceLocation[] frames;
+  private final int totalFrames;
+  private final long durationMs; // Total animation duration in milliseconds
+  private final int yOffset;
+  private final int height;
+  private final int vOffset;
 
-    private final ResourceLocation[] frames;
-    private int animSpeed;
-    private int currentFrame = 1;
-    private int vOffset, yOffset, height, delayFrames = 0;
-    private boolean complete, playedSound = false;
-    private SoundEvent soundEffect;
-    private Animation nextAnim;
+  private long startTime = -1;
+  private boolean complete = false;
+  private Animation nextAnim;
+  private double animProgess;
+  private SoundEvent soundEffect;
+  private long delay = 0;
 
-    public Animation(String path, int count, int speed, int vOffset, int yOffset, int height) {
-        this.frames = createAnim(path, count);
-        this.animSpeed = speed;
-        this.vOffset = vOffset;
-        this.yOffset = yOffset;
-        this.height = height;
+  public Animation(String basePath, int frameCount, long durationMs, int vOffset, int yOffset, int height) {
+    this.totalFrames = frameCount;
+    this.durationMs = durationMs;
+    this.yOffset = yOffset;
+    this.height = height;
+    this.vOffset = vOffset;
+
+    this.frames = new ResourceLocation[frameCount];
+    for (int i = 0; i < frameCount; i++) {
+      frames[i] = Util.rl(basePath + (i + 1) + ".png");
+    }
+  }
+
+  public ResourceLocation getCurrentFrame() {
+    if (startTime == -1) {
+      startTime = System.currentTimeMillis() + delay;
+      if (soundEffect != null) {
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(this.soundEffect, 1.0F));
+      }
     }
 
-    private static ResourceLocation[] createAnim(String path, int count) {
-        ResourceLocation[] returnRL = new ResourceLocation[count];
-        for (int i = 0; i < count; i++) {
-            returnRL[i] = Util.rl(path + (i + 1) + ".png");
-        }
-        return returnRL;
+    long elapsed = System.currentTimeMillis() - startTime;
+    if (elapsed < 0) {
+      return frames[0]; // Still in delay period
     }
 
-    public ResourceLocation getCurrentFrameThenIterate(int timer) {
-        if (timer < delayFrames) {
-            return frames[0];
-        }
-        int i = currentFrame;
-        if (!playedSound && soundEffect != null) {
-            playedSound = true;
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(this.soundEffect, 1.0F));
-        }
-        if (currentFrame < frames.length) {
-            if (timer % animSpeed == 0) {
-                currentFrame++;
-            }
-        }
-        else {
-            complete = true;
-        }
-        return frames[i-1];
+    if (elapsed >= durationMs) {
+      complete = true;
+      return frames[totalFrames - 1];
     }
 
-    public void reset() {
-        currentFrame = 1;
-        playedSound = false;
-        complete = false;
-    }
+    // Calculate current frame based on elapsed time
+    int currentFrame = (int) ((elapsed * totalFrames) / durationMs);
+    animProgess = (double) elapsed / durationMs; // Calculate animation progress as a percentage
+    return frames[Math.min(currentFrame, totalFrames - 1)];
+  }
 
-    public boolean isComplete() {
-        return complete;
-    }
+  public void reset() {
+    startTime = -1;
+    complete = false;
+  }
 
-    public int getVOffset() {
-        return vOffset;
-    }
+  public boolean isComplete() {
+    return complete;
+  }
 
-    public int getYOffset() {
-        return yOffset;
-    }
+  public int getVOffset() {
+    return vOffset;
+  }
 
-    public int getHeight() {
-        return height;
-    }
+  public int getYOffset() {
+    return yOffset;
+  }
 
-    public void addDelay(int delayFrames) {
-        this.delayFrames += delayFrames;
-    }
+  public int getHeight() {
+    return height;
+  }
 
-    public void setSoundEffect(SoundEvent soundEffect) {
-        this.soundEffect = soundEffect;
-    }
+  public void addDelay(long delayMs) {
+    this.delay = delayMs;
+  }
 
-    public void setNextAnim(Animation nextAnim) {
-        this.nextAnim = nextAnim;
-    }
+  public void setSoundEffect(SoundEvent soundEffect) {
+    this.soundEffect = soundEffect;
+  }
 
-    public Animation getNextAnim() {
-        return nextAnim;
-    }
+  public void setNextAnim(Animation nextAnim) {
+    this.nextAnim = nextAnim;
+  }
 
+  public Animation getNextAnim() {
+    return nextAnim;
+  }
+
+  public double getAnimProgess() {
+    return animProgess;
+  }
 }
