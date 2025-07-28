@@ -57,7 +57,10 @@
         "effectiveWeight": 1.0,
         "minReach": 1.5,
         "maxReach": 3.0,
-        "attackSpeedMod": 0.85
+        "attackSpeedMod": 0.85,
+        "reticleShapes": [
+          "pickaxe_swipe"
+        ]
       }
     }
   },

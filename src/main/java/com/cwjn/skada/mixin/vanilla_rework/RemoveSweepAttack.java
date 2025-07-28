@@ -12,7 +12,8 @@ public class RemoveSweepAttack {
 
     @Redirect(
             method = "attack",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;canPerformAction(Lnet/minecraftforge/common/ToolAction;)Z")
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;canPerformAction(Lnet/minecraftforge/common/ToolAction;)Z",
+            remap = false)
     )
     private boolean removeSweepAttack(ItemStack instance, ToolAction toolAction) {
         return false;

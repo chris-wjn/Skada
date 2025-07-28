@@ -1,7 +1,6 @@
 package com.cwjn.skada.event;
 
 import com.cwjn.skada.SkadaCommand;
-import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
@@ -10,10 +9,7 @@ import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.event.custom.PostMitigationEvent;
 import com.cwjn.skada.network.SkadaNetwork;
-import com.cwjn.skada.network.server_to_client.S2CCreateDamageIndicator;
-import com.cwjn.skada.network.server_to_client.S2CSendArmourInfoMap;
-import com.cwjn.skada.network.server_to_client.S2CSendWeaponInfoMap;
-import com.cwjn.skada.network.server_to_client.S2CSyncSkyDarken;
+import com.cwjn.skada.network.server_to_client.*;
 import com.cwjn.skada.util.Util;
 import com.google.common.collect.HashMultimap;
 import com.google.gson.Gson;
@@ -23,8 +19,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -40,9 +34,6 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
@@ -71,8 +62,8 @@ public class CommonEvent {
                     e.add(entityType, dc.resistAttribute());
                 }
                 for (Element element : REGISTRY_ELEMENT.get().getValues()) {
-                    e.add(entityType, element.affinityAttribute());
-                    e.add(entityType, element.resistAttribute());
+                    e.add(entityType, element.affinity());
+                    e.add(entityType, element.resist());
                     e.add(entityType, element.baseDamage());
                 }
             });
@@ -119,26 +110,26 @@ public class CommonEvent {
                                 info.getAttackTypes().keySet().toArray(AttackType[]::new)[stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
                         );
                 if (attackInfo.maxReach() - 3.0 != 0) e.addModifier(ForgeMod.ENTITY_REACH.get(),
-                        new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_reach_mod", attackInfo.maxReach() - 3.0, AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier(SKADA_ATTACK_TYPE_REACH_UUID, "attack_type_reach_mod", attackInfo.maxReach() - 3.0, AttributeModifier.Operation.ADDITION));
                 if (attackInfo.attackSpeedMod() - 1 != 0) e.addModifier(Attributes.ATTACK_SPEED,
-                        new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_speed_mod", attackInfo.attackSpeedMod() - 1, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                        new AttributeModifier(SKADA_ATTACK_TYPE_SPEED_UUID, "attack_type_speed_mod", attackInfo.attackSpeedMod() - 1, AttributeModifier.Operation.MULTIPLY_TOTAL));
                 if (attackInfo.damageBonus() != 0) e.addModifier(Attributes.ATTACK_DAMAGE,
-                        new AttributeModifier(SKADA_ATTACK_TYPE_BASE_MOD_UUID, "attack_type_damage_mod", attackInfo.damageBonus(), AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier(SKADA_ATTACK_TYPE_DAMAGE_UUID, "attack_type_damage_mod", attackInfo.damageBonus(), AttributeModifier.Operation.ADDITION));
             }
             if (stack.getTagElement(ARMOUR_INFO_TAG_KEY) != null) {
                 ArmourInfo info = ArmourInfo.fromCompoundTag(stack.getTagElement(ARMOUR_INFO_TAG_KEY));
                 for (Map.Entry<Element, Double> entry : info.elementalResists().entrySet()) {
-                    e.addModifier(entry.getKey().resistAttribute(),
-                            new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, entry.getKey() + "_resist_mod", entry.getValue(), AttributeModifier.Operation.ADDITION));
+                    e.addModifier(entry.getKey().resist(),
+                            new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID[LivingEntity.getEquipmentSlotForItem(stack).getIndex()], stack.getHoverName().getString(), entry.getValue(), AttributeModifier.Operation.ADDITION));
                 }
                 for (Map.Entry<AttackType, Double> entry : info.attackResists().entrySet()) {
                     e.addModifier(entry.getKey().resistAttribute(),
-                            new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, entry.getKey() + "_resist_mod", entry.getValue(), AttributeModifier.Operation.ADDITION));
+                            new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID[LivingEntity.getEquipmentSlotForItem(stack).getIndex()], stack.getHoverName().getString(), entry.getValue(), AttributeModifier.Operation.ADDITION));
                 }
                 if (info.armourBonus() != 0) e.addModifier(Attributes.ARMOR,
-                        new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, "armour_bonus_mod", info.armourBonus(), AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID[LivingEntity.getEquipmentSlotForItem(stack).getIndex()], "armour_bonus_mod", info.armourBonus(), AttributeModifier.Operation.ADDITION));
                 if (info.armourToughnessBonus() != 0) e.addModifier(Attributes.ARMOR_TOUGHNESS,
-                        new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID, "armour_toughness_bonus_mod", info.armourToughnessBonus(), AttributeModifier.Operation.ADDITION));
+                        new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID[LivingEntity.getEquipmentSlotForItem(stack).getIndex()], "armour_toughness_bonus_mod", info.armourToughnessBonus(), AttributeModifier.Operation.ADDITION));
             }
         }
 
@@ -240,18 +231,6 @@ public class CommonEvent {
                     LOGGER.error("Failed to read armour info from " + rl, e);
                 }
             });
-            manager.listResources("reticles", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
-                try {
-                    BufferedReader reader = new BufferedReader(manager.openAsReader(rl));
-                    JsonObject obj = gson.fromJson(reader, JsonObject.class);
-                    DataResult<ReticleShape> info = ReticleShape.CODEC.parse(JsonOps.INSTANCE, obj);
-                    info.result().ifPresent((rs) -> {
-
-                    });
-                } catch (Exception e) {
-                    LOGGER.error("Failed to read armour info from " + rl, e);
-                }
-            });
             // If the player isn't null, it means a player is joining the server, so we send the maps to that player.
             if (event.getPlayer() != null) {
                 weaponMapToSend.forEach((key, value) ->
@@ -260,6 +239,7 @@ public class CommonEvent {
                 armourMapToSend.forEach((key, value) ->
                         SkadaNetwork.serverToPlayer(new S2CSendArmourInfoMap(Map.of(key, value)), event.getPlayer())
                 );
+                SkadaNetwork.serverToPlayer(new S2CSendReticles(RETICLES.values().stream().toList()), event.getPlayer());
             }
             // If the player is null, it means the reload command was run, so we send the maps to all players.
             else {
@@ -269,8 +249,8 @@ public class CommonEvent {
                 armourMapToSend.forEach((key, value) ->
                         SkadaNetwork.serverToAll(new S2CSendArmourInfoMap(Map.of(key, value)))
                 );
+                SkadaNetwork.serverToAll(new S2CSendReticles(RETICLES.values().stream().toList()));
             }
-
         }
 
         /*

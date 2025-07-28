@@ -17,8 +17,6 @@ import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.*;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
@@ -63,7 +61,8 @@ public abstract class Util {
 
     private static final Style SPACER = Style.EMPTY.withFont(rl("space"));
     private static final Style PIXEL = Style.EMPTY.withFont(rl("minimal_pixel_bitmap"));
-    private static final Style PIXEL_LARGE = Style.EMPTY.withFont(rl("minimal_pixel_16x"));
+    private static final Style PIXEL_16 = Style.EMPTY.withFont(rl("minimal_pixel_16x"));
+    private static final Style PIXEL_12 = Style.EMPTY.withFont(rl("minimal_pixel_12x"));
 
     public static ResourceLocation rl(String path) {
         return new ResourceLocation(Skada.MODID, path);
@@ -80,9 +79,7 @@ public abstract class Util {
     public static String getEntityPath(EntityType<?> entity) {
         return ForgeRegistries.ENTITY_TYPES.getKey(entity).getPath();
     }
-    public static Attribute attribute(SkadaAttributeHolder holder) {
-        return holder.getAttribute();
-    }
+
     public static MutableComponent spacer(int i) {
         return Component.translatable("space." + i).withStyle(SPACER);
     }
@@ -117,21 +114,33 @@ public abstract class Util {
         return bd.toString();
     }
 
+    /**
+     * Creates a pixel font component with the given string. Only one of usePixel16 or usePixel12 should be true,
+     * but usePixel16 is used if both are true.
+     */
     @OnlyIn(Dist.CLIENT)
     public static MutableComponent pixelFontComponent(String s) {
-        return pixelFontComponent(s, false, false);
+        return pixelFontComponent(s, false, false, false);
     }
 
+    /**
+     * Creates a pixel font component with the given MutableComponent. Only one of usePixel16 or usePixel12 should be true,
+     * but usePixel16 is used if both are true.
+     */
     @OnlyIn(Dist.CLIENT)
     public static MutableComponent pixelFontComponent(MutableComponent comp) {
-        return ClientConfig.USE_MDU_FONT.get()? pixelFontComponent(comp, false, false) : comp.copy();
+        return ClientConfig.USE_MDU_FONT.get()? pixelFontComponent(comp, false, false, false) : comp.copy();
     }
 
+    /**
+        * Creates a pixel font component with the given string. Only one of usePixel16 or usePixel12 should be true,
+        * but usePixel16 is used if both are true.
+     */
     @OnlyIn(Dist.CLIENT)
-    public static MutableComponent pixelFontComponent(String s, boolean useBoldNumbers, boolean useLargeFont) {
+    public static MutableComponent pixelFontComponent(String s, boolean useBoldNumbers, boolean usePixel16, boolean usePixel12) {
         if (Minecraft.getInstance().getLanguageManager().getSelected().startsWith("en")
          || Minecraft.getInstance().getLanguageManager().getSelected().startsWith("sv")) {
-            MutableComponent retComp = Component.empty().withStyle(useLargeFont? PIXEL_LARGE : PIXEL);
+            MutableComponent retComp = Component.empty().withStyle(usePixel16? PIXEL_16 : usePixel12? PIXEL_12 : PIXEL);
             if (useBoldNumbers) s = s.replace("0", "ᙐ").replace("1", "ᙑ").replace("2", "ᙒ").replace("3", "ᙓ").replace("4", "ᙔ").replace("5", "ᙕ").replace("6", "ᙖ").replace("7", "ᙗ").replace("8", "ᙘ").replace("9", "ᙙ").replace('.', '_').replace('(', '<').replace(')', '>');
             for (char c : s.toCharArray()) {
                 retComp.append(String.valueOf(c));
@@ -148,11 +157,15 @@ public abstract class Util {
         }
     }
 
+    /**
+     * Creates a pixel font component with the given MutableComponent. Only one of usePixel16 or usePixel12 should be true,
+     * but usePixel16 is used if both are true.
+     */
     @OnlyIn(Dist.CLIENT)
-    public static MutableComponent pixelFontComponent(MutableComponent comp, boolean useBoldNumbers, boolean useLargeFont) {
+    public static MutableComponent pixelFontComponent(MutableComponent comp, boolean useBoldNumbers, boolean usePixel16, boolean usePixel12) {
         if (Minecraft.getInstance().getLanguageManager().getSelected().startsWith("en")
          || Minecraft.getInstance().getLanguageManager().getSelected().startsWith("sv")) {
-            MutableComponent retComp = Component.empty().withStyle(useLargeFont? PIXEL_LARGE : PIXEL);
+            MutableComponent retComp = Component.empty().withStyle(usePixel16? PIXEL_16 : usePixel12? PIXEL_12 : PIXEL);
             String s = I18n.exists(comp.getString())? I18n.get(comp.getString()) : comp.getString();
             if (useBoldNumbers) s = s.replace("0", "ᙐ").replace("1", "ᙑ").replace("2", "ᙒ").replace("3", "ᙓ").replace("4", "ᙔ").replace("5", "ᙕ").replace("6", "ᙖ").replace("7", "ᙗ").replace("8", "ᙘ").replace("9", "ᙙ").replace('.', '_').replace('(', '<').replace(')', '>');
             Style currentFormatting = Style.EMPTY;

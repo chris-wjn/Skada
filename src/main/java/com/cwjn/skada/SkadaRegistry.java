@@ -5,7 +5,6 @@ import com.cwjn.skada.data.damage.LethalityFunction;
 import com.cwjn.skada.data.gen.AttackTypeGeneratorConfiguration;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
-import com.cwjn.skada.data.registry.Parameter;
 import com.cwjn.skada.util.ColourLibrary;
 import com.cwjn.skada.util.Util;
 import net.minecraft.core.registries.Registries;
@@ -24,7 +23,6 @@ public class SkadaRegistry {
 
     public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(ForgeRegistries.ATTRIBUTES, MODID);
     public static final DeferredRegister<AttackType> ATTACK_TYPES = DeferredRegister.create(Util.rl("damage_class"), MODID);
-    public static final DeferredRegister<Parameter> PARAMETERS = DeferredRegister.create(Util.rl("parameter"), MODID);
 
     public static final DeferredRegister<Element> ELEMENTS = DeferredRegister.create(Util.rl("element"), MODID);
 

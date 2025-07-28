@@ -11,7 +11,6 @@ import com.cwjn.skada.event.custom.PostMitigationEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.effect.MobEffects;
@@ -136,13 +135,13 @@ public class DamageHandler {
                 if (DEBUG_ENABLED) Skada.LOGGER.debug("Element: {}, Base damage: {}, Affinity: {}, Pre-resistance damage: {}, Target Resistance: {}",
                         element.name(),
                         le.getAttributeValue(element.baseDamage()),
-                        (1 + le.getAttributeValue(element.affinityAttribute())),
+                        (1 + le.getAttributeValue(element.affinity())),
                         spread.getElements().get(element),
-                        target.getAttributeValue(element.resistAttribute()));
+                        target.getAttributeValue(element.resist()));
                 spread.applyFunctionToElement(element, x -> x + le.getAttributeValue(element.baseDamage()));
-                spread.applyFunctionToElement(element, x -> x * (1 + le.getAttributeValue(element.affinityAttribute())));
+                spread.applyFunctionToElement(element, x -> x * (1 + le.getAttributeValue(element.affinity())));
             }
-            spread.applyFunctionToElement(element, x -> x - (x * resistanceReductionFormula(target.getAttributeValue(element.resistAttribute()))));
+            spread.applyFunctionToElement(element, x -> x - (x * resistanceReductionFormula(target.getAttributeValue(element.resist()))));
             if (DEBUG_ENABLED) Skada.LOGGER.debug("Element: {}, Final damage: {}", element.name(), spread.getElements().get(element));
         }
         PostMitigationEvent evt = new PostMitigationEvent(target, spread.getElements());

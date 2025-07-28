@@ -1,11 +1,7 @@
 package com.cwjn.skada.network.client_to_server;
 
-import com.cwjn.skada.data.damage.WeaponInfo;
-import com.cwjn.skada.util.SkadaEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;

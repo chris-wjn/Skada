@@ -1,14 +1,10 @@
 package com.cwjn.skada.mixin.new_features;
 
 import com.cwjn.skada.client.ClientHandler;
-import com.cwjn.skada.client.hud.ReticleCoordinate;
 import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.registry.AttackType;
-import com.cwjn.skada.util.ReticleShapes;
 import com.cwjn.skada.util.Util;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
@@ -22,12 +18,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import oshi.util.tuples.Pair;
 
 import java.util.Collection;
 import java.util.Map;
 
-import static com.cwjn.skada.data.SkadaData.DEBUG_ENABLED;
 import static com.cwjn.skada.data.SkadaData.RETICLES;
 
 @Mixin(GameRenderer.class)

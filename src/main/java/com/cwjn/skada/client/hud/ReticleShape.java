@@ -63,12 +63,11 @@ public class ReticleShape {
          /*
             We don't want to add the entire outline if the shape has a lot of vertices,
          */
-        int increment = 1 + (int) Math.floor(outline.size() / 10f);
         int index = 0;
         while (index < outline.size()) {
             ReticleCoordinate coord = outline.get(index);
             points.put(coord.x(), coord.y());
-            index += increment;
+            index += 1;
         }
 
         // Scan the bounding box with the specified spacing

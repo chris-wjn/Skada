@@ -125,7 +125,8 @@ public class CustomReticlesHitDetectedEntities {
 
     @Inject(
             method = "startAttack",
-            at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/event/InputEvent$InteractionKeyMappingTriggered;shouldSwingHand()Z", shift = At.Shift.BEFORE)
+            at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/event/InputEvent$InteractionKeyMappingTriggered;shouldSwingHand()Z", shift = At.Shift.BEFORE,
+            remap = false)
     )
     private void hitDetectedEntities2(CallbackInfoReturnable<Boolean> cir) {
         if (!alreadyHit.isEmpty()) {

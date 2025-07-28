@@ -243,7 +243,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
                         + mainAttributes.get(Attributes.ATTACK_SPEED).stream().filter(m -> m.getOperation()== AttributeModifier.Operation.ADDITION).mapToDouble(AttributeModifier::getAmount).sum();
                 this.mainAttributes.get(Attributes.ATTACK_SPEED).removeIf(m -> m.getOperation() == AttributeModifier.Operation.ADDITION);
                 baseSpeed *= attackTypeInfo.attackSpeedMod();
-                this.mainAttributes.get(Attributes.ATTACK_SPEED).removeIf(m -> m.getId().equals(SKADA_ATTACK_TYPE_BASE_MOD_UUID));
+                this.mainAttributes.get(Attributes.ATTACK_SPEED).removeIf(m -> m.getId().equals(SKADA_ATTACK_TYPE_SPEED_UUID));
                 retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_speed",
                         Util.round(baseSpeed, 1))));
                 break;

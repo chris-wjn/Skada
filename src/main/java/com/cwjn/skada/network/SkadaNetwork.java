@@ -55,11 +55,6 @@ public class SkadaNetwork {
                 S2CCreateDamageIndicator::decode,
                 S2CCreateDamageIndicator::handle);
         INSTANCE.registerMessage(id++,
-                S2CUpdateWeaponInfo.class,
-                S2CUpdateWeaponInfo::encode,
-                S2CUpdateWeaponInfo::decode,
-                S2CUpdateWeaponInfo::handle);
-        INSTANCE.registerMessage(id++,
                 S2CSendReticles.class,
                 S2CSendReticles::encode,
                 S2CSendReticles::decode,

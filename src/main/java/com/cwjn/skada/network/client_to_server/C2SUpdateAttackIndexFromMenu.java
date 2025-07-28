@@ -1,6 +1,5 @@
 package com.cwjn.skada.network.client_to_server;
 
-import com.cwjn.skada.util.SkadaEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 

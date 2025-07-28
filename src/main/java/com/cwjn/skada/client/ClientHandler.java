@@ -2,16 +2,12 @@ package com.cwjn.skada.client;
 
 import com.cwjn.skada.ClientConfig;
 import com.cwjn.skada.client.hud.ReticleShape;
-import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.armour.AccessArmourInfo;
 import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
-import com.cwjn.skada.util.SkadaEntity;
 import com.cwjn.skada.data.damage.AccessWeaponInfo;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
@@ -35,6 +31,7 @@ public class ClientHandler {
     public static int skyDarken;
 
     public static void updateWeaponInfos(Map<String, Map<String, WeaponInfo>> map) {
+        LOGGER.info("Syncing {} weapon info maps from server.", map.size());
         for (Map.Entry<String,Map<String, WeaponInfo>> submap : map.entrySet()) {
             submap.getValue().forEach((key, value) -> {
                 String modId = submap.getKey();
@@ -53,6 +50,7 @@ public class ClientHandler {
     }
 
     public static void updateArmourInfos(Map<String, Map<String, ArmourInfo>> map) {
+        LOGGER.info("Syncing {} armour info maps from server.", map.size());
         for (Map.Entry<String,Map<String, ArmourInfo>> submap : map.entrySet()) {
             submap.getValue().forEach((key, value) -> {
                 String modId = submap.getKey();
@@ -80,13 +78,8 @@ public class ClientHandler {
         }
     }
 
-    public static void updateClientWeaponInfo(CompoundTag info, int id) {
-        if (Minecraft.getInstance().player.getCommandSenderWorld().getEntity(id) instanceof LivingEntity e) {
-            ((SkadaEntity)e).setWeaponInfo(WeaponInfo.fromCompoundTag(info));
-        }
-    }
-
     public static void updateReticles(List<ReticleShape> reticles) {
+        LOGGER.info("Received {} reticle shapes from server.", reticles.size());
         for (ReticleShape r : reticles) {
             RETICLES.put(r.getName(), r);
         }
