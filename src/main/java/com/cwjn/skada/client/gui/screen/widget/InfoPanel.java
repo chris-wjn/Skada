@@ -49,34 +49,22 @@ public class InfoPanel {
     private String[] getContentForTopic(String topic) {
         return switch (topic) {
             case "Combat Basics" -> new String[]{
-                    "• Right-click to attack",
-                    "• Hold to charge attacks",
-                    "• Time attacks for criticals"
+                    "• placeholder"
             };
             case "Weapon Types" -> new String[]{
-                    "• Swords: Balanced damage/speed",
-                    "• Axes: High damage, slower",
-                    "• Spears: Long reach attacks"
+                    "• placeholder"
             };
             case "Element System" -> new String[]{
-                    "• Fire: Burns over time",
-                    "• Ice: Slows enemies",
-                    "• Lightning: Chain damage"
+                    "• placeholder"
             };
             case "Status Effects" -> new String[]{
-                    "• Poison: Damage over time",
-                    "• Weakness: Reduced damage",
-                    "• Strength: Increased damage"
+                    "• placeholder"
             };
             case "Damage Mechanics" -> new String[]{
-                    "• Base damage from weapon",
-                    "• Elements modify damage",
-                    "• Armor reduces incoming damage"
+                    "• placeholder"
             };
             case "Defense Stats" -> new String[]{
-                    "• Armor reduces physical damage",
-                    "• Resistance affects elements",
-                    "• Toughness prevents knockback"
+                    "• placeholder"
             };
             default -> new String[]{"No information available"};
         };
