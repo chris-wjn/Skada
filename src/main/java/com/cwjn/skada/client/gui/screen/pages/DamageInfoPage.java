@@ -88,6 +88,7 @@ public class DamageInfoPage extends JournalPage {
             return true;
         }
         else {
+            if (currentInfoWidget == null || !currentInfoWidget.visible) return false;
             return currentInfoWidget.handleScroll(mouseX, mouseY, pDelta);
         }
     }

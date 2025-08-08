@@ -23,7 +23,6 @@ public class SkadaRegistry {
 
     public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(ForgeRegistries.ATTRIBUTES, MODID);
     public static final DeferredRegister<AttackType> ATTACK_TYPES = DeferredRegister.create(Util.rl("damage_class"), MODID);
-
     public static final DeferredRegister<Element> ELEMENTS = DeferredRegister.create(Util.rl("element"), MODID);
 
     public static final RegistryObject<Element> HEAT = element("heat", ColourLibrary.HEAT);
