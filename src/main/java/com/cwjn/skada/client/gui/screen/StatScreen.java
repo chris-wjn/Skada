@@ -3,6 +3,7 @@ package com.cwjn.skada.client.gui.screen;
 import com.cwjn.skada.client.gui.button.TabButton;
 import com.cwjn.skada.client.gui.screen.pages.DamageInfoPage;
 import com.cwjn.skada.client.gui.screen.pages.InfoPage;
+import com.cwjn.skada.client.gui.screen.pages.PlayerPage;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.AttackType;
@@ -51,12 +52,14 @@ public class StatScreen extends Screen {
     public static final ResourceLocation DAMAGE_PAGE_SCROLLBOX_BORDER = Util.rl("textures/gui/damage_page/scrollbox_border.png");
     public static final ResourceLocation SCROLLBAR = Util.rl("textures/gui/book_idle/scrollbar.png");
     public Animation anim = OPEN_ANIM;
+    private static final ResourceLocation PLAYER_PAGE_ICON = Util.rl("textures/gui/book_page_icons/player_page_icon.png");
     private static final ResourceLocation DAMAGE_ICON = Util.rl("textures/gui/book_page_icons/damage_page_icon.png");
     private static final ResourceLocation ARMOUR_ICON = Util.rl("textures/gui/book_page_icons/armour_icon.png");
     private static final ResourceLocation INFO_ICON = Util.rl("textures/gui/book_page_icons/info_page_icon.png");
     private JournalPage[] pages = new JournalPage[] {
-            new DamageInfoPage(DAMAGE_ICON, BOOK_TAB_1, this),
-            new InfoPage(INFO_ICON, BOOK_TAB_2, this)
+            new PlayerPage(PLAYER_PAGE_ICON, BOOK_TAB_1, this),
+            new DamageInfoPage(DAMAGE_ICON, BOOK_TAB_2, this),
+            new InfoPage(INFO_ICON, BOOK_TAB_3, this)
     }; //max 6 pages, but only 2 for now
     private int DISPLAY_STATE = 0; //index of the currently displayed page
     private int BOOK_LEFT_X;
@@ -129,7 +132,7 @@ public class StatScreen extends Screen {
     protected void init() {
         super.init();
 
-        minecraft.getWindow().setGuiScale(2);
+        if (minecraft.getWindow().getGuiScale() > 2) minecraft.getWindow().setGuiScale(2);
         BOOK_LEFT_X = (minecraft.getWindow().getGuiScaledWidth() - BOOK_WIDTH)/2;
         BOOK_TOP_Y = (minecraft.getWindow().getGuiScaledHeight() - BOOK_HEIGHT)/2;
 
@@ -180,7 +183,7 @@ public class StatScreen extends Screen {
         else if (anim == CONTENT_APPEAR_ANIM) {
             drawFromState(pGuiGraphics, pMouseX, pMouseY);
             pGuiGraphics.pose().pushPose();
-            pGuiGraphics.pose().translate(0, 0, 1);
+            pGuiGraphics.pose().translate(0, 0, 201);
             pGuiGraphics.blit(anim.getCurrentFrame(), BOOK_LEFT_X, BOOK_TOP_Y +anim.getYOffset(), BOOK_TEXTURE_OFFSET_X, anim.getVOffset(), BOOK_WIDTH, anim.getHeight(), 896, 720);
             pGuiGraphics.pose().popPose();
             if (anim.isComplete()) {
@@ -192,7 +195,7 @@ public class StatScreen extends Screen {
         else if (anim == CONTENT_APPEAR_ANIM_RIGHT_PAGE_ONLY) {
             drawFromState(pGuiGraphics, pMouseX, pMouseY);
             pGuiGraphics.pose().pushPose();
-            pGuiGraphics.pose().translate(0, 0, 1);
+            pGuiGraphics.pose().translate(0, 0, 201);
             pGuiGraphics.blit(anim.getCurrentFrame(), BOOK_LEFT_X + BOOK_RIGHT_PAGE_OFFSET_X, BOOK_TOP_Y + anim.getYOffset(), BOOK_TEXTURE_OFFSET_X+BOOK_RIGHT_PAGE_OFFSET_X, anim.getVOffset(), BOOK_WIDTH/2, anim.getHeight(), 896, 720);
             pGuiGraphics.pose().popPose();
             if (anim.isComplete()) {

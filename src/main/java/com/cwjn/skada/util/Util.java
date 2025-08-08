@@ -107,11 +107,69 @@ public abstract class Util {
         return bd.doubleValue();
     }
 
+    public static float round(float value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+        BigDecimal bd = new BigDecimal(Float.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.floatValue();
+    }
+
     public static String roundToString(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();
         BigDecimal bd = new BigDecimal(Double.toString(value));
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.toString();
+    }
+
+    /**
+     * Gets a colour from red to green based the difference between the value and defaultValue,
+     * where if the value is worse than the expected value, it is red, and if it is better, it is green.
+     */
+    public static int getColourByPercentage(double value, double defaultValue, boolean higherIsBetter) {
+        double percentage = getPercentage(value, defaultValue, higherIsBetter);
+        int red, green;
+
+        if (percentage >= 0.95 && percentage <= 1.05) {
+            return ColourLibrary.LIGHT_GRAY;
+        }
+
+        if (percentage < 0.95) {
+            double normalizedPercentage = percentage / 0.95;
+            red = 255;
+            green = (int) (255 * normalizedPercentage * 0.5);
+        } else {
+            double normalizedPercentage = (percentage - 1.05) / 0.95;
+            red = (int) (255 * (1.0 - normalizedPercentage));
+            green = 255;
+        }
+
+        // Ensure color values are within valid range
+        red = Math.max(0, Math.min(255, red));
+        green = Math.max(0, Math.min(255, green));
+
+        // Return RGB color as integer (format: 0xRRGGBB)
+        return (red << 16) | (green << 8);
+    }
+
+    private static double getPercentage(double value, double defaultValue, boolean higherIsBetter) {
+        double ratio;
+        if (defaultValue == 0) {
+            ratio = value;
+        }
+        else {
+            ratio = value / defaultValue;
+        }
+        double percentage;
+
+        if (higherIsBetter) {
+            percentage = Math.min(ratio, 2.0);
+        } else {
+            percentage = Math.max(2.0 - ratio, 0.0); // Invert the ratio
+        }
+
+        // Clamp percentage between 0.5 and 2.0 for color interpolation
+        percentage = Math.max(0.5, Math.min(2.0, percentage));
+        return percentage;
     }
 
     /**
@@ -138,8 +196,9 @@ public abstract class Util {
      */
     @OnlyIn(Dist.CLIENT)
     public static MutableComponent pixelFontComponent(String s, boolean useBoldNumbers, boolean usePixel16, boolean usePixel12) {
-        if (Minecraft.getInstance().getLanguageManager().getSelected().startsWith("en")
-         || Minecraft.getInstance().getLanguageManager().getSelected().startsWith("sv")) {
+        if ((Minecraft.getInstance().getLanguageManager().getSelected().startsWith("en")
+         || Minecraft.getInstance().getLanguageManager().getSelected().startsWith("sv"))
+         && ClientConfig.USE_MDU_FONT.get()) {
             MutableComponent retComp = Component.empty().withStyle(usePixel16? PIXEL_16 : usePixel12? PIXEL_12 : PIXEL);
             if (useBoldNumbers) s = s.replace("0", "ᙐ").replace("1", "ᙑ").replace("2", "ᙒ").replace("3", "ᙓ").replace("4", "ᙔ").replace("5", "ᙕ").replace("6", "ᙖ").replace("7", "ᙗ").replace("8", "ᙘ").replace("9", "ᙙ").replace('.', '_').replace('(', '<').replace(')', '>');
             for (char c : s.toCharArray()) {
@@ -163,8 +222,9 @@ public abstract class Util {
      */
     @OnlyIn(Dist.CLIENT)
     public static MutableComponent pixelFontComponent(MutableComponent comp, boolean useBoldNumbers, boolean usePixel16, boolean usePixel12) {
-        if (Minecraft.getInstance().getLanguageManager().getSelected().startsWith("en")
-         || Minecraft.getInstance().getLanguageManager().getSelected().startsWith("sv")) {
+        if ((Minecraft.getInstance().getLanguageManager().getSelected().startsWith("en")
+            || Minecraft.getInstance().getLanguageManager().getSelected().startsWith("sv"))
+                && ClientConfig.USE_MDU_FONT.get()) {
             MutableComponent retComp = Component.empty().withStyle(usePixel16? PIXEL_16 : usePixel12? PIXEL_12 : PIXEL);
             String s = I18n.exists(comp.getString())? I18n.get(comp.getString()) : comp.getString();
             if (useBoldNumbers) s = s.replace("0", "ᙐ").replace("1", "ᙑ").replace("2", "ᙒ").replace("3", "ᙓ").replace("4", "ᙔ").replace("5", "ᙕ").replace("6", "ᙖ").replace("7", "ᙗ").replace("8", "ᙘ").replace("9", "ᙙ").replace('.', '_').replace('(', '<').replace(')', '>');
@@ -417,6 +477,17 @@ public abstract class Util {
         else {
             return AttackTypeInfo.DEFAULT;
         }
+    }
+
+    /**
+     * Calculates the player's speed in blocks per second based on the movespeed attribute.
+     * The formula is based on the fact that 0.1 movement speed is equal to 4.3 blocks per second.
+     * @param movespeed_attribute the player's movespeed attribute value, which by default is 0.1
+     * @return the player's speed in blocks per second, rounded to 1 decimal place
+     */
+    public static double getPlayerSpeedInBlocksPerSecond(double movespeed_attribute) {
+        BigDecimal x = BigDecimal.valueOf(movespeed_attribute * 43.178);
+        return x.setScale(1, RoundingMode.HALF_UP).doubleValue();
     }
 
     public static void updateReticleListFromResources(ResourceManager manager) {
