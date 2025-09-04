@@ -41,7 +41,7 @@ public class StatScreen extends Screen {
     private static final Animation OPEN_ANIM = new Animation("textures/gui/book_open/", 5, 300, 85, -96, BOOK_OPENING_HEIGHT); // 300ms duration
     private static final Animation CONTENT_APPEAR_ANIM = new Animation("textures/gui/book_content_appear/", 36, 800, 181, 0, BOOK_HEIGHT); // 800ms duration
     public static final Animation CONTENT_APPEAR_ANIM_RIGHT_PAGE_ONLY = new Animation("textures/gui/book_content_appear/", 36, 800, 181, 0, BOOK_HEIGHT); // 800ms duration
-    private static final Animation TABS_APPEAR_ANIM = new Animation("textures/gui/book_tabs_appear/", 17, 600, 181, 0, BOOK_HEIGHT); // 600ms duration
+    private static final Animation TABS_APPEAR_ANIM = new Animation("textures/gui/book_tabs_appear/", 17, 500, 181, 0, BOOK_HEIGHT); // 600ms duration
     private static final ResourceLocation BOOK_NO_TAB_SELECTED = Util.rl("textures/gui/book_idle/none_selected.png");
     private static final ResourceLocation BOOK_TAB_1 = Util.rl("textures/gui/book_idle/1.png");
     private static final ResourceLocation BOOK_TAB_2 = Util.rl("textures/gui/book_idle/2.png");
@@ -76,7 +76,6 @@ public class StatScreen extends Screen {
         OPEN_ANIM.setNextAnim(TABS_APPEAR_ANIM);
         TABS_APPEAR_ANIM.setNextAnim(CONTENT_APPEAR_ANIM);
         OPEN_ANIM.addDelay(250);
-        TABS_APPEAR_ANIM.addDelay(100);
     }
 
     public StatScreen(WeaponInfo info, AttackType type, AttackTypeInfo attackTypeInfo) {

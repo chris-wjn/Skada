@@ -67,12 +67,7 @@ public class PlayerPage extends JournalPage {
   }
 
   private void drawPlayerStats(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
-    int xLeftColumn = screen.getBookX() + 30;
-    int xRightColumn = screen.getBookX() + 165;
-    int yTopRow = screen.getBookY() + 240;
-    int lineSpacing = 16;
     Font font = Minecraft.getInstance().font;
-
     int healthX = screen.getBookX() + PLAYER_BOX_X_OFFSET + 60;
     int healthY = screen.getBookY() + PLAYER_BOX_Y_OFFSET + 182;
     float currentHealth = Util.round(Minecraft.getInstance().player.getHealth(), 1);
@@ -82,42 +77,29 @@ public class PlayerPage extends JournalPage {
     int healthIconX = -18 + healthX - font.width(health.getVisualOrderText()) / 2;
     pGuiGraphics.blit(HEALTH_ICON, healthIconX, healthY, 0, 0, 16, 16, 16, 16);
 
-    drawIconThenNumber(pGuiGraphics, TOUGHNESS_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 50, player.getAttributeValue(Attributes.ARMOR_TOUGHNESS), ColourLibrary.LIGHT_GRAY);
-    drawIconThenNumber(pGuiGraphics, ARMOUR_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 70, player.getAttributeValue(Attributes.ARMOR), ColourLibrary.LIGHT_GRAY);
+    drawIconThenNumber(pGuiGraphics, TOUGHNESS_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 50, player.getAttributeValue(Attributes.ARMOR_TOUGHNESS), ColourLibrary.LIGHTER_GRAY);
+    drawIconThenNumber(pGuiGraphics, ARMOUR_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 70, player.getAttributeValue(Attributes.ARMOR), ColourLibrary.LIGHTER_GRAY);
     double bps = Util.getPlayerSpeedInBlocksPerSecond(player.getAttributeValue(Attributes.MOVEMENT_SPEED));
     drawIconThenNumber(pGuiGraphics, MOVESPEED_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 90, bps, Util.getColourByPercentage(bps, 4.3, true));
     drawIconThenNumber(pGuiGraphics, SLASH_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 110, player.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute()), Util.getColourByPercentage(player.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute()), 0, true));
     drawIconThenNumber(pGuiGraphics, THRUST_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 130, player.getAttributeValue(SkadaRegistry.THRUST.get().resistAttribute()), Util.getColourByPercentage(player.getAttributeValue(SkadaRegistry.THRUST.get().resistAttribute()), 0, true));
     drawIconThenNumber(pGuiGraphics, STRIKE_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 150, player.getAttributeValue(SkadaRegistry.STRIKE.get().resistAttribute()), Util.getColourByPercentage(player.getAttributeValue(SkadaRegistry.STRIKE.get().resistAttribute()), 0, true));
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.HEAT.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 50, player.getAttributeValue(SkadaRegistry.HEAT.get().resist()), ColourLibrary.HEAT);
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.COLD.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 70, player.getAttributeValue(SkadaRegistry.COLD.get().resist()), ColourLibrary.COLD);
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.LIGHTNING.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 90, player.getAttributeValue(SkadaRegistry.LIGHTNING.get().resist()), ColourLibrary.LIGHTNING);
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.ENDER.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 110, player.getAttributeValue(SkadaRegistry.ENDER.get().resist()), ColourLibrary.ENDER);
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.WITHER.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 130, player.getAttributeValue(SkadaRegistry.WITHER.get().resist()), ColourLibrary.WITHER);
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.AETHER.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 150, player.getAttributeValue(SkadaRegistry.AETHER.get().resist()), ColourLibrary.AETHER);
+    pGuiGraphics.pose().pushPose();
+    pGuiGraphics.pose().scale(0.5f, 0.5f, 1f);
+    pGuiGraphics.blit(ARMOUR_ICON, (screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40 - 10)*2, (screen.getBookY() + 50 +9)*2, 0, 0, 16, 16, 16, 16);
+    pGuiGraphics.blit(ARMOUR_ICON, (screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40 - 10)*2, (screen.getBookY() + 70 +9)*2, 0, 0, 16, 16, 16, 16);
+    pGuiGraphics.blit(ARMOUR_ICON, (screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40 - 10)*2, (screen.getBookY() + 90 +9)*2, 0, 0, 16, 16, 16, 16);
+    pGuiGraphics.blit(ARMOUR_ICON, (screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40 - 10)*2, (screen.getBookY() + 110 +9)*2, 0, 0, 16, 16, 16, 16);
+    pGuiGraphics.blit(ARMOUR_ICON, (screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40 - 10)*2, (screen.getBookY() + 130 +9)*2, 0, 0, 16, 16, 16, 16);
+    pGuiGraphics.blit(ARMOUR_ICON, (screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40 - 10)*2, (screen.getBookY() + 150 +9)*2, 0, 0, 16, 16, 16, 16);
+    pGuiGraphics.pose().popPose();
 
-    double slashResist = Minecraft.getInstance().player.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute());
-    pGuiGraphics.drawString(font, Util.pixelFontComponent(Component.translatable("skada.statscreen.statline.slash_resist", slashResist), false, true, false),
-            xLeftColumn, yTopRow += lineSpacing, ColourLibrary.UI_BORDER_COLOUR, true);
-    double thrustResist = Minecraft.getInstance().player.getAttributeValue(SkadaRegistry.THRUST.get().resistAttribute());
-    pGuiGraphics.drawString(font, Util.pixelFontComponent(Component.translatable("skada.statscreen.statline.thrust_resist", thrustResist), false, true, false),
-            xLeftColumn, yTopRow += lineSpacing, ColourLibrary.UI_BORDER_COLOUR, true);
-    double strikeResist = Minecraft.getInstance().player.getAttributeValue(SkadaRegistry.STRIKE.get().resistAttribute());
-    pGuiGraphics.drawString(font, Util.pixelFontComponent(Component.translatable("skada.statscreen.statline.strike_resist", strikeResist), false, true, false),
-            xLeftColumn, yTopRow += lineSpacing, ColourLibrary.UI_BORDER_COLOUR, true);
-    yTopRow = screen.getBookY() + 240; // Reset top row for right column
-    double heatResist = Minecraft.getInstance().player.getAttributeValue(SkadaRegistry.HEAT.get().resist());
-    pGuiGraphics.drawString(font, Util.pixelFontComponent(Component.translatable("skada.statscreen.statline.heat_resist", heatResist), false, true, false),
-            xRightColumn, yTopRow, ColourLibrary.UI_BORDER_COLOUR, true);
-    double coldResist = Minecraft.getInstance().player.getAttributeValue(SkadaRegistry.COLD.get().resist());
-    pGuiGraphics.drawString(font, Util.pixelFontComponent(Component.translatable("skada.statscreen.statline.cold_resist", coldResist), false, true, false),
-            xRightColumn, yTopRow += lineSpacing, ColourLibrary.UI_BORDER_COLOUR, true);
-    double lightningResist = Minecraft.getInstance().player.getAttributeValue(SkadaRegistry.LIGHTNING.get().resist());
-    pGuiGraphics.drawString(font, Util.pixelFontComponent(Component.translatable("skada.statscreen.statline.lightning_resist", lightningResist), false, true, false),
-            xRightColumn, yTopRow += lineSpacing, ColourLibrary.UI_BORDER_COLOUR, true);
-    double enderResist = Minecraft.getInstance().player.getAttributeValue(SkadaRegistry.ENDER.get().resist());
-    pGuiGraphics.drawString(font, Util.pixelFontComponent(Component.translatable("skada.statscreen.statline.ender_resist", enderResist), false, true, false),
-            xRightColumn, yTopRow += lineSpacing, ColourLibrary.UI_BORDER_COLOUR, true);
-    double witherResist = Minecraft.getInstance().player.getAttributeValue(SkadaRegistry.WITHER.get().resist());
-    pGuiGraphics.drawString(font, Util.pixelFontComponent(Component.translatable("skada.statscreen.statline.wither_resist", witherResist), false, true, false),
-            xRightColumn, yTopRow += lineSpacing, ColourLibrary.UI_BORDER_COLOUR, true);
-    double aetherResist = Minecraft.getInstance().player.getAttributeValue(SkadaRegistry.AETHER.get().resist());
-    pGuiGraphics.drawString(font, Util.pixelFontComponent(Component.translatable("skada.statscreen.statline.aether_resist", aetherResist), false, true, false),
-            xRightColumn, yTopRow += lineSpacing, ColourLibrary.UI_BORDER_COLOUR, true);
   }
 
   private void drawIconThenNumber(GuiGraphics pGuiGraphics, ResourceLocation icon, int x, int y, double value, int colour) {

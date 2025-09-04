@@ -102,6 +102,9 @@ public class DamageHandler {
         amount = armourReductionFormula(amount, armour);
         if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-armour damage: {}", amount);
 
+        /*
+            Enchantment and potion effects, copied from LivingEntity#getDamageAfterMagicAbsorb
+         */
         if (!source.is(DamageTypeTags.BYPASSES_EFFECTS)) {
             if (target.hasEffect(MobEffects.DAMAGE_RESISTANCE) && !source.is(DamageTypeTags.BYPASSES_RESISTANCE)) {
                 int i = (target.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;

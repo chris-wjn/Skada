@@ -126,50 +126,47 @@ public abstract class Util {
      * where if the value is worse than the expected value, it is red, and if it is better, it is green.
      */
     public static int getColourByPercentage(double value, double defaultValue, boolean higherIsBetter) {
-        double percentage = getPercentage(value, defaultValue, higherIsBetter);
-        int red, green;
+        double difference = value - defaultValue;
+        int red = 128, green = 128, blue = 128; //start at #808080 so that when we add colour it'll be brighter
 
-        if (percentage >= 0.95 && percentage <= 1.05) {
-            return ColourLibrary.LIGHT_GRAY;
-        }
+        float percentOfDefault;
+        if (defaultValue == 0) percentOfDefault = (float) difference;
+        else percentOfDefault = (float) (difference / defaultValue);
+        int mainHex = Math.round(128*mainToOtherHexRatio(percentOfDefault));
+        int otherHex = 128-mainHex;
+        blue += otherHex;
 
-        if (percentage < 0.95) {
-            double normalizedPercentage = percentage / 0.95;
-            red = 255;
-            green = (int) (255 * normalizedPercentage * 0.5);
+        if (percentOfDefault < 0.05) {
+            if (higherIsBetter) {
+                red += mainHex;
+                green += otherHex;
+            } else {
+                red += otherHex;
+                green += mainHex;
+            }
         } else {
-            double normalizedPercentage = (percentage - 1.05) / 0.95;
-            red = (int) (255 * (1.0 - normalizedPercentage));
-            green = 255;
+            if (higherIsBetter) {
+                red += otherHex;
+                green += mainHex;
+            } else {
+                red += mainHex;
+                green += otherHex;
+            }
         }
+        red = Math.min(255, red);
+        green = Math.min(255, green);
+        blue = Math.min(255, blue);
 
-        // Ensure color values are within valid range
-        red = Math.max(0, Math.min(255, red));
-        green = Math.max(0, Math.min(255, green));
-
-        // Return RGB color as integer (format: 0xRRGGBB)
-        return (red << 16) | (green << 8);
+        return (red << 16) | (green << 8) | blue;
     }
 
-    private static double getPercentage(double value, double defaultValue, boolean higherIsBetter) {
-        double ratio;
-        if (defaultValue == 0) {
-            ratio = value;
-        }
-        else {
-            ratio = value / defaultValue;
-        }
-        double percentage;
-
-        if (higherIsBetter) {
-            percentage = Math.min(ratio, 2.0);
-        } else {
-            percentage = Math.max(2.0 - ratio, 0.0); // Invert the ratio
-        }
-
-        // Clamp percentage between 0.5 and 2.0 for color interpolation
-        percentage = Math.max(0.5, Math.min(2.0, percentage));
-        return percentage;
+    /*
+        Get the ratio of main hex colour to other hex colours based on percentage.
+        At 500% (5.0), the main hex colour is 100% and the other hex colours are 0%.
+     */
+    private static float mainToOtherHexRatio(float percent) {
+        float hexPercent = percent/3.0f;
+        return Math.max(0.5f, hexPercent);
     }
 
     /**
