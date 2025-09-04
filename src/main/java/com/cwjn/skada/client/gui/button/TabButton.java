@@ -3,6 +3,7 @@ package com.cwjn.skada.client.gui.button;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -13,7 +14,7 @@ public class TabButton extends Button {
     private boolean renderIcon = true;
     private boolean wasRenderIcon = true;
     private long fadeStartTime = 0;
-    private static final long FADE_DURATION = 200;
+    private static final long FADE_DURATION = 800;
 
     public TabButton(int pX, int pY, Component pMessage, OnPress pOnPress) {
         super(pX, pY, 32, 26, pMessage, pOnPress, Button.DEFAULT_NARRATION);
@@ -43,13 +44,15 @@ public class TabButton extends Button {
                 alpha = Mth.clamp(alpha, 0.0f, 1.0f);
             }
 
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.enableBlend();
             RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
             if (active) {
                 pGuiGraphics.blit(icon, this.getX()+7, this.getY()+5, 0, 0, 16, 16, 16, 16);
             } else {
                 pGuiGraphics.blit(icon, this.getX()+16, this.getY()+5, 0, 0, 16, 16, 16, 16);
             }
-            RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.disableBlend();
         }
     }
 

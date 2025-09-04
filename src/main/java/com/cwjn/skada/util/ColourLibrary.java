@@ -14,6 +14,7 @@ public class ColourLibrary {
     public static final int WHITE = 0xFFFFFF;
     public static final int BLACK = 0x000000;
     public static final int GRAY = 0x808080;
+    public static final int LIGHTER_GRAY = 0xC0C0C0;
     public static final int LIGHT_GRAY = 0xE0E0E0;
     public static final int DARK_GRAY = 0x404040;
     public static final int UI_BORDER_COLOUR = 0x91665B;

@@ -31,7 +31,7 @@ public class SkadaRegistry {
     public static final RegistryObject<Element> ENDER = element("ender", ColourLibrary.ENDER);
     public static final RegistryObject<Element> WITHER = element("wither", ColourLibrary.WITHER);
     public static final RegistryObject<Element> AETHER = element("aether", ColourLibrary.AETHER);
-    public static final RegistryObject<Element> BASIC = element("basic", ColourLibrary.BASIC);
+    public static final RegistryObject<Element> PHYSICAL = element("basic", ColourLibrary.BASIC);
 
     public static final RegistryObject<AttackType> SLASH = attackType("slash", SkadaData.PERCENT_DAMAGE_BONUS, SkadaData.SLASH_GENERATOR_CONFIG);
     public static final RegistryObject<AttackType> THRUST = attackType("thrust", SkadaData.PERCENT_HEALTH_DAMAGE, SkadaData.THRUST_GENERATOR_CONFIG);
@@ -65,11 +65,6 @@ public class SkadaRegistry {
                         TagKey.create(Registries.DAMAGE_TYPE, Util.rl("convert_" + name))
                 )
         );
-    }
-
-    private static RegistryObject<Attribute> combatAttribute(String name) {
-            return ATTRIBUTES.register("combat_attribute." + name,
-                    () -> new RangedAttribute("attribute.skada.combat_attribute." + name, 0.0D, 0.0D, 20.0D).setSyncable(true));
     }
 
 }

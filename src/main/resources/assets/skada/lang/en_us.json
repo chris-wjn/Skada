@@ -68,9 +68,9 @@
   "skada.icon.attack_speed": "\u0042",
   "skada.icon.attack_damage": "\u0003",
   "skada.icon.critical_fail": "\u002E",
-  "skada.icon.attack_type.slash": "\u0056",
-  "skada.icon.attack_type.thrust": "\u0058",
-  "skada.icon.attack_type.strike": "\u0057",
+  "skada.icon.attack_type.slash": "\u006F",
+  "skada.icon.attack_type.thrust": "\u0071",
+  "skada.icon.attack_type.strike": "\u0070",
 
   "skada.tooltip.info.element.resist.heat": "§iHeat Resist:§r §e%s",
   "skada.tooltip.info.element.resist.cold": "§iCold Resist:§r §e%s",
