@@ -90,19 +90,18 @@ public class DamageHandler {
       //ATTACK TYPE WEAKNESSES
       AttackType attackType = info.attackType();
       if (DEBUG_ENABLED) Skada.LOGGER.debug("Pre-attack type damage: {}", amount);
-      amount -= (amount * resistanceReductionFormula(target.getAttributeValue(attackType.resistAttribute())));
+      amount = getDamageAfterAttackTypeReduction(amount, target.getAttributeValue(attackType.resistAttribute()));
       if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-attack type damage: {}", amount);
 
     }
 
     //ARMOUR FORMULA
     if (DEBUG_ENABLED) Skada.LOGGER.debug("Pre-armour damage: {}", amount);
-    amount = armourReductionFormula(amount, armour);
+    amount = getDamageAfterArmourReduction(amount, armour);
     if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-armour damage: {}", amount);
 
-        /*
-            Enchantment and potion effects, copied from LivingEntity#getDamageAfterMagicAbsorb
-         */
+
+    //Enchantment and potion effects, copied from LivingEntity#getDamageAfterMagicAbsorb
     if (!source.is(DamageTypeTags.BYPASSES_EFFECTS)) {
       if (target.hasEffect(MobEffects.DAMAGE_RESISTANCE) && !source.is(DamageTypeTags.BYPASSES_RESISTANCE)) {
         int i = (target.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;
@@ -142,7 +141,7 @@ public class DamageHandler {
         spread.applyFunctionToElement(element, x -> x + le.getAttributeValue(element.baseDamage()));
         spread.applyFunctionToElement(element, x -> x * (1 + le.getAttributeValue(element.affinity())));
       }
-      spread.applyFunctionToElement(element, x -> x - (x * resistanceReductionFormula(target.getAttributeValue(element.resist()))));
+      spread.applyFunctionToElement(element, x -> getDamageAfterElementalResistance(x, target.getAttributeValue(element.resist())));
       if (DEBUG_ENABLED) Skada.LOGGER.debug("Element: {}, Final damage: {}", element.name(), spread.getElements().get(element));
     }
     PostMitigationEvent evt = new PostMitigationEvent(target, spread.getElements());
@@ -151,10 +150,17 @@ public class DamageHandler {
     if (target.getServer() != null) target.getServer().getProfiler().pop();
   }
 
-  /*
-   * Base armour damage reduction formula. Returns the damage after reduction.
+  /**
+   * Armour reduction formula, using a logistic curve to convert armour points to percentage resistance.
+   *  <pre>
+   *    if x >= 0, y = 100 / (1 + e^((-x/10) + 2))
+   *    if x < 0, y = -100 / (1 + e^((x/10) + 2))
+   *  </pre>
+   * @param damage The damage to be reduced.
+   * @param armour The armour value, can be negative.
+   * @return The damage after armour reduction.
    */
-  private static double armourReductionFormula(double damage, double armour) {
+  private static double getDamageAfterArmourReduction(double damage, double armour) {
     //If the target has no armour, the attack does full damage.
     if (armour == 0) return damage;
     //Convert armour points to a percentage resistance. If armour is negative, the formula is inverted.
@@ -163,28 +169,42 @@ public class DamageHandler {
     return resistance >= 100 ? 0 : damage * (1 - resistance / 100);
   }
 
-  /*
-   * Return a number from representing the percentage of resistance reduction, where 1.0 is 100% reduction.
+  /**
+   * Uses a radical formula to reduce damage based on elemental resistance.
+   *  <pre>
+   *      if x >= 0, y = √(x/4)
+   *      if x < 0, y = -√(-x/4)
+   *  </pre>
+   * @param damage The damage to be reduced.
+   * @param resistance The resistance value, can be negative.
+   * @return The damage after elemental resistance reduction.
    */
-  private static double resistanceReductionFormula(double resistance) {
-    //each point of resistance is 10% reduction, this can also be negative.
-    return resistance * 0.1;
+  private static double getDamageAfterElementalResistance(double damage, double resistance) {
+    return damage * (1 - (resistance > 0 ? Math.sqrt(resistance / 4) : -Math.sqrt(-resistance / 4)));
   }
 
   /**
-   * Get a percentage of damage reduced based on the resistance value. The inverse of the result
-   * of this function should be multiplied with the corresponding damage type.
-   *
+   * Get a percentage of damage reduced based on the resistance value, using the damage class formula.
+   * The result of this function should be multiplied with the value to be reduced.
+   *  <pre>
+   *    y = 100 / (100 + x)
+   *  </pre>
+   * @param damage The damage to be reduced.
    * @param resistance The resistance value, can be negative.
-   * @return A double (-inf, 1], where 1 is 100% damage reduction.
+   * @return The damage after reduction.
    */
-  private static double getElementalResistanceModifier(double resistance) {
-    return resistance > 0 ? Math.sqrt(resistance / 4) : -Math.sqrt(-resistance / 4);
+  private static double getDamageAfterAttackTypeReduction(double damage, double resistance) {
+    return damage * (100/(100+resistance));
   }
 
-  /*
-   * Get a percentage of damage total based on a normal distribution, where the damage total is the
-   * mean and the accuracy is the standard deviation. Cannot go above the original damage value.
+  /**
+   * Calculates damage based on accuracy using a normal distribution. Higher accuracy results
+   * in lower standard deviation, leading to more consistent damage.
+   *
+   * @param accuracy The accuracy value (0.0 to 1.0).
+   * @param damage The initial damage value.
+   * @param random The random source for generating normal distribution values.
+   * @return The damage after applying accuracy adjustments.
    */
   private static double getDamageFromAccuracyNormalDistribution(double accuracy, double damage, RandomSource random) {
     // Higher accuracy means lower standard deviation (more consistent damage)
