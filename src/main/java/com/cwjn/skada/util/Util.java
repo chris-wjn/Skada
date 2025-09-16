@@ -694,7 +694,7 @@ public abstract class Util {
     }
 
     /*
-    function to calculate the percentage reduction in armour for strike     attack type. Returns a value between 0 and 1 that should
+    function to calculate the percentage reduction in armour for strike attack type. Returns a value between 0 and 1 that should
     be multiplied with the target's armour. When lethality is 5x armour toughness, returns 0.5.
     */
     public static double percentReduc(double lethality, double armorToughness, double targetHP) {
@@ -704,12 +704,17 @@ public abstract class Util {
         return Math.max(0, Math.min(1, effectiveness));
     }
 
-    /*
-    function to calculate percentage health damage for thrust attack type. Returns a real damage number to be summed with
-    the current damage total. When lethality is 2x armour toughness, returns 15% of the target's hp.
-     */
+  /**
+   * Calculates the amount of health damage based on lethality, armor toughness, and target HP.
+   * The formula applies a scaling factor to lethality, divided by \(armorToughness + 1\), and multiplies by the target's HP.
+   *
+   * @param lethality the lethality value of the attack
+   * @param armorToughness the toughness value of the target's armor
+   * @param targetHP the current health of the target
+   * @return a damage value to be summed with the current damage total
+   */
     public static double percentHealthDamage(double lethality, double armorToughness, double targetHP) {
-        return 0.075*lethality/(armorToughness+1)*targetHP;
+        return ((0.06*lethality)/(armorToughness+1))*targetHP;
     }
 
     /*
