@@ -693,53 +693,127 @@ public abstract class Util {
                 (p) -> p.broadcastBreakEvent(player.getUsedItemHand()));
     }
 
-    /*
-    function to calculate the percentage reduction in armour for strike attack type. Returns a value between 0 and 1 that should
-    be multiplied with the target's armour. When lethality is 5x armour toughness, returns 0.5.
-    */
-    public static double percentReduc(double lethality, double armorToughness, double targetHP) {
-        if (armorToughness == 0) return 0;
-        double ratio = lethality / armorToughness;
-        double effectiveness = 1 / (1 + ratio / 5);
-        return Math.max(0, Math.min(1, effectiveness));
+    /**
+     * Calculates the percentage reduction in target's armour based on lethality and toughness.
+     * Returns a number between 0.0 and 0.5 representing the percentage reduction in target's armour.<br>
+     * L = A -> 9.09% armour reduction<br>
+     * L = 2A -> 16.67% armour reduction<br>
+     * L = 3A -> 23.08% armour reduction<br>
+     * L = 4A -> 28.57% armour reduction<br>
+     * L = 5A -> 33.33% armour reduction<br>
+     * cap is 50% armour reduction at L = 10A
+     * @param lethality the lethality value of the attack
+     * @param toughness the target's toughness
+     * @param targetHP the current health of the target
+     * @return a number between 0.0 and 0.5 to be multiplied with the target's armour value
+     */
+    public static double percentReduc(double lethality, double toughness, double targetHP) {
+        if (toughness == 0) return 0.5;
+        double ratio = lethality/(10*toughness);
+        double denominator = 1 + ratio;
+        return (-1/denominator) + 1;
     }
 
   /**
-   * Calculates the amount of health damage based on lethality, armor toughness, and target HP.
-   * The formula applies a scaling factor to lethality, divided by \(armorToughness + 1\), and multiplies by the target's HP.
+   * Calculates the amount of damage based on lethality, armor toughness, and target HP.
+   * Returns a number that is a percentage of the target's current health, which should be
+   * summed with the running total of damage to be dealt.<br>
+   * L = A -> 5% cHP<br>
+   * L = 2A -> 10% cHP<br>
+   * L = 3A -> 15% cHP<br>
+   * cap is 25% cHP at L = 5A<br>
+   * etc...
    *
    * @param lethality the lethality value of the attack
-   * @param armorToughness the toughness value of the target's armor
+   * @param toughness the target's toughness
    * @param targetHP the current health of the target
    * @return a damage value to be summed with the current damage total
    */
-    public static double percentHealthDamage(double lethality, double armorToughness, double targetHP) {
-        return ((0.06*lethality)/(armorToughness+1))*targetHP;
+    public static double percentHealthDamage(double lethality, double toughness, double targetHP) {
+        if (toughness == 0) return 0.25*targetHP;
+        double percentage = (0.05*lethality)/toughness;
+        return Math.min(percentage*targetHP, 0.25*targetHP);
     }
 
-    /*
-    function to calculate bonus damage for slash attack type. Returns a real damage number to be multiplied with
-    the current damage total. When lethality is 2x armour toughness, returns 1.35 (35% bonus damage).
+    /**
+     * Calculates a bonus damage multiplier based on lethality and toughness.
+     * The formula increases the bonus as lethality increases relative to toughness.
+     * The bonus damage multiplier approaches 2.0 as lethality becomes much greater than toughness,
+     * and approaches 1.0 as lethality becomes much less than toughness. <br>
+     * L = A -> 1.125x damage<br>
+     * L = 2A -> 1.35x damage<br>
+     * L = 3A -> 1.5x damage<br>
+     * L = 4A -> 1.6x damage<br>
+     * no need for hard cap cause of diminishing returns
+     *
+     * @param lethality the lethality value of the attack
+     * @param toughness the target's armor toughness
+     * @param targetHP the current health of the target (unused in calculation)
+     * @return the bonus damage multiplier
      */
-    public static double percentBonusDamage(double lethality, double armorToughness, double targetHP) {
-        if (lethality == 0) return 1;
-        return 1+(1/Math.pow(2, 3*armorToughness/lethality));
+    public static double percentBonusDamage(double lethality, double toughness, double targetHP) {
+        if (lethality == 0) return 1.0;
+        double exponent = (3*toughness)/lethality;
+        double denominator = Math.pow(2, exponent);
+        double secondTerm = 1/denominator;
+        return 1 + secondTerm;
     }
 
+    /**
+     * Calculates the lethality value for a slash attack based on weapon properties.
+     * Each property is normalized and weighted: weight (0.3), hardness (0.3), toughness (0.2), flexibility (0.2).
+     * The result is scaled to a range from 1 to 20.
+     *
+     * @param weight the weapon's weight
+     * @param hardness the weapon's material hardness
+     * @param toughness the weapon's material toughness
+     * @param flexibility the weapon's material flexibility
+     * @return the calculated lethality value for slash attack type
+     */
     public static double slashLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
-        double bonus = weight;
-        bonus += flexibility*0.5;
-        return bonus;
+        double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
+        double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+        double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+        double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+        return 1 + 19 * (0.3 * normWeight + 0.3 * normHardness + 0.2 * normToughness + 0.2 * normFlexibility);
     }
 
+    /**
+     * Calculates the lethality value for a thrust attack based on weapon properties.
+     * Weight and hardness are weighted at (0.5) each; toughness and flexibility are ignored.
+     * The result is scaled to a range from 1 to 20.
+     *
+     * @param weight the weapon's weight
+     * @param hardness the weapon's material hardness
+     * @param toughness the weapon's material toughness
+     * @param flexibility the weapon's material flexibility
+     * @return the calculated lethality value for thrust attack type
+     */
     public static double thrustLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
-        double bonus = weight;
-        bonus += hardness*0.5;
-        return bonus;
+        double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
+        double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+        double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+        double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+        return 1 + 19 * (0.5 * normWeight + 0.5 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
     }
 
+    /**
+     * Calculates the lethality value for a strike attack based on weapon properties.
+     * Weight is weighted at (0.7), toughness at (0.3); hardness and flexibility are ignored.
+     * The result is scaled to a range from 1 to 20.
+     *
+     * @param weight the weapon's weight
+     * @param hardness the weapon's material hardness
+     * @param toughness the weapon's material toughness
+     * @param flexibility the weapon's material flexibility
+     * @return the calculated lethality value for strike attack type
+     */
     public static double strikeLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
-        return weight*1.5;
+        double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
+        double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+        double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+        double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+        return 1 + 19 * (0.7 * normWeight + 0.0 * normHardness + 0.3 * normToughness + 0.0 * normFlexibility);
     }
 
     public static double slashAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {

@@ -55,5 +55,8 @@ public abstract class SkadaData {
     public static final UUID SKADA_MOB_MODIFIER_OPERATION_1 = UUID.fromString("5520c08a-21d8-4b25-bfb4-a7b69fb96040");
     public static final UUID SKADA_MOB_MODIFIER_OPERATION_2 = UUID.fromString("ea5398cc-9f9d-43ac-bf3f-1ee0ab6c5dc4");
     public static final UUID unused_2 = UUID.fromString("6fad54f3-44c2-4a4f-a8c0-6d0b8a2e7f30");
-
+    public static final double MAX_WEAPON_WEIGHT = 10.0;
+    public static final double MIN_WEAPON_WEIGHT = 0.01;
+    public static final double MAX_WEAPON_MATERIAL_PROPERTY_VALUE = 10.0;
+    public static final double MIN_WEAPON_MATERIAL_PROPERTY_VALUE = 1.0;
 }
