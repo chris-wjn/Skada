@@ -808,39 +808,119 @@ public abstract class Util {
     return 1 + 19 * (0.7 * normWeight + 0.0 * normHardness + 0.3 * normToughness + 0.0 * normFlexibility);
   }
 
+  /**
+   * Calculates the accuracy for a slash attack based on weapon properties.
+   * Accuracy is determined by normalized weight, hardness, toughness, and flexibility,
+   * with weight and hardness weighted at 0.6 each, flexibility at -0.2, and toughness ignored.
+   * The result is scaled to a range from 0.01 to 1.0.
+   *
+   * @param weight the weapon's weight
+   * @param hardness the weapon's material hardness
+   * @param toughness the weapon's material toughness
+   * @param flexibility the weapon's material flexibility
+   * @return the calculated accuracy value for slash attack type
+   */
   public static double slashAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
     double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
     double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
     double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
     double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    return 0.01 + 0.99*(0.6 * normWeight + 0.6 * normHardness + 0.0 * normToughness - 0.2 * normFlexibility);
+    return 0.01 + 0.99*(0.5 * normWeight + 0.5 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
   }
 
+  /**
+   * Calculates the accuracy for a thrust attack based on weapon properties.
+   * Accuracy is determined by normalized hardness (0.8), toughness (0.5), flexibility (-0.3),
+   * and ignores weight. The result is scaled to a range from 0.01 to 1.0.
+   *
+   * @param weight the weapon's weight
+   * @param hardness the weapon's material hardness
+   * @param toughness the weapon's material toughness
+   * @param flexibility the weapon's material flexibility
+   * @return the calculated accuracy value for thrust attack type
+   */
   public static double thrustAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
     double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
     double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
     double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
     double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    return 0.01 + 0.99*(0.6 * normWeight + 0.6 * normHardness + 0.0 * normToughness - 0.2 * normFlexibility);
+    return 0.01 + 0.99*(0.0 * normWeight + 0.5 * normHardness + 0.5 * normToughness + 0.0 * normFlexibility);
   }
 
+  /**
+   * Calculates the accuracy for a strike attack based on weapon properties.
+   * Accuracy is determined by normalized weight (1.5) and flexibility (-0.5),
+   * with hardness and toughness ignored. The result is scaled to a range from 0.01 to 1.0.
+   *
+   * @param weight the weapon's weight
+   * @param hardness the weapon's material hardness
+   * @param toughness the weapon's material toughness
+   * @param flexibility the weapon's material flexibility
+   * @return the calculated accuracy value for strike attack type
+   */
   public static double strikeAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
     double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
     double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
     double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
     double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    return 0.01 + 0.99*(0.6 * normWeight + 0.6 * normHardness + 0.0 * normToughness - 0.2 * normFlexibility);
+    return 0.01 + 0.99*(1.0 * normWeight + 0.0 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
   }
 
+  /**
+   * Calculates the critical fail chance for a slash attack based on weapon properties.
+   * Toughness and flexibility are weighted most heavily; weight and hardness are ignored.
+   * The result is scaled to a range from 0.01 to 1.0.
+   *
+   * @param weight the weapon's weight
+   * @param hardness the weapon's material hardness
+   * @param toughness the weapon's material toughness
+   * @param flexibility the weapon's material flexibility
+   * @return the calculated critical fail chance for slash attack type
+   */
   public static double slashCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
-    return (0.01 * hardness * hardness) / (toughness * flexibility * flexibility);
+    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
+    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    return 0.01 + 0.99*(0.0 * normWeight + 0.0 * normHardness + 0.75 * normToughness + 0.25 * normFlexibility);
   }
 
+  /**
+   * Calculates the critical fail chance for a thrust attack based on weapon properties.
+   * Toughness is weighted most heavily, hardness is weighted negatively; weight and flexibility are ignored.
+   * The result is scaled to a range from 0.01 to 1.0.
+   *
+   * @param weight the weapon's weight
+   * @param hardness the weapon's material hardness
+   * @param toughness the weapon's material toughness
+   * @param flexibility the weapon's material flexibility
+   * @return the calculated critical fail chance for thrust attack type
+   */
   public static double thrustCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
-    return (0.015 * hardness * hardness) / (toughness * toughness * flexibility);
+    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
+    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    return 0.01 + 0.99*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
   }
 
+  /**
+   * Calculates the critical fail chance for a strike attack based on weapon properties.
+   * Toughness is weighted most heavily; weight, hardness, and flexibility are ignored.
+   * The result is scaled to a range from 0.01 to 1.0.
+   *
+   * @param weight the weapon's weight
+   * @param hardness the weapon's material hardness
+   * @param toughness the weapon's material toughness
+   * @param flexibility the weapon's material flexibility
+   * @return the calculated critical fail chance for strike attack type
+   */
   public static double strikeCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
-    return (0.0075 * hardness * hardness) / (toughness * toughness * toughness);
+    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
+    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    return 0.01 + 0.99*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
   }
+
 }
