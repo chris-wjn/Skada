@@ -763,10 +763,10 @@ public abstract class Util {
    * @return the calculated lethality value for slash attack type
    */
   public static double slashLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
-    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
+    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     return 1 + 19 * (0.25 * normWeight + 0.25 * normHardness + 0.0 * normToughness + 0.5 * normFlexibility);
   }
 
@@ -782,10 +782,10 @@ public abstract class Util {
    * @return the calculated lethality value for thrust attack type
    */
   public static double thrustLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
-    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
+    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     return 1 + 19 * (0.5 * normWeight + 0.5 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
   }
 
@@ -801,11 +801,22 @@ public abstract class Util {
    * @return the calculated lethality value for strike attack type
    */
   public static double strikeLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
-    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
+    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     return 1 + 19 * (0.7 * normWeight + 0.0 * normHardness + 0.3 * normToughness + 0.0 * normFlexibility);
+  }
+
+  public static double lethalityCalculation(double weightValue, double weightedWeight,
+                                            double hardnessValue, double weightedHardness,
+                                           double toughnessValue, double weightedToughness,
+                                           double flexibilityValue, double weightedFlexibility) {
+    double normWeight = Math.log(10*weightValue - WEAPON_WEIGHT_MINIMUM + 1);
+    double normHardness = (hardnessValue - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normToughness = (toughnessValue - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normFlexibility = (flexibilityValue - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    return 1 + 19 * (weightedWeight * normWeight + weightedHardness * normHardness + weightedToughness * normToughness + weightedFlexibility * normFlexibility);
   }
 
   /**
@@ -821,10 +832,10 @@ public abstract class Util {
    * @return the calculated accuracy value for slash attack type
    */
   public static double slashAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
-    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
+    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     return 0.01 + 0.99*(0.5 * normWeight + 0.5 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
   }
 
@@ -840,10 +851,10 @@ public abstract class Util {
    * @return the calculated accuracy value for thrust attack type
    */
   public static double thrustAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
-    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
+    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     return 0.01 + 0.99*(0.0 * normWeight + 0.5 * normHardness + 0.5 * normToughness + 0.0 * normFlexibility);
   }
 
@@ -859,10 +870,10 @@ public abstract class Util {
    * @return the calculated accuracy value for strike attack type
    */
   public static double strikeAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
-    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
+    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
+    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     return 0.01 + 0.99*(1.0 * normWeight + 0.0 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
   }
 
@@ -878,11 +889,11 @@ public abstract class Util {
    * @return the calculated critical fail chance for slash attack type
    */
   public static double slashCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
-    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    return 0.01 + 0.99*(0.0 * normWeight + 0.0 * normHardness + 0.75 * normToughness + 0.25 * normFlexibility);
+    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
+    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    return 0.5 - 0.5*(0.0 * normWeight + 0.0 * normHardness + 0.75 * normToughness + 0.25 * normFlexibility);
   }
 
   /**
@@ -897,11 +908,11 @@ public abstract class Util {
    * @return the calculated critical fail chance for thrust attack type
    */
   public static double thrustCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
-    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    return 0.01 + 0.99*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
+    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
+    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    return 0.5 - 0.5*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
   }
 
   /**
@@ -916,11 +927,11 @@ public abstract class Util {
    * @return the calculated critical fail chance for strike attack type
    */
   public static double strikeCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = (weight - MIN_WEAPON_WEIGHT) / (MAX_WEAPON_WEIGHT - MIN_WEAPON_WEIGHT);
-    double normHardness = (hardness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normToughness = (toughness - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    double normFlexibility = (flexibility - MIN_WEAPON_MATERIAL_PROPERTY_VALUE) / (MAX_WEAPON_MATERIAL_PROPERTY_VALUE - MIN_WEAPON_MATERIAL_PROPERTY_VALUE);
-    return 0.01 + 0.99*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
+    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
+    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
+    return 0.5 - 0.5*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
   }
 
 }
