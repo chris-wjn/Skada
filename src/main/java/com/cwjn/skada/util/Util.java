@@ -893,7 +893,7 @@ public abstract class Util {
     double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.5 - 0.5*(0.0 * normWeight + 0.0 * normHardness + 0.75 * normToughness + 0.25 * normFlexibility);
+    return 0.25 - 0.25*(0.0 * normWeight + 0.0 * normHardness + 0.5 * normToughness + 0.5 * normFlexibility);
   }
 
   /**
@@ -912,7 +912,7 @@ public abstract class Util {
     double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.5 - 0.5*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
+    return 0.25 - 0.25*(0.0 * normWeight + 0.0 * normHardness + 0.75 * normToughness + 0.25  * normFlexibility);
   }
 
   /**
@@ -931,7 +931,7 @@ public abstract class Util {
     double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.5 - 0.5*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
+    return 0.25 - 0.25*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
   }
 
 }
