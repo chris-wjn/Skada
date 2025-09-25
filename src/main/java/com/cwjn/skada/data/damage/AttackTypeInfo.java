@@ -25,7 +25,7 @@ public record AttackTypeInfo(double lethality,
             Codec.DOUBLE.fieldOf("accuracy").forGetter(AttackTypeInfo::accuracy),
             Codec.DOUBLE.fieldOf("minReach").forGetter(AttackTypeInfo::minReach),
             Codec.DOUBLE.fieldOf("maxReach").forGetter(AttackTypeInfo::maxReach),
-            Codec.DOUBLE.fieldOf("attackSpeedMod").forGetter(AttackTypeInfo::attackSpeedMod),
+            Codec.DOUBLE.fieldOf("attackSpeedModifier").forGetter(AttackTypeInfo::attackSpeedMod),
             Codec.DOUBLE.fieldOf("damageBonus").forGetter(AttackTypeInfo::damageBonus),
             Codec.DOUBLE.fieldOf("failChance").forGetter(AttackTypeInfo::failChance),
             Codec.list(Codec.STRING).optionalFieldOf("reticleShapes", new ArrayList<>()).forGetter(AttackTypeInfo::reticleShapes)
@@ -39,7 +39,7 @@ public record AttackTypeInfo(double lethality,
         tag.putDouble("accuracy", accuracy);
         tag.putDouble("minReach", minReach);
         tag.putDouble("maxReach", maxReach);
-        tag.putDouble("attackSpeedMod", attackSpeedMod);
+        tag.putDouble("attackSpeedModifier", attackSpeedMod);
         tag.putDouble("damageBonus", damageBonus);
         tag.putDouble("failChance", failChance);
         if (hasReticleShapes()) {
@@ -65,7 +65,7 @@ public record AttackTypeInfo(double lethality,
                 tag.getDouble("accuracy"),
                 tag.getDouble("minReach"),
                 tag.getDouble("maxReach"),
-                tag.getDouble("attackSpeedMod"),
+                tag.getDouble("attackSpeedModifier"),
                 tag.getDouble("damageBonus"),
                 tag.getDouble("failChance"),
                 reticleShapes

@@ -76,42 +76,29 @@ public class WeaponInfo {
         Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
         for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : nInfo.attackTypes().entrySet()) {
             AttackTypeJsonInfo genInfo = entry.getValue();
-            double weight = info.weight()*nInfo.size()*genInfo.effectiveWeight();
+            double weight = info.weight()*nInfo.area()*nInfo.thickness()*genInfo.effectiveWeight();
             retMap.put(entry.getKey(), new AttackTypeInfo(
-                    Util.round(entry.getKey().tierStatFunction().getLethalityBonus(weight, info.hardness(), info.toughness(), info.flexibility()), 1),
-                    Util.roundAndClamp(entry.getKey().tierStatFunction().getAccuracyBonus(weight, info.hardness(), info.toughness(), info.flexibility()), 2, 0, 1),
+                    Util.round(entry.getKey().tierStatFunction().getLethalityBonus(
+                            weight, nInfo.thickness(), info.hardness(), info.toughness(), info.flexibility(), genInfo.lethalityModifier()), 1),
+                    Util.roundAndClamp(entry.getKey().tierStatFunction().getAccuracyBonus(
+                            weight, nInfo.thickness(), info.hardness(), info.toughness(), info.flexibility(), genInfo.accuracyModifier()), 2, 0, 1),
                     genInfo.minReach(),
                     genInfo.maxReach(),
-                    genInfo.attackSpeedMod(),
+                    genInfo.attackSpeedModifier(),
                     0,
-                    Util.roundAndClamp(entry.getKey().tierStatFunction().getCritFailChance(weight, info.hardness(), info.toughness(), info.flexibility()), 2, 0, 1),
+                    Util.roundAndClamp(entry.getKey().tierStatFunction().getCritFailChance(
+                            weight, nInfo.thickness(), info.hardness(), info.toughness(), info.flexibility(), genInfo.critFailModifier()), 2, 0, 1),
                     entry.getValue().reticleShapes()
             ));
         }
-        return new WeaponInfo(retMap, spread, Util.round(info.weight()*nInfo.size(), 1), ignoreAttributes);
+        return new WeaponInfo(retMap, spread, Util.round(info.weight()*nInfo.area(), 1), ignoreAttributes);
     }
 
     /*
         * Construct a new WeaponInfo with a given item by guessing weapon info based on only name, these items should be looked at manually
      */
     public static WeaponInfo generate(NamedInfo info, boolean ignoreAttributes) {
-        ElementSpread spread = new ElementSpread();
-        Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
-        for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : info.attackTypes().entrySet()) {
-            AttackTypeJsonInfo genInfo = entry.getValue();
-            double weight = info.size()*0.01* genInfo.effectiveWeight();
-            retMap.put(entry.getKey(), new AttackTypeInfo(
-                    Util.round(entry.getKey().tierStatFunction().getLethalityBonus(weight, 1, 1, 1), 1),
-                    Util.roundAndClamp(entry.getKey().tierStatFunction().getAccuracyBonus(weight, 1, 1, 1), 2, 0, 1),
-                    genInfo.minReach(),
-                    genInfo.maxReach(),
-                    genInfo.attackSpeedMod(),
-                    0,
-                    Util.roundAndClamp(entry.getKey().tierStatFunction().getCritFailChance(weight, 1, 1, 1), 2, 0, 1),
-                    entry.getValue().reticleShapes()
-            ));
-        }
-        return new WeaponInfo(retMap, spread, Util.round(info.size()*0.01, 1), ignoreAttributes);
+        return generate(ExtraTierInfo.getDefault(), info, ignoreAttributes);
     }
 
     public Map<AttackType, AttackTypeInfo> getAttackTypes() {

@@ -10,14 +10,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record NamedInfo(double size, Map<AttackType, AttackTypeJsonInfo> attackTypes) {
+public record NamedInfo(double area, double thickness, Map<AttackType, AttackTypeJsonInfo> attackTypes) {
 
     private static final Map<AttackType, AttackTypeJsonInfo> DEFAULT_MAP = new HashMap<>(
-            Map.of(AttackType.strike(), new AttackTypeJsonInfo(0.5, 0.0, 3, 1.0, List.of()))
+            Map.of(AttackType.strike(), AttackTypeJsonInfo.getDefault())
     );
 
     public static final Codec<NamedInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.DOUBLE.fieldOf("size").forGetter(NamedInfo::size),
+            Codec.DOUBLE.fieldOf("area").forGetter(NamedInfo::area),
+            Codec.DOUBLE.fieldOf("thickness").forGetter(NamedInfo::thickness),
             Codec.unboundedMap(Codec.STRING, AttackTypeJsonInfo.CODEC).fieldOf("attackTypes").forGetter(NamedInfo::attackTypeStringMap)
     ).apply(instance, NamedInfo::fromStringMap));
     public static final Codec<Map<String, NamedInfo>> STRING_MAP_CODEC = Codec.unboundedMap(Codec.STRING, CODEC);
@@ -28,16 +29,16 @@ public record NamedInfo(double size, Map<AttackType, AttackTypeJsonInfo> attackT
         }
         return retMap;
     }
-    private static NamedInfo fromStringMap(double weight, Map<String, AttackTypeJsonInfo> map) {
+    private static NamedInfo fromStringMap(double area, double thickness, Map<String, AttackTypeJsonInfo> map) {
         Map<AttackType, AttackTypeJsonInfo> retMap = new HashMap<>();
         for (Map.Entry<String, AttackTypeJsonInfo> a : map.entrySet()) {
             retMap.put(SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation(a.getKey())), a.getValue());
         }
-        return new NamedInfo(weight, retMap);
+        return new NamedInfo(area, thickness, retMap);
     }
 
     public NamedInfo() {
-        this(1.0, DEFAULT_MAP);
+        this(1.0, 1.0, DEFAULT_MAP);
     }
 
 }

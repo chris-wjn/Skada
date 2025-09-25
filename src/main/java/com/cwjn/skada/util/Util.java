@@ -761,12 +761,14 @@ public abstract class Util {
    * The result is scaled to a range from 1 to 20.
    *
    * @param weight      the weapon's weight
+   * @param thickness   the weapon's thickness
    * @param hardness    the weapon's material hardness
    * @param toughness   the weapon's material toughness
    * @param flexibility the weapon's material flexibility
+   * @param modifier    a modifier based on the weapon's shape
    * @return the calculated lethality value for slash attack type
    */
-  public static double slashLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
+  public static double slashLethalityCalculation(double weight, double thickness, double hardness, double toughness, double flexibility, double modifier) {
     double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
     double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
@@ -829,7 +831,7 @@ public abstract class Util {
     double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.01 + 0.99*(0.5 * normWeight + 0.5 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
+    return 0.33 + 0.67*(0.5 * normWeight + 0.5 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
   }
 
   /**
@@ -848,7 +850,7 @@ public abstract class Util {
     double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.01 + 0.99*(0.0 * normWeight + 0.5 * normHardness + 0.5 * normToughness + 0.0 * normFlexibility);
+    return 0.33 + 0.67*(0.0 * normWeight + 0.5 * normHardness + 0.5 * normToughness + 0.0 * normFlexibility);
   }
 
   /**
@@ -867,7 +869,7 @@ public abstract class Util {
     double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.01 + 0.99*(1.0 * normWeight + 0.0 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
+    return 0.33 + 0.67*(1.0 * normWeight + 0.0 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
   }
 
   /**
