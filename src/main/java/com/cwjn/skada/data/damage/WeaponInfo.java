@@ -79,12 +79,12 @@ public class WeaponInfo {
             double weight = info.weight()*nInfo.size()*genInfo.effectiveWeight();
             retMap.put(entry.getKey(), new AttackTypeInfo(
                     Util.round(entry.getKey().tierStatFunction().getLethalityBonus(weight, info.hardness(), info.toughness(), info.flexibility()), 1),
-                    Util.round(entry.getKey().tierStatFunction().getAccuracyBonus(weight, info.hardness(), info.toughness(), info.flexibility()), 2),
+                    Util.roundAndClamp(entry.getKey().tierStatFunction().getAccuracyBonus(weight, info.hardness(), info.toughness(), info.flexibility()), 2, 0, 1),
                     genInfo.minReach(),
                     genInfo.maxReach(),
                     genInfo.attackSpeedMod(),
                     0,
-                    Util.round(entry.getKey().tierStatFunction().getCritFailChance(weight, info.hardness(), info.toughness(), info.flexibility()), 1),
+                    Util.roundAndClamp(entry.getKey().tierStatFunction().getCritFailChance(weight, info.hardness(), info.toughness(), info.flexibility()), 2, 0, 1),
                     entry.getValue().reticleShapes()
             ));
         }
@@ -102,12 +102,12 @@ public class WeaponInfo {
             double weight = info.size()*0.01* genInfo.effectiveWeight();
             retMap.put(entry.getKey(), new AttackTypeInfo(
                     Util.round(entry.getKey().tierStatFunction().getLethalityBonus(weight, 1, 1, 1), 1),
-                    Util.round(entry.getKey().tierStatFunction().getAccuracyBonus(weight, 1, 1, 1), 2),
+                    Util.roundAndClamp(entry.getKey().tierStatFunction().getAccuracyBonus(weight, 1, 1, 1), 2, 0, 1),
                     genInfo.minReach(),
                     genInfo.maxReach(),
                     genInfo.attackSpeedMod(),
                     0,
-                    Util.round(entry.getKey().tierStatFunction().getCritFailChance(weight, 1, 1, 1), 1),
+                    Util.roundAndClamp(entry.getKey().tierStatFunction().getCritFailChance(weight, 1, 1, 1), 2, 0, 1),
                     entry.getValue().reticleShapes()
             ));
         }
