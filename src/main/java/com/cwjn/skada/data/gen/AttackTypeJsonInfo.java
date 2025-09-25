@@ -8,16 +8,26 @@ import java.util.List;
 public record AttackTypeJsonInfo(double effectiveWeight,
                                  double minReach,
                                  double maxReach,
-                                 double attackSpeedMod,
+                                 double attackSpeedModifier,
+                                 double lethalityModifier,
+                                 double accuracyModifier,
+                                 double critFailModifier,
                                  List<String> reticleShapes) {
 
-    public static Codec<AttackTypeJsonInfo> CODEC = RecordCodecBuilder.create(
-            instance -> instance.group(
-                    Codec.DOUBLE.fieldOf("effectiveWeight").forGetter(AttackTypeJsonInfo::effectiveWeight),
-                    Codec.DOUBLE.fieldOf("minReach").forGetter(AttackTypeJsonInfo::minReach),
-                    Codec.DOUBLE.fieldOf("maxReach").forGetter(AttackTypeJsonInfo::maxReach),
-                    Codec.DOUBLE.fieldOf("attackSpeedMod").forGetter(AttackTypeJsonInfo::attackSpeedMod),
-                    Codec.list(Codec.STRING).optionalFieldOf("reticleShapes", List.of()).forGetter(AttackTypeJsonInfo::reticleShapes)
-            ).apply(instance, AttackTypeJsonInfo::new));
+  public static AttackTypeJsonInfo getDefault() {
+    return new AttackTypeJsonInfo(0.5, 0.0, 3.0, 1.0, 1.0, 1.0, 1.0, List.of());
+  }
+
+  public static Codec<AttackTypeJsonInfo> CODEC = RecordCodecBuilder.create(
+          instance -> instance.group(
+                  Codec.DOUBLE.fieldOf("effectiveWeight").forGetter(AttackTypeJsonInfo::effectiveWeight),
+                  Codec.DOUBLE.fieldOf("minReach").forGetter(AttackTypeJsonInfo::minReach),
+                  Codec.DOUBLE.fieldOf("maxReach").forGetter(AttackTypeJsonInfo::maxReach),
+                  Codec.DOUBLE.fieldOf("attackSpeedModifier").forGetter(AttackTypeJsonInfo::attackSpeedModifier),
+                  Codec.DOUBLE.optionalFieldOf("lethalityModifier", 1.0).forGetter(AttackTypeJsonInfo::lethalityModifier),
+                  Codec.DOUBLE.optionalFieldOf("accuracyModifier", 1.0).forGetter(AttackTypeJsonInfo::accuracyModifier),
+                  Codec.DOUBLE.optionalFieldOf("critFailModifier", 1.0).forGetter(AttackTypeJsonInfo::critFailModifier),
+                  Codec.list(Codec.STRING).optionalFieldOf("reticleShapes", List.of()).forGetter(AttackTypeJsonInfo::reticleShapes)
+          ).apply(instance, AttackTypeJsonInfo::new));
 
 }

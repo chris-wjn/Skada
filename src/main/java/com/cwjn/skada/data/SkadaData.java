@@ -33,7 +33,7 @@ public abstract class SkadaData {
   public static final AttackTypeGeneratorConfiguration SLASH_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::slashAccuracyCalculation, Util::slashLethalityCalculation, Util::slashCriticalFailCalculation);
   public static final AttackTypeGeneratorConfiguration STRIKE_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::strikeAccuracyCalculation, Util::strikeLethalityCalculation, Util::strikeCriticalFailCalculation);
   public static final AttackTypeGeneratorConfiguration THRUST_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::thrustAccuracyCalculation, Util::thrustLethalityCalculation, Util::thrustCriticalFailCalculation);
-  public static final AttackTypeGeneratorConfiguration NULL_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a, b, c, d) -> 0, (a, b, c, d) -> 0, (a, b, c, d) -> 0);
+  public static final AttackTypeGeneratorConfiguration NULL_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a, b, c, d, e, f) -> 0, (a, b, c, d, e, f) -> 0, (a, b, c, d, e, f) -> 0);
   public static final String WEAPON_INFO_TAG_KEY = "skada.weapon_info.tagkey";
   public static final String ARMOUR_INFO_TAG_KEY = "skada.armour_info.tagkey";
   public static final String CURRENT_ATTACK_TYPE_TAG_KEY = "skada.current_attack_type.tagKey";

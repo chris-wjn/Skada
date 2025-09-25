@@ -58,7 +58,7 @@ public class CustomReticlesDetectEntities {
         }
         else {
             /*
-            We use the amount of rays we're going to shoot to determine the size of the hitResults array.
+            We use the amount of rays we're going to shoot to determine the area of the hitResults array.
          */
             ClientHandler.hitResults = new HitResult[defaultShape.getFilledShape().size()];
         /*
@@ -66,7 +66,7 @@ public class CustomReticlesDetectEntities {
             For each coordinate, we calculate the 3D position of the ray trace, and then call doRayTrace to perform the actual ray tracing
             and store the result in ClientHandler.hitResults. Then we increment the index.
             The index is used to store the hit result in the hitResults array. The index should never
-            exceed the size of the hitResults array, which is equal to the number of coordinates in the shape.
+            exceed the area of the hitResults array, which is equal to the number of coordinates in the shape.
          */
             int i = 0;
             for (Map.Entry<Float, Collection<Float>> map : defaultShape.getFilledShape().asMap().entrySet()) {

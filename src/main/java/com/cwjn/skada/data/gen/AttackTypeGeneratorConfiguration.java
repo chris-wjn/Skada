@@ -14,16 +14,16 @@ public class AttackTypeGeneratorConfiguration {
         this.critFail = critFail;
     }
 
-    public double getAccuracyBonus(double weight, double hardness, double toughness, double flexibility) {
-        return accuracy.apply(weight, hardness, toughness, flexibility);
+    public double getAccuracyBonus(double weight, double thickness, double hardness, double toughness, double flexibility, double modifier) {
+        return accuracy.apply(weight, thickness, hardness, toughness, flexibility, modifier);
     }
 
-    public double getLethalityBonus(double weight, double hardness, double toughness, double flexibility) {
-        return lethality.apply(weight, hardness, toughness, flexibility);
+    public double getLethalityBonus(double weight, double thickness,double hardness, double toughness, double flexibility, double modifier) {
+        return lethality.apply(weight, thickness, hardness, toughness, flexibility, modifier);
     }
 
-    public double getCritFailChance(double weight, double hardness, double toughness, double flexibility) {
-        return critFail.apply(weight, hardness, toughness, flexibility);
+    public double getCritFailChance(double weight, double thickness, double hardness, double toughness, double flexibility, double modifier) {
+        return critFail.apply(weight, thickness, hardness, toughness, flexibility, modifier);
     }
 
 }

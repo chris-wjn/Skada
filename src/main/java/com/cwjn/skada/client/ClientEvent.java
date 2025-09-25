@@ -107,7 +107,7 @@ public class ClientEvent {
                     if (i.hasTag() && i.getTag().contains(CURRENT_ATTACK_TYPE_TAG_KEY)) {
                         int currentAttackType = i.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
                         int maxAttackTypes = i.getTag().getInt(NUM_ATTACK_TYPES_TAG_KEY);
-                        //need to +1 because currentAttackType is an index and maxAttackTypes is a size
+                        //need to +1 because currentAttackType is an index and maxAttackTypes is a area
                         if (currentAttackType + 1 == maxAttackTypes) {
                             i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, 0);
                             SkadaNetwork.playerToServer(new C2SUpdateAttackIndexFromMenu(0, screen.getMenu().containerId, screen.getSlotUnderMouse().index));
@@ -122,7 +122,7 @@ public class ClientEvent {
                     if (i.hasTag() && i.getTag().contains(CURRENT_ATTACK_TYPE_TAG_KEY)) {
                         int currentAttackType = i.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
                         int maxAttackTypes = i.getTag().getInt(NUM_ATTACK_TYPES_TAG_KEY);
-                        //need to +1 because currentAttackType is an index and maxAttackTypes is a size
+                        //need to +1 because currentAttackType is an index and maxAttackTypes is a area
                         if (currentAttackType + 1 == maxAttackTypes) {
                             i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, 0);
                             SkadaNetwork.playerToServer(new C2SUpdateAttackIndex(0));

@@ -185,7 +185,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
         Font font = Minecraft.getInstance().font;
 
         /* we create an array of MutableComponents that will be used to create the final component.
-         * (attackTypes.length + 2 + attackTypes.length-1) is the size of the array, where the +2 is for the curly braces
+         * (attackTypes.length + 2 + attackTypes.length-1) is the area of the array, where the +2 is for the curly braces
          * and the +attackTypes.length-1 is for the commas between the attack types
         */
         MutableComponent[] attackTypeComponents = new MutableComponent[info.getAttackTypes().size() + 2 + info.getAttackTypes().size()-1];
