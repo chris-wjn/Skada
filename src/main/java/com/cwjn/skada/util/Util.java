@@ -105,6 +105,10 @@ public abstract class Util {
     return new AttributeModifier(UUID.randomUUID().toString(), amount, AttributeModifier.Operation.fromValue(operation));
   }
 
+  public static double roundAndClamp(double value, int places, double min, double max) {
+    return Math.min(max, Math.max(min, round(value, places)));
+  }
+
   public static double round(double value, int places) {
     if (places < 0) throw new IllegalArgumentException();
     BigDecimal bd = new BigDecimal(Double.toString(value));
@@ -767,7 +771,7 @@ public abstract class Util {
     double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 1 + 19 * (0.25 * normWeight + 0.25 * normHardness + 0.0 * normToughness + 0.5 * normFlexibility);
+    return 1 + 10 * (0.25 * normWeight + 0.25 * normHardness + 0.0 * normToughness + 0.5 * normFlexibility);
   }
 
   /**
@@ -786,7 +790,7 @@ public abstract class Util {
     double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 1 + 19 * (0.5 * normWeight + 0.5 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
+    return 1 + 10 * (0.5 * normWeight + 0.5 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
   }
 
   /**
@@ -805,18 +809,7 @@ public abstract class Util {
     double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 1 + 19 * (0.7 * normWeight + 0.0 * normHardness + 0.3 * normToughness + 0.0 * normFlexibility);
-  }
-
-  public static double lethalityCalculation(double weightValue, double weightedWeight,
-                                            double hardnessValue, double weightedHardness,
-                                           double toughnessValue, double weightedToughness,
-                                           double flexibilityValue, double weightedFlexibility) {
-    double normWeight = Math.log(10*weightValue - WEAPON_WEIGHT_MINIMUM + 1);
-    double normHardness = (hardnessValue - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normToughness = (toughnessValue - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normFlexibility = (flexibilityValue - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 1 + 19 * (weightedWeight * normWeight + weightedHardness * normHardness + weightedToughness * normToughness + weightedFlexibility * normFlexibility);
+    return 1 + 10 * (0.7 * normWeight + 0.0 * normHardness + 0.3 * normToughness + 0.0 * normFlexibility);
   }
 
   /**
