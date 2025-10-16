@@ -933,7 +933,9 @@ public abstract class Util {
 
   public static void generateWeaponInfo(WeaponProfile profile, ExtraTierInfo tierInfo, boolean ignoreAttributes) {
     if (profile.attackTypes().containsKey(AttackType.slash())) {
-       double accuracyBase = profile.edgeBevel().edgeRadius();
+      if (profile.edgeBevel().edgeRadius() <= 0)
+        throw new IllegalArgumentException("Edge radius for Weapon Profile {} was {}. Must be greater than 0!", profile.);
+      double accuracyBase = profile.edgeBevel().edgeRadius();
     }
     if (profile.attackTypes().containsKey(AttackType.thrust())) {
 
