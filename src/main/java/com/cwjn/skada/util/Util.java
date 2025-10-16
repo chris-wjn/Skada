@@ -10,6 +10,8 @@ import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.AccessWeaponInfo;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
+import com.cwjn.skada.data.gen.ExtraTierInfo;
+import com.cwjn.skada.data.gen.WeaponProfile;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.google.common.collect.ArrayListMultimap;
@@ -927,6 +929,18 @@ public abstract class Util {
     double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
     return 0.25 - 0.25*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
+  }
+
+  public static void generateWeaponInfo(WeaponProfile profile, ExtraTierInfo tierInfo, boolean ignoreAttributes) {
+    if (profile.attackTypes().containsKey(AttackType.slash())) {
+       double accuracyBase = profile.edgeBevel().edgeRadius();
+    }
+    if (profile.attackTypes().containsKey(AttackType.thrust())) {
+
+    }
+    if (profile.attackTypes().containsKey(AttackType.strike())) {
+
+    }
   }
 
 }

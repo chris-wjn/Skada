@@ -5,7 +5,7 @@ import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.gen.ArmourMaterialInfo;
 import com.cwjn.skada.data.gen.ArmourPieceInfo;
 import com.cwjn.skada.data.gen.ExtraTierInfo;
-import com.cwjn.skada.data.gen.NamedInfo;
+import com.cwjn.skada.data.gen.WeaponProfile;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
@@ -26,7 +26,6 @@ import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -35,7 +34,6 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.*;
-import net.minecraftforge.common.TierSortingRegistry;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -192,13 +190,13 @@ public class SkadaCommand {
         player.displayClientMessage(Component.translatable("skada.generate_weapon_info.start", namespace), false);
         TreeMap<String, WeaponInfo> map = new TreeMap<>();
         HashMap<String, ExtraTierInfo> tierMap = new HashMap<>();
-        HashMap<String, NamedInfo> namedMap = new HashMap<>();
+        HashMap<String, WeaponProfile> namedMap = new HashMap<>();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         source.getServer().getResourceManager().listResources("generator_data/weapon", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
             try (var reader = resource.openAsReader()) {
                 String path = rl.getPath();
                 if (path.equals("generator_data/weapon/by_item_name.json")) {
-                    DataResult<Map<String, NamedInfo>> namedInfo = NamedInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+                    DataResult<Map<String, WeaponProfile>> namedInfo = WeaponProfile.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
                     namedInfo.result().ifPresent(namedMap::putAll);
                 } else if (path.startsWith("generator_data/weapon/tier/")) {
                     String tierName = path.substring("generator_data/weapon/tier/".length()).replace(".json", "");
@@ -223,7 +221,7 @@ public class SkadaCommand {
                     boolean ignoreAttributes = item instanceof ProjectileWeaponItem;
                     String path = Util.getItemPath(item);
                     WeaponInfo info = null;
-                    NamedInfo nInfo = new NamedInfo();
+                    WeaponProfile nInfo = new WeaponProfile();
                     for (String s : namedMap.keySet()) {
                         if (Pattern.compile("\\b" + s + "\\b", Pattern.CASE_INSENSITIVE).matcher(path.replace('_', ' ')).find()) {
                             nInfo = namedMap.get(s);
