@@ -4,7 +4,7 @@ import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.gen.AttackTypeJsonInfo;
 import com.cwjn.skada.data.gen.ElementSpread;
 import com.cwjn.skada.data.gen.ExtraTierInfo;
-import com.cwjn.skada.data.gen.NamedInfo;
+import com.cwjn.skada.data.gen.WeaponProfile;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;
@@ -71,7 +71,7 @@ public class WeaponInfo {
     /*
         * Construct a new WeaponInfo with a given item by guessing weapon info based on attributes and name.
      */
-    public static WeaponInfo generate(ExtraTierInfo info, NamedInfo nInfo, boolean ignoreAttributes) {
+    public static WeaponInfo generate(ExtraTierInfo info, WeaponProfile nInfo, boolean ignoreAttributes) {
         ElementSpread spread = info.spread();
         Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
         for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : nInfo.attackTypes().entrySet()) {
@@ -97,7 +97,7 @@ public class WeaponInfo {
     /*
         * Construct a new WeaponInfo with a given item by guessing weapon info based on only name, these items should be looked at manually
      */
-    public static WeaponInfo generate(NamedInfo info, boolean ignoreAttributes) {
+    public static WeaponInfo generate(WeaponProfile info, boolean ignoreAttributes) {
         return generate(ExtraTierInfo.getDefault(), info, ignoreAttributes);
     }
 
