@@ -41,7 +41,7 @@ public class TridentThrowUseSkada {
                             info.getAttackTypes().keySet().toArray(AttackType[]::new)[pStack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
                     );
             double lethality = attackInfo.lethality();
-            double accuracy = attackInfo.accuracy();
+            double accuracy = attackInfo.precision();
             ((AccessProjectileData) throwntrident).setDamageInfo(new DamageInfo(
                     lethality,
                     accuracy,

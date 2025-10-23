@@ -60,5 +60,8 @@ public abstract class SkadaData {
   public static final double LETHALITY_SOFT_CAP = 20;
   public static final double MATERIAL_PROPERTY_MINIMUM = 1.0;
   public static final double MATERIAL_PROPERTY_SOFT_CAP = 10.0;
+  public static final double EDGE_RADIUS_DEFAULT = 5.0; //nanometres
+  public static final double EDGE_ANGLE_DEFAULT = 32.5; //degrees
+  public static final double BEVEL_ANGLE_DEFAULT = 22.5; //degrees
 
 }

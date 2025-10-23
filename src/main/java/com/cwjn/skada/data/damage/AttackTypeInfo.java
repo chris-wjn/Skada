@@ -11,7 +11,7 @@ import java.util.List;
 import static com.cwjn.skada.data.SkadaData.RETICLES;
 
 public record AttackTypeInfo(double lethality,
-                             double accuracy,
+                             double precision,
                              double minReach,
                              double maxReach,
                              double attackSpeedMod,
@@ -22,7 +22,7 @@ public record AttackTypeInfo(double lethality,
     public static Codec<AttackTypeInfo> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
             Codec.DOUBLE.fieldOf("lethality").forGetter(AttackTypeInfo::lethality),
-            Codec.DOUBLE.fieldOf("accuracy").forGetter(AttackTypeInfo::accuracy),
+            Codec.DOUBLE.fieldOf("precision").forGetter(AttackTypeInfo::precision),
             Codec.DOUBLE.fieldOf("minReach").forGetter(AttackTypeInfo::minReach),
             Codec.DOUBLE.fieldOf("maxReach").forGetter(AttackTypeInfo::maxReach),
             Codec.DOUBLE.fieldOf("attackSpeedModifier").forGetter(AttackTypeInfo::attackSpeedMod),
@@ -36,7 +36,7 @@ public record AttackTypeInfo(double lethality,
     public CompoundTag toCompoundTag() {
         CompoundTag tag = new CompoundTag();
         tag.putDouble("lethality", lethality);
-        tag.putDouble("accuracy", accuracy);
+        tag.putDouble("precision", precision);
         tag.putDouble("minReach", minReach);
         tag.putDouble("maxReach", maxReach);
         tag.putDouble("attackSpeedModifier", attackSpeedMod);
@@ -62,7 +62,7 @@ public record AttackTypeInfo(double lethality,
         }
         return new AttackTypeInfo(
                 tag.getDouble("lethality"),
-                tag.getDouble("accuracy"),
+                tag.getDouble("precision"),
                 tag.getDouble("minReach"),
                 tag.getDouble("maxReach"),
                 tag.getDouble("attackSpeedModifier"),

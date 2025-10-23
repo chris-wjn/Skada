@@ -66,9 +66,9 @@ public class DamageHandler {
     if (!info.isEnvironmental()) {
 
       if (CommonConfig.ENABLE_ACCURACY.get() && CommonConfig.ENABLE_ACCURACY_FOR_MELEE.get() && !isProjectile) {
-        if (DEBUG_ENABLED) Skada.LOGGER.debug("Pre-accuracy damage: {}", amount);
+        if (DEBUG_ENABLED) Skada.LOGGER.debug("Pre-precision damage: {}", amount);
         amount = getDamageFromAccuracyNormalDistribution(info.accuracy(), amount, event.getEntity().getRandom());
-        if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-accuracy damage: {}", amount);
+        if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-precision damage: {}", amount);
       }
 
       if (CommonConfig.ENABLE_LETHALITY.get()) {
@@ -198,16 +198,16 @@ public class DamageHandler {
   }
 
   /**
-   * Calculates damage based on accuracy using a normal distribution. Higher accuracy results
+   * Calculates damage based on precision using a normal distribution. Higher precision results
    * in lower standard deviation, leading to more consistent damage.
    *
-   * @param accuracy The accuracy value (0.0 to 1.0).
+   * @param accuracy The precision value (0.0 to 1.0).
    * @param damage The initial damage value.
    * @param random The random source for generating normal distribution values.
-   * @return The damage after applying accuracy adjustments.
+   * @return The damage after applying precision adjustments.
    */
   private static double getDamageFromAccuracyNormalDistribution(double accuracy, double damage, RandomSource random) {
-    // Higher accuracy means lower standard deviation (more consistent damage)
+    // Higher precision means lower standard deviation (more consistent damage)
     double standardDeviation = (1.0 - accuracy) * damage;
 
     // Generate a random number from a normal distribution

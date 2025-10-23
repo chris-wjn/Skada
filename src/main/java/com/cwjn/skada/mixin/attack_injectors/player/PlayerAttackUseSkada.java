@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = Player.class, priority = 1100)
@@ -45,7 +44,7 @@ public class PlayerAttackUseSkada {
 //        double distance = thisPlayer().distanceTo(instance);
 //        if (distance < attackInfo.minReach()) amount *= CommonConfig.INEFFECTIVE_REACH_DAMAGE_MODIFIER.get();
 //
-//        damageInfo = new DamageInfo(attackInfo.lethality(), attackInfo.accuracy(), false, attackType, weaponInfo.getSpread().instance());
+//        damageInfo = new DamageInfo(attackInfo.lethality(), attackInfo.precision(), false, attackType, weaponInfo.getSpread().instance());
 //        SkadaDamageSource skadaSource = new SkadaDamageSource(source, damageInfo);
 //
 //        return instance.hurt(skadaSource, amount);
@@ -68,7 +67,7 @@ public class PlayerAttackUseSkada {
             Util.rollCriticalFail(heldItem, attackInfo.failChance(), thisPlayer().getRandom(), player);
         }
 
-        damageInfo = new DamageInfo(attackInfo.lethality(), attackInfo.accuracy(), false, attackType, weaponInfo.getSpread().instance());
+        damageInfo = new DamageInfo(attackInfo.lethality(), attackInfo.precision(), false, attackType, weaponInfo.getSpread().instance());
         return new SkadaDamageSource(source, damageInfo);
     }
 

@@ -1,6 +1,9 @@
 package com.cwjn.skada.util;
 
+import com.cwjn.skada.data.gen.ExtraTierInfo;
+import com.cwjn.skada.data.gen.WeaponProfile;
+
 @FunctionalInterface
 public interface TierStatFunctionInterface {
-    double apply(double weight, double thickness, double hardness, double toughness, double flexibility, double modifier);
+    double apply(WeaponProfile profile, ExtraTierInfo tierInfo);
 }

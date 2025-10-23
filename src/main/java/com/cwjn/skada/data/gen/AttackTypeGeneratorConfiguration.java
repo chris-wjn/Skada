@@ -7,23 +7,29 @@ public class AttackTypeGeneratorConfiguration {
     private final TierStatFunctionInterface lethality;
     private final TierStatFunctionInterface accuracy;
     private final TierStatFunctionInterface critFail;
+    private final TierStatFunctionInterface attackSpeed;
 
-    public AttackTypeGeneratorConfiguration(TierStatFunctionInterface accuracy, TierStatFunctionInterface lethality, TierStatFunctionInterface critFail) {
+    public AttackTypeGeneratorConfiguration(TierStatFunctionInterface accuracy, TierStatFunctionInterface lethality, TierStatFunctionInterface critFail, TierStatFunctionInterface attackSpeed) {
         this.lethality = lethality;
         this.accuracy = accuracy;
         this.critFail = critFail;
+        this.attackSpeed = attackSpeed;
     }
 
-    public double getAccuracyBonus(double weight, double thickness, double hardness, double toughness, double flexibility, double modifier) {
-        return accuracy.apply(weight, thickness, hardness, toughness, flexibility, modifier);
+    public double precision(WeaponProfile profile, ExtraTierInfo tierInfo) {
+        return accuracy.apply(profile, tierInfo);
     }
 
-    public double getLethalityBonus(double weight, double thickness,double hardness, double toughness, double flexibility, double modifier) {
-        return lethality.apply(weight, thickness, hardness, toughness, flexibility, modifier);
+    public double lethality(WeaponProfile profile, ExtraTierInfo tierInfo) {
+        return lethality.apply(profile, tierInfo);
     }
 
-    public double getCritFailChance(double weight, double thickness, double hardness, double toughness, double flexibility, double modifier) {
-        return critFail.apply(weight, thickness, hardness, toughness, flexibility, modifier);
+    public double criticalFail(WeaponProfile profile, ExtraTierInfo tierInfo) {
+        return critFail.apply(profile, tierInfo);
+    }
+
+    public double attackSpeed(WeaponProfile profile, ExtraTierInfo tierInfo) {
+        return attackSpeed.apply(profile, tierInfo);
     }
 
 }
