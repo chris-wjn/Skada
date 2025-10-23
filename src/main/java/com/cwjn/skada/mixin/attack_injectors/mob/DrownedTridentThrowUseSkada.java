@@ -6,7 +6,6 @@ import com.cwjn.skada.data.damage.DamageInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.registry.AttackType;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Drowned;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -43,7 +42,7 @@ public class DrownedTridentThrowUseSkada {
                             info.getAttackTypes().keySet().toArray(AttackType[]::new)[stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
                     );
             double lethality = attackInfo.lethality();
-            double accuracy = attackInfo.accuracy();
+            double accuracy = attackInfo.precision();
             ((AccessProjectileData) tr).setDamageInfo(new DamageInfo(
                     lethality,
                     accuracy,

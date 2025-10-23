@@ -4,10 +4,8 @@ import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.gen.ElementSpread;
 import com.cwjn.skada.data.registry.AttackType;
-import com.cwjn.skada.util.Keybinds;
 import com.cwjn.skada.util.Util;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -39,8 +37,6 @@ import java.util.*;
 import static com.cwjn.skada.data.SkadaData.*;
 import static com.cwjn.skada.util.Util.getOtherSlotAttributesAsList;
 import static com.cwjn.skada.util.Util.otherAttributesComponent;
-import static java.util.stream.Collectors.toList;
-import static net.minecraft.world.item.ItemStack.ATTRIBUTE_MODIFIER_FORMAT;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
@@ -249,7 +245,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
                 break;
             case ACCURACY:
                 retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.accuracy",
-                        df.format(attackTypeInfo.accuracy()*100))));
+                        df.format(attackTypeInfo.precision()*100))));
                 break;
             case VELOCITY_CROSSBOW:
                 retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",

@@ -22,19 +22,16 @@ public class WeaponInfo {
 
     private final Map<AttackType, AttackTypeInfo> attackTypes;
     private final ElementSpread spread;
-    private final double weight;
     private final boolean ignoreAttributes;
     public static final WeaponInfo NO_WEAPON = new WeaponInfo(
             new HashMap<>(Map.of(AttackType.strike(), AttackTypeInfo.DEFAULT)),
             new ElementSpread(),
-            0.0,
             false
     );
 
     public static Codec<WeaponInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(Codec.STRING, AttackTypeInfo.CODEC).fieldOf("attack_types").forGetter(WeaponInfo::attackTypeStringMap),
             ElementSpread.CODEC.fieldOf("spread").forGetter(WeaponInfo::getSpread),
-            Codec.DOUBLE.fieldOf("weight").forGetter(WeaponInfo::getWeight),
             Codec.BOOL.optionalFieldOf("ignore_attributes", false).forGetter(WeaponInfo::ignoreAttributes)
     ).apply(instance, WeaponInfo::fromStringMap));
 
@@ -46,52 +43,49 @@ public class WeaponInfo {
         return retMap;
     }
 
-    private static WeaponInfo fromStringMap(Map<String, AttackTypeInfo> map, ElementSpread spread, double weight, boolean ignoreAttributes) {
+    private static WeaponInfo fromStringMap(Map<String, AttackTypeInfo> map, ElementSpread spread, boolean ignoreAttributes) {
         Map<AttackType, AttackTypeInfo> retMap = new TreeMap<>();
         for (Map.Entry<String, AttackTypeInfo> a : map.entrySet()) {
             retMap.put(SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation(a.getKey())), a.getValue());
         }
-        return new WeaponInfo(retMap, spread, weight, ignoreAttributes);
+        return new WeaponInfo(retMap, spread, ignoreAttributes);
     }
 
     public static Codec<Map<String, WeaponInfo>> STRING_MAP_CODEC = Codec.unboundedMap(Codec.STRING, CODEC);
     public static Codec<Map<String, Map<String, WeaponInfo>>> STRING_STRING_MAP_CODEC = Codec.unboundedMap(Codec.STRING, STRING_MAP_CODEC);
 
-    public WeaponInfo(Map<AttackType, AttackTypeInfo> attackType, ElementSpread spread, double weight, boolean ignoreAttributes) {
+    public WeaponInfo(Map<AttackType, AttackTypeInfo> attackType, ElementSpread spread, boolean ignoreAttributes) {
         this.attackTypes = attackType;
         this.spread = spread;
-        this.weight = weight;
         this.ignoreAttributes = ignoreAttributes;
     }
 
     public WeaponInfo() {
-        this(Collections.emptyMap(), new ElementSpread(), 0.0, false);
+        this(Collections.emptyMap(), new ElementSpread(), false);
     }
 
     /*
         * Construct a new WeaponInfo with a given item by guessing weapon info based on attributes and name.
      */
-    public static WeaponInfo generate(ExtraTierInfo info, WeaponProfile nInfo, boolean ignoreAttributes) {
-        ElementSpread spread = info.spread();
-        Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
-        for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : nInfo.attackTypes().entrySet()) {
-            AttackTypeJsonInfo genInfo = entry.getValue();
-            double weight = info.weight()*nInfo.area()*nInfo.thickness()*genInfo.effectiveWeight();
-            retMap.put(entry.getKey(), new AttackTypeInfo(
-                    Util.round(entry.getKey().tierStatFunction().getLethalityBonus(
-                            weight, nInfo.thickness(), info.hardness(), info.toughness(), info.flexibility(), genInfo.lethalityModifier()), 1),
-                    Util.roundAndClamp(entry.getKey().tierStatFunction().getAccuracyBonus(
-                            weight, nInfo.thickness(), info.hardness(), info.toughness(), info.flexibility(), genInfo.accuracyModifier()), 2, 0, 1),
-                    genInfo.minReach(),
-                    genInfo.maxReach(),
-                    genInfo.attackSpeedModifier(),
-                    0,
-                    Util.roundAndClamp(entry.getKey().tierStatFunction().getCritFailChance(
-                            weight, nInfo.thickness(), info.hardness(), info.toughness(), info.flexibility(), genInfo.critFailModifier()), 2, 0, 1),
-                    entry.getValue().reticleShapes()
-            ));
-        }
-        return new WeaponInfo(retMap, spread, Util.round(info.weight()*nInfo.area(), 1), ignoreAttributes);
+    public static WeaponInfo generate(ExtraTierInfo tierInfo, WeaponProfile profile, boolean ignoreAttributes) {
+      ElementSpread spread = tierInfo.spread();
+      Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
+      for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : profile.attackTypes().entrySet()) {
+        double lethality = entry.getKey().tierStatFunction().lethality(profile, tierInfo);
+        double precision = entry.getKey().tierStatFunction().precision(profile, tierInfo);
+        double critFailChance = entry.getKey().tierStatFunction().criticalFail(profile, tierInfo);
+        double attackSpeed = entry.getKey().tierStatFunction().attackSpeed(profile, tierInfo);
+        retMap.put(entry.getKey(), new AttackTypeInfo(
+                lethality*entry.getValue().lethalityModifier(),
+                precision*entry.getValue().precisionModifier(),
+                entry.getValue().minReach(),
+                entry.getValue().maxReach(),
+                attackSpeed*entry.getValue().attackSpeedModifier(),
+                0.0,
+                critFailChance*entry.getValue().critFailModifier(),
+                entry.getValue().reticleShapes()));
+      }
+      return new WeaponInfo(retMap, spread, ignoreAttributes);
     }
 
     /*
@@ -109,16 +103,11 @@ public class WeaponInfo {
         return spread;
     }
 
-    public double getWeight() {
-        return weight;
-    }
-
     public boolean ignoreAttributes() {
         return ignoreAttributes;
     }
 
     public Supplier<Component> toTextComponent() {
-        MutableComponent weight = Component.translatable("skada.weapon_info.weight", getWeight());
         MutableComponent attackType = Component.translatable("skada.weapon_info.attack_types");
         for (Map.Entry<AttackType, AttackTypeInfo> entry : attackTypes.entrySet()) {
             attackType.append("\n");
@@ -131,7 +120,6 @@ public class WeaponInfo {
         }
 
         return () -> Component.empty()
-                .append(weight).append("\n")
                 .append("ignore_attributes: ").append(String.valueOf(ignoreAttributes)).append("\n")
                 .append(attackType).append("\n")
                 .append(elements);
@@ -139,7 +127,6 @@ public class WeaponInfo {
 
     public CompoundTag toCompoundTag() {
         CompoundTag tag = new CompoundTag();
-        tag.putDouble("weight", weight);
         tag.putBoolean("ignore_attributes", ignoreAttributes);
         tag.put("spread", spread.toCompoundTag());
         CompoundTag attackTypes = new CompoundTag();
@@ -151,7 +138,6 @@ public class WeaponInfo {
     }
 
     public static WeaponInfo fromCompoundTag(CompoundTag tag) {
-        double weight = tag.getDouble("weight");
         boolean ignoreAttributes = tag.getBoolean("ignore_attributes");
         ElementSpread spread = ElementSpread.fromCompoundTag(tag.getCompound("spread"));
         CompoundTag attackTypes = tag.getCompound("attack_types");
@@ -159,7 +145,7 @@ public class WeaponInfo {
         for (String key : attackTypes.getAllKeys()) {
             attackTypeMap.put(SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation(key)), AttackTypeInfo.fromCompoundTag(attackTypes.getCompound(key)));
         }
-        return new WeaponInfo(attackTypeMap, spread, weight, ignoreAttributes);
+        return new WeaponInfo(attackTypeMap, spread, ignoreAttributes);
     }
 
 }

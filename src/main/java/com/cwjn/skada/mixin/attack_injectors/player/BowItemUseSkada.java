@@ -5,7 +5,6 @@ import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.util.Util;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
@@ -20,7 +19,7 @@ import static com.cwjn.skada.data.SkadaData.WEAPON_INFO_TAG_KEY;
 public class BowItemUseSkada {
 
     /*
-     * Use the bow's accuracy and damage bonus to affect the projectile's deviation from crosshair and velocity, and inject the projectile's damage info.
+     * Use the bow's precision and damage bonus to affect the projectile's deviation from crosshair and velocity, and inject the projectile's damage info.
      * @param entity is never null because it is checked to be a Player in the original method
      */
     @Redirect(
@@ -36,12 +35,12 @@ public class BowItemUseSkada {
                     info.getAttackTypes().get(
                             info.getAttackTypes().keySet().toArray(AttackType[]::new)[pStack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
                     );
-            inaccuracy = (float) (15 * (1 - attackInfo.accuracy()));
+            inaccuracy = (float) (15 * (1 - attackInfo.precision()));
             float velocity = (float) (chargePower * (3 + attackInfo.damageBonus()));
             Util.rollCriticalFail(pStack, attackInfo.failChance(), ((ServerPlayer)entity).getRandom(), ((ServerPlayer)entity));
             ((AccessProjectileData) instance).setDamageInfo(new DamageInfo(
                     attackInfo.lethality(),
-                    attackInfo.accuracy(),
+                    attackInfo.precision(),
                     false,
                     info.getAttackTypes().keySet().toArray(AttackType[]::new)[pStack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)],
                     info.getSpread().instance()));

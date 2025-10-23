@@ -22,11 +22,11 @@ public class CommonConfig {
         BUILDER.comment("Combat Settings").push("combat");
 
         BUILDER.push("Accuracy Settings");
-        ENABLE_ACCURACY = BUILDER.comment("Enable accuracy in general. All the following settings in this section will be ignored if this is false")
+        ENABLE_ACCURACY = BUILDER.comment("Enable precision in general. All the following settings in this section will be ignored if this is false")
                 .define("enableAccuracy", true);
-        ENABLE_ACCURACY_FOR_MELEE = BUILDER.comment("Enable accuracy damage modifier for melee attacks")
+        ENABLE_ACCURACY_FOR_MELEE = BUILDER.comment("Enable precision damage modifier for melee attacks")
                 .define("enableAccuracyForMelee", true);
-        ENABLE_ACCURACY_FOR_RANGED = BUILDER.comment("Enable accuracy projectile deviation modifier for bow and crossbow attacks")
+        ENABLE_ACCURACY_FOR_RANGED = BUILDER.comment("Enable precision projectile deviation modifier for bow and crossbow attacks")
                 .define("enableAccuracyForRanged", true);
         BUILDER.pop();
 

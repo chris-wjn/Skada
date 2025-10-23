@@ -10,6 +10,8 @@ import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.AccessWeaponInfo;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
+import com.cwjn.skada.data.gen.AttackTypeJsonInfo;
+import com.cwjn.skada.data.gen.ElementSpread;
 import com.cwjn.skada.data.gen.ExtraTierInfo;
 import com.cwjn.skada.data.gen.WeaponProfile;
 import com.cwjn.skada.data.mob.MobData;
@@ -759,10 +761,10 @@ public abstract class Util {
 
   /**
    * Calculates the lethality value for a slash attack based on weapon properties.
-   * Each property is normalized and weighted: weight (0.25), hardness (0.25), flexibility (0.5). Toughness is ignored.
+   * Each property is normalized and weighted: density (0.25), hardness (0.25), flexibility (0.5). Toughness is ignored.
    * The result is scaled to a range from 1 to 20.
    *
-   * @param weight      the weapon's weight
+   * @param weight      the weapon's density
    * @param thickness   the weapon's thickness
    * @param hardness    the weapon's material hardness
    * @param toughness   the weapon's material toughness
@@ -783,7 +785,7 @@ public abstract class Util {
    * Weight and hardness are weighted at (0.5) each; toughness and flexibility are ignored.
    * The result is scaled to a range from 1 to 20.
    *
-   * @param weight      the weapon's weight
+   * @param weight      the weapon's density
    * @param hardness    the weapon's material hardness
    * @param toughness   the weapon's material toughness
    * @param flexibility the weapon's material flexibility
@@ -802,7 +804,7 @@ public abstract class Util {
    * Weight is weighted at (0.7), toughness at (0.3); hardness and flexibility are ignored.
    * The result is scaled to a range from 1 to 20.
    *
-   * @param weight      the weapon's weight
+   * @param weight      the weapon's density
    * @param hardness    the weapon's material hardness
    * @param toughness   the weapon's material toughness
    * @param flexibility the weapon's material flexibility
@@ -817,16 +819,16 @@ public abstract class Util {
   }
 
   /**
-   * Calculates the accuracy for a slash attack based on weapon properties.
-   * Accuracy is determined by normalized weight, hardness, toughness, and flexibility,
-   * with weight and hardness weighted at 0.6 each, flexibility at -0.2, and toughness ignored.
+   * Calculates the precision for a slash attack based on weapon properties.
+   * Accuracy is determined by normalized density, hardness, toughness, and flexibility,
+   * with density and hardness weighted at 0.6 each, flexibility at -0.2, and toughness ignored.
    * The result is scaled to a range from 0.01 to 1.0.
    *
-   * @param weight the weapon's weight
+   * @param weight the weapon's density
    * @param hardness the weapon's material hardness
    * @param toughness the weapon's material toughness
    * @param flexibility the weapon's material flexibility
-   * @return the calculated accuracy value for slash attack type
+   * @return the calculated precision value for slash attack type
    */
   public static double slashAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
     double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
@@ -837,15 +839,15 @@ public abstract class Util {
   }
 
   /**
-   * Calculates the accuracy for a thrust attack based on weapon properties.
+   * Calculates the precision for a thrust attack based on weapon properties.
    * Accuracy is determined by normalized hardness (0.8), toughness (0.5), flexibility (-0.3),
-   * and ignores weight. The result is scaled to a range from 0.01 to 1.0.
+   * and ignores density. The result is scaled to a range from 0.01 to 1.0.
    *
-   * @param weight the weapon's weight
+   * @param weight the weapon's density
    * @param hardness the weapon's material hardness
    * @param toughness the weapon's material toughness
    * @param flexibility the weapon's material flexibility
-   * @return the calculated accuracy value for thrust attack type
+   * @return the calculated precision value for thrust attack type
    */
   public static double thrustAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
     double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
@@ -856,15 +858,15 @@ public abstract class Util {
   }
 
   /**
-   * Calculates the accuracy for a strike attack based on weapon properties.
-   * Accuracy is determined by normalized weight (1.5) and flexibility (-0.5),
+   * Calculates the precision for a strike attack based on weapon properties.
+   * Accuracy is determined by normalized density (1.5) and flexibility (-0.5),
    * with hardness and toughness ignored. The result is scaled to a range from 0.01 to 1.0.
    *
-   * @param weight the weapon's weight
+   * @param weight the weapon's density
    * @param hardness the weapon's material hardness
    * @param toughness the weapon's material toughness
    * @param flexibility the weapon's material flexibility
-   * @return the calculated accuracy value for strike attack type
+   * @return the calculated precision value for strike attack type
    */
   public static double strikeAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
     double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
@@ -876,10 +878,10 @@ public abstract class Util {
 
   /**
    * Calculates the critical fail chance for a slash attack based on weapon properties.
-   * Toughness and flexibility are weighted most heavily; weight and hardness are ignored.
+   * Toughness and flexibility are weighted most heavily; density and hardness are ignored.
    * The result is scaled to a range from 0.01 to 1.0.
    *
-   * @param weight the weapon's weight
+   * @param weight the weapon's density
    * @param hardness the weapon's material hardness
    * @param toughness the weapon's material toughness
    * @param flexibility the weapon's material flexibility
@@ -895,10 +897,10 @@ public abstract class Util {
 
   /**
    * Calculates the critical fail chance for a thrust attack based on weapon properties.
-   * Toughness is weighted most heavily, hardness is weighted negatively; weight and flexibility are ignored.
+   * Toughness is weighted most heavily, hardness is weighted negatively; density and flexibility are ignored.
    * The result is scaled to a range from 0.01 to 1.0.
    *
-   * @param weight the weapon's weight
+   * @param weight the weapon's density
    * @param hardness the weapon's material hardness
    * @param toughness the weapon's material toughness
    * @param flexibility the weapon's material flexibility
@@ -914,10 +916,10 @@ public abstract class Util {
 
   /**
    * Calculates the critical fail chance for a strike attack based on weapon properties.
-   * Toughness is weighted most heavily; weight, hardness, and flexibility are ignored.
+   * Toughness is weighted most heavily; density, hardness, and flexibility are ignored.
    * The result is scaled to a range from 0.01 to 1.0.
    *
-   * @param weight the weapon's weight
+   * @param weight the weapon's density
    * @param hardness the weapon's material hardness
    * @param toughness the weapon's material toughness
    * @param flexibility the weapon's material flexibility
@@ -931,17 +933,80 @@ public abstract class Util {
     return 0.25 - 0.25*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
   }
 
-  public static void generateWeaponInfo(WeaponProfile profile, ExtraTierInfo tierInfo, boolean ignoreAttributes) {
-    if (profile.attackTypes().containsKey(AttackType.slash())) {
-      if (profile.edgeBevel().edgeRadius() <= 0)
-        throw new IllegalArgumentException("Edge radius for Weapon Profile {} was {}. Must be greater than 0!", profile.);
-      double accuracyBase = profile.edgeBevel().edgeRadius();
-    }
-    if (profile.attackTypes().containsKey(AttackType.thrust())) {
+  public double slashLethality(WeaponProfile profile, ExtraTierInfo tierInfo) {
+    //First we'll normalize our values for the weapon profile. We take 1 to be the "default" value.
+    double edgeRadiusNormalized = EDGE_RADIUS_DEFAULT / profile.edgeBevel().edgeRadius(); //edge radius is inversely proportional to sharpness
+    double edgeAngleNormalized = EDGE_ANGLE_DEFAULT / profile.edgeBevel().angle(); //acuter angle means better cutting
+    double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength()); //percentage from 0-1, where 1 is furthest from pommel
+    double primaryEdgeBevelAngle = -180 + profile.edgeBevel().angle() + profile.edgeBevel().shoulderAngle(); //mathematically derived
+    double primaryEdgeBevelAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryEdgeBevelAngle; //acuter angle means more lethality cause better cutting
 
-    }
-    if (profile.attackTypes().containsKey(AttackType.strike())) {
+    //Some calculations about the weight of the weapon at various points and in total, using material density and profile dimensions
+    double bladeWeight = estimateBladeVolume(profile) * tierInfo.density(); //in grams
+    double bladeStartPercentage = profile.handleLength() / (profile.bladeLength() + profile.handleLength()); //the distance up the weapon where the blade portion starts, as a percentage of total length
+    double idealPointOfBalance = bladeStartPercentage + (profile.bladeLength() * 0.33) / (profile.bladeLength() + profile.handleLength()); //ideal point of balance is 33% up the blade from the blade start
 
+    // most important thing is bevel angle and length, so let's start there
+    double averageBladeWidth = (profile.bladeCrossguardWidth() + profile.bladeTipShoulderWidth()) * 0.5;
+    if (!profile.singleEdged()) averageBladeWidth *= 0.5; //if the blade is double-edged, half the width is used on each edge
+    double bevelLength = averageBladeWidth * profile.primaryBevel().percentageOfBladeWidth();
+    double lethality = bevelLengthToLethalityBase(bevelLength) * primaryEdgeBevelAngleNormalized; //multiply here to make both stats relevant
+    if (profile.primaryBevel().bevelType() == WeaponProfile.BevelType.CONCAVE) {
+      lethality += 10; //concave bevels are slightly more lethal
+    } else if (profile.primaryBevel().bevelType() == WeaponProfile.BevelType.CONVEX) {
+      lethality -= 10; //convex bevels are slightly less lethal
+    }
+    if (pointOfBalanceNormalized >= bladeStartPercentage) {
+      lethality += bladeStartPercentage*10; //if the point of balance is on the blade, give a little bonus
+    }
+    lethality *= 0.5 + (pointOfBalanceNormalized/(2*idealPointOfBalance)); //the ideal point of balance is where lethality and attack speed are balanced, higher = more lethality, lower = more speed.
+    return lethality;
+  }
+
+  public double thrustLethality(WeaponProfile profile, ExtraTierInfo tierInfo) {
+    //weapon profile values and normalizations
+
+  }
+
+  /**
+   * Estimate blade volume using data from WeaponProfile.
+   * - Approximate cross-sectional area as width * thickness and assume linear taper along length.
+   * - Use trapezoidal rule: volume = length * (A_base + A_tip) / 2.
+   * @param profile the weapon profile containing blade dimensions.
+   * @return estimated blade volume in cubic millimetres.
+   */
+  public static double estimateBladeVolume(WeaponProfile profile) {
+    double bladeLength = profile.bladeLength(); // units from profile (e.g. mm)
+    double baseWidth = profile.bladeCrossguardWidth();
+    double tipWidth = profile.bladeTipShoulderWidth();
+
+    // Clamp small/zero values defensively
+    bladeLength = Math.max(1e-6, bladeLength);
+    baseWidth = Math.max(1e-6, baseWidth);
+    tipWidth = Math.max(1e-6, tipWidth);
+    double baseThickness = Math.max(1e-6, profile.bladeSpineCrossguardThickness());
+    double tipThickness = Math.max(1e-6, profile.bladeSpineTipShoulderThickness());
+
+    double areaBase = baseWidth * baseThickness;
+    double areaTip = tipWidth * tipThickness;
+
+    // Linear taper approximation
+    return bladeLength * (areaBase + areaTip) / 2.0;
+  }
+
+
+  /**
+   * Calculates a base lethality value from the bevel length.
+   * Bevel length is derived from blade width and bevel percentage.
+   * The formula provides diminishing returns for bevel lengths over 80mm,
+   * because the average bevel length should be roughly 40mm.
+   * @param bevelLength the length of the bevel in millimetres, always > 0.
+   * @return the base lethality value, somewhere between 0 and ~80.
+   */
+  private static double bevelLengthToLethalityBase(double bevelLength) {
+    if (bevelLength <= 80) return 0.7*bevelLength;
+    else {
+      return 56.0 + 7*Math.log(1 + 0.1*(bevelLength-80));
     }
   }
 

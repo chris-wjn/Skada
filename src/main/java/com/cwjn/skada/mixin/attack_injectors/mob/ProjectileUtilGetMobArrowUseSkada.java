@@ -34,7 +34,7 @@ public class ProjectileUtilGetMobArrowUseSkada {
                             info.getAttackTypes().keySet().toArray(AttackType[]::new)[stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
                     );
             double lethality = attackInfo.lethality();
-            double accuracy = attackInfo.accuracy();
+            double accuracy = attackInfo.precision();
             ((AccessProjectileData) cir.getReturnValue()).setDamageInfo(new DamageInfo(
                     lethality,
                     accuracy,
