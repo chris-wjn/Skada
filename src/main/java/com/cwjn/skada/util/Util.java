@@ -10,8 +10,6 @@ import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.AccessWeaponInfo;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
-import com.cwjn.skada.data.gen.AttackTypeJsonInfo;
-import com.cwjn.skada.data.gen.ElementSpread;
 import com.cwjn.skada.data.gen.ExtraTierInfo;
 import com.cwjn.skada.data.gen.WeaponProfile;
 import com.cwjn.skada.data.mob.MobData;
@@ -935,14 +933,11 @@ public abstract class Util {
 
   public double slashLethality(WeaponProfile profile, ExtraTierInfo tierInfo) {
     //First we'll normalize our values for the weapon profile. We take 1 to be the "default" value.
-    double edgeRadiusNormalized = EDGE_RADIUS_DEFAULT / profile.edgeBevel().edgeRadius(); //edge radius is inversely proportional to sharpness
-    double edgeAngleNormalized = EDGE_ANGLE_DEFAULT / profile.edgeBevel().angle(); //acuter angle means better cutting
     double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength()); //percentage from 0-1, where 1 is furthest from pommel
     double primaryEdgeBevelAngle = -180 + profile.edgeBevel().angle() + profile.edgeBevel().shoulderAngle(); //mathematically derived
     double primaryEdgeBevelAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryEdgeBevelAngle; //acuter angle means more lethality cause better cutting
 
-    //Some calculations about the weight of the weapon at various points and in total, using material density and profile dimensions
-    double bladeWeight = estimateBladeVolume(profile) * tierInfo.density(); //in grams
+    //Some calculations about the balance point of the weapon, using material density and profile dimensions
     double bladeStartPercentage = profile.handleLength() / (profile.bladeLength() + profile.handleLength()); //the distance up the weapon where the blade portion starts, as a percentage of total length
     double idealPointOfBalance = bladeStartPercentage + (profile.bladeLength() * 0.33) / (profile.bladeLength() + profile.handleLength()); //ideal point of balance is 33% up the blade from the blade start
 
@@ -959,13 +954,59 @@ public abstract class Util {
     if (pointOfBalanceNormalized >= bladeStartPercentage) {
       lethality += bladeStartPercentage*10; //if the point of balance is on the blade, give a little bonus
     }
-    lethality *= 0.5 + (pointOfBalanceNormalized/(2*idealPointOfBalance)); //the ideal point of balance is where lethality and attack speed are balanced, higher = more lethality, lower = more speed.
+    lethality *= 0.5 + ((pointOfBalanceNormalized/(2*idealPointOfBalance))); //the ideal point of balance is where lethality and attack speed are balanced, higher = more lethality, lower = more speed.
+
+    double hardness = tierInfo.hardness();
+    double flexibility = tierInfo.flexibility();
+    lethality *= 1 + 0.09*hardness - 0.04*Math.abs(flexibility-5)/5; //factor material properties
+    /*
+      increases with hardness (keeps a sharp edge), flexibility has a sweet spot
+      at flexibility = 5. Too low flexibility and the blade can't flex at all
+      to achieve the correct angle, too high and the blade might bounce off the target
+      instead of cutting in.
+    */
+
     return lethality;
+  }
+
+  public double slashPrecision(WeaponProfile profile, ExtraTierInfo tierInfo) {
+    double edgeRadiusNormalized = EDGE_RADIUS_DEFAULT / profile.edgeBevel().edgeRadius(); //edge radius is inversely proportional to sharpness
+    double edgeAngleNormalized = EDGE_ANGLE_DEFAULT / profile.edgeBevel().angle(); //acuter angle means better cutting
+    double bladeWeight = estimateBladeVolume(profile) * tierInfo.density(); //in grams
+    double bladeWeightNormalized = bladeWeightNormalization(bladeWeight); //normalized weight value for lethality calculations
+    return 0.0;
   }
 
   public double thrustLethality(WeaponProfile profile, ExtraTierInfo tierInfo) {
     //weapon profile values and normalizations
+    double tipBevelAngleNormalized = EDGE_ANGLE_DEFAULT / profile.tipSpecs().tipBevelAngle(); //acuter angle means more lethality cause better piercing
+    double primaryAngle = -180 + profile.tipSpecs().tipBevelAngle() + profile.tipSpecs().tipBevelShoulderAngle(); //mathematically derived
+    double primaryAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryAngle; //acuter angle means more lethality cause better piercing
+    double lethality = primaryAngleNormalized * bladeDimensionsToLethalityBase(profile.bladeLength(), profile.bladeTipShoulderWidth(), profile.bladeCrossguardWidth());
+    if (profile.singleEdged()) lethality*=0.5;
 
+    lethality *= 1.0 + 0.08 * (tierInfo.hardness()/MATERIAL_PROPERTY_SOFT_CAP) - 0.06 * (tierInfo.flexibility()/MATERIAL_PROPERTY_SOFT_CAP);
+
+    return lethality;
+  }
+
+  public double strikeLethality(WeaponProfile profile, ExtraTierInfo tierInfo) {
+    //Some calculations about the balance point of the weapon, using material density and profile dimensions
+    double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength());
+    double bladeStartPercentage = profile.handleLength() / (profile.bladeLength() + profile.handleLength()); //the distance up the weapon where the blade portion starts, as a percentage of total length
+    double idealPointOfBalance = bladeStartPercentage + (profile.bladeLength() * 0.33) / (profile.bladeLength() + profile.handleLength()); //ideal point of balance is 33% up the blade from the blade start
+
+    double bladeWeight = estimateBladeVolume(profile) * tierInfo.density(); //in grams
+    double lethality = weightToLethalityBase(bladeWeight);
+
+    if (pointOfBalanceNormalized >= bladeStartPercentage) {
+      lethality += bladeStartPercentage*10; //if the point of balance is on the blade, give a little bonus
+    }
+    lethality *= 1.0 +  0.25*pointOfBalanceNormalized;
+
+    lethality *= 1.0 + 0.07 * (tierInfo.hardness()/MATERIAL_PROPERTY_SOFT_CAP) + 0.05 * (tierInfo.toughness()/MATERIAL_PROPERTY_SOFT_CAP);
+
+    return lethality;
   }
 
   /**
@@ -996,7 +1037,7 @@ public abstract class Util {
 
 
   /**
-   * Calculates a base lethality value from the bevel length.
+   * Calculates a base lethality value for slash from the bevel length.
    * Bevel length is derived from blade width and bevel percentage.
    * The formula provides diminishing returns for bevel lengths over 80mm,
    * because the average bevel length should be roughly 40mm.
@@ -1008,6 +1049,60 @@ public abstract class Util {
     else {
       return 56.0 + 7*Math.log(1 + 0.1*(bevelLength-80));
     }
+  }
+
+  /**
+   * Calculates a base lethality value for thrust from sword dimensions.
+   * Formula considers blade length, which increases lethality, and blade width.
+   * The narrower the blade, the higher the lethality, and vice versa.
+   * The wider the blade is at any particular point, the less the length of the blade
+   * contributes to lethality.
+   * @param bladeLength the length of the blade in millimetres
+   * @param bladeTipWidth the width of the blade at the tip shoulder bevel in millimetres
+   * @param bladeCrossguardWidth the width of the blade at the crossguard in millimetres
+   * @return the base lethality value, somewhere between 0 and ~80.
+   */
+  private static double bladeDimensionsToLethalityBase(double bladeLength, double bladeTipWidth, double bladeCrossguardWidth) {
+    //the average blade length is around 750mm, with 1500mm being a top 1% and 300mm being a bottom 1%.
+    //the amount the length contributes should be calculated based on how wide the blade is at that point.
+    //the average blade has width of roughly 50mm at crossguard and 30mm at tip shoulder, so average is 40mm.
+    //the ratio of length to avg width to achieve 75 lethality is 91.3, because the average blade isn't
+    //a good thrusting sword. Instead, the average rapier is 1050mm long, 15mm at crossguard and 8mm at tip shoulder.
+    double averageBladeWidth = (bladeTipWidth + bladeCrossguardWidth) * 0.5;
+    double lengthContribution = (bladeLength / averageBladeWidth);
+    //so, we need a function that linearly increases lethality based on length contribution from
+    //0 to 91.3, achieving y = 75 at x = 91.3, and then diminishing returns after that.
+    if (lengthContribution <= 91.3) {
+      return 0.82 * lengthContribution;
+    } else {
+      return 75.0 + 5*Math.log(1 + 0.1*(lengthContribution-91.3));
+    }
+  }
+
+  /**
+   * Converts weapon weight to a lethality linearly, since for strike,
+   * you're literally just smacking them with a piece of metal or whatever.
+   * The weight of whatever it is matters most.
+   * @param weight the weight of the weapon in grams
+   * @return the base lethality value for strike attacks
+   */
+  private static double weightToLethalityBase(double weight) {
+    if (weight <= 1000) return 0.05*weight + 30; //1000g = 80 leth
+    else {
+      return 80.0 + 2*Math.log(1 + 0.01*(weight-1000)); //diminishing returns after 1000g
+    }
+  }
+
+  /**
+   * Normalizes blade weight for lethality calculations using a logistic function.
+   * The function centers around 1000g, with a steepness factor of 100.
+   * This means weights below 1000g will have a lower normalized value, minimum at 0.5,
+   * while weights above 1000g will approach a maximum of 1.5 asymptotically.
+   * @param bladeWeight the weight of the blade in grams.
+   * @return the normalized blade weight value for lethality calculations, ranging from 0.5 to 1.5.
+   */
+  private static double bladeWeightNormalization(double bladeWeight) {
+    return (Math.exp((bladeWeight-1000)/100) / (1 + Math.exp((bladeWeight-1000)/100))) + 0.5;
   }
 
 }
