@@ -69,14 +69,15 @@ public record WeaponProfile(
     }
 
     /**
-     * Default constructor with reasonable defaults for a one-handed sword. Uses Carolingian sword as a model.
+     * Default constructor with reasonable defaults for a one-handed sword.
+     * Uses a <a href="https://kvetun-armoury.com/assets/images/products/163/caroling.png">Carolingian sword</a> as a model.
      * Measurements in millimetres.
      */
     public WeaponProfile() {
         this(true, 115, 750, 6, 5, 50, 30, 120,
                 new EdgeBevel(32.5, 170, BevelType.CONVEX, 5),
                 new Bevel(0.66, BevelType.FLAT),
-                new TipSpecifications(15000, 0, 0, 0),  DEFAULT_MAP);
+                new TipSpecifications(7500, 40, 150),  DEFAULT_MAP);
     }
 
     public enum BevelType {
@@ -85,17 +86,23 @@ public record WeaponProfile(
         FLAT
     }
 
+    /**
+   * Specifications for the tip of the blade. If the blade doesn't have a distinct tip,
+     * like for example if the blade is squared off on the end, the tip radius should be set
+     * to 0, and the bevel angles should be set to 180 degrees.
+   * @param tipRadius the radius of the tip in micrometers (1000 micrometers = 1 millimetre)
+   * @param tipBevelAngle the angle of the bevel at the tip in degrees
+   * @param tipBevelShoulderAngle the angle of the shoulder where the tip bevel meets the rest of the blade in degrees
+   */
     public record TipSpecifications(
             double tipRadius,
             double tipBevelAngle,
-            double tipBevelLength,
             double tipBevelShoulderAngle
     ) {
         public static final Codec<TipSpecifications> CODEC = RecordCodecBuilder.create(
                 instance -> instance.group(
                         Codec.DOUBLE.fieldOf("tipRadius").forGetter(TipSpecifications::tipRadius),
                         Codec.DOUBLE.fieldOf("tipBevelAngle").forGetter(TipSpecifications::tipBevelAngle),
-                        Codec.DOUBLE.fieldOf("tipBevelLength").forGetter(TipSpecifications::tipBevelLength),
                         Codec.DOUBLE.fieldOf("tipBevelShoulderAngle").forGetter(TipSpecifications::tipBevelShoulderAngle)
                 ).apply(instance, TipSpecifications::new)
         );
