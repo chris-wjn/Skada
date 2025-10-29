@@ -165,4 +165,41 @@ public record WeaponProfile(
 
     }
 
+  /**
+   * Estimate blade volume using data from WeaponProfile.
+   * - Approximate cross-sectional area as width * thickness and assume linear taper along length.
+   * - Use trapezoidal rule: volume = length * (A_base + A_tip) / 2.
+   * For the default blade profile, this returns 168,750 cubic millimetres (168.75 cm³). Multiplied
+   * by the density of iron, which is 7.785 g/cm³, gives a blade weight of ~1.31 kg or 1300 grams.
+   * @return estimated blade volume in cubic millimetres.
+   */
+  public double estimateBladeVolume() {
+    double bladeLength = this.bladeLength(); // units from profile (e.g. mm)
+    double baseWidth = this.bladeCrossguardWidth();
+    double tipWidth = this.bladeTipShoulderWidth();
+
+    // Clamp small/zero values defensively
+    bladeLength = Math.max(1e-6, bladeLength);
+    baseWidth = Math.max(1e-6, baseWidth);
+    tipWidth = Math.max(1e-6, tipWidth);
+    double baseThickness = Math.max(1e-6, this.bladeSpineCrossguardThickness());
+    double tipThickness = Math.max(1e-6, this.bladeSpineTipShoulderThickness());
+
+    double areaBase = baseWidth * baseThickness;
+    double areaTip = tipWidth * tipThickness;
+
+    // Linear taper approximation
+    return bladeLength * (areaBase + areaTip) / 2.0;
+  }
+
+  /**
+   * Calculates the absolute length of the primary bevel in millimetres.
+   * @return the absolute length of the primary bevel in millimetres.
+   */
+  public double absoluteBevelLength() {
+    double averageBladeWidth = (this.bladeCrossguardWidth() + this.bladeTipShoulderWidth()) * 0.5;
+    if (!this.singleEdged()) averageBladeWidth *= 0.5; //if the blade is double-edged, half the width is used on each edge
+    return averageBladeWidth * this.primaryBevel().percentageOfBladeWidth();
+  }
+
 }
