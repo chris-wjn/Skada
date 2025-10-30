@@ -19,6 +19,10 @@ public class PrecisionGenerationUtil {
     return precision;
   }
 
+  public double thrustPrecision(WeaponProfile profile, ExtraTierInfo tierInfo) {
+
+  }
+
   /**
    * Provides a precision value based on edge radius for slashing attacks.
    * Average precision for a sword is 20, for edge radius = 5.
