@@ -1,9 +1,7 @@
 package com.cwjn.skada.data.gen;
 
-import static com.cwjn.skada.data.SkadaData.*;
 import static com.cwjn.skada.data.SkadaData.BEVEL_ANGLE_DEFAULT;
 import static com.cwjn.skada.data.SkadaData.MATERIAL_PROPERTY_SOFT_CAP;
-import static com.cwjn.skada.util.Util.*;
 
 public abstract class LethalityGenerationUtil {
 
@@ -14,11 +12,12 @@ public abstract class LethalityGenerationUtil {
    * @param tierInfo The weapon material info
    * @return a double representing lethality
    */
-  public static double slashLethality(WeaponProfile profile, ExtraTierInfo tierInfo) {
+  public static double slash(WeaponProfile profile, ExtraTierInfo tierInfo) {
     //First we'll normalize our values for the weapon profile. We take 1 to be the "default" value.
     double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength()); //percentage from 0-1, where 1 is furthest from pommel
-    double primaryEdgeBevelAngle = -180 + profile.edgeBevel().angle() + profile.edgeBevel().shoulderAngle(); //mathematically derived
+    double primaryEdgeBevelAngle = profile.primaryBevelAngle(); //mathematically derived
     double primaryEdgeBevelAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryEdgeBevelAngle; //acuter angle means more lethality cause better cutting
+    double normalizedBladeWeight = profile.normalizeBladeWeight(tierInfo);
 
     //Some calculations about the balance point of the weapon, using material density and profile dimensions
     double bladeStartPercentage = profile.handleLength() / (profile.bladeLength() + profile.handleLength()); //the distance up the weapon where the blade portion starts, as a percentage of total length
@@ -37,8 +36,8 @@ public abstract class LethalityGenerationUtil {
     lethality *= 0.5 + ((pointOfBalanceNormalized/(2*idealPointOfBalance))); //the ideal point of balance is where lethality and attack speed are balanced, higher = more lethality, lower = more speed.
 
     double normalizedHardness = tierInfo.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
-    double normalizedFlexibility = tierInfo.flexibility()/MATERIAL_PROPERTY_SOFT_CAP;
-    lethality *= 1 + 0.09*normalizedHardness - 0.04*Math.abs(normalizedFlexibility-5)/5; //factor material properties
+    double normalizedFlexibility = Math.abs(tierInfo.flexibility()-MATERIAL_PROPERTY_SOFT_CAP/2)/(MATERIAL_PROPERTY_SOFT_CAP/2);
+    lethality *= 1 + 0.04*normalizedHardness + 0.07*normalizedBladeWeight - 0.05*normalizedFlexibility; //factor material properties
     /*
       increases with hardness (keeps a sharp edge), flexibility has a sweet spot
       at flexibility = 5. Too low flexibility and the blade can't flex at all
@@ -64,9 +63,8 @@ public abstract class LethalityGenerationUtil {
     }
   }
 
-  public static double thrustLethality(WeaponProfile profile, ExtraTierInfo tierInfo) {
+  public static double thrust(WeaponProfile profile, ExtraTierInfo tierInfo) {
     //weapon profile values and normalizations
-    double tipBevelAngleNormalized = EDGE_ANGLE_DEFAULT / profile.tipSpecs().tipBevelAngle(); //acuter angle means more lethality cause better piercing
     double primaryAngle = -180 + profile.tipSpecs().tipBevelAngle() + profile.tipSpecs().tipBevelShoulderAngle(); //mathematically derived
     double primaryAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryAngle; //acuter angle means more lethality cause better piercing
     double lethality = primaryAngleNormalized * bladeDimensionsToLethalityBase(profile.bladeLength(), profile.bladeTipShoulderWidth(), profile.bladeCrossguardWidth());
@@ -74,7 +72,7 @@ public abstract class LethalityGenerationUtil {
 
     double normalizedHardness = tierInfo.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
     double normalizedFlexibility = tierInfo.flexibility()/MATERIAL_PROPERTY_SOFT_CAP;
-    lethality *= 1.0 + 0.08 * normalizedHardness - 0.06 * normalizedFlexibility;
+    lethality *= 1.0 + 0.1 * normalizedHardness - 0.06 * normalizedFlexibility;
 
     return lethality;
   }
@@ -107,7 +105,7 @@ public abstract class LethalityGenerationUtil {
     }
   }
 
-  public static double strikeLethality(WeaponProfile profile, ExtraTierInfo tierInfo) {
+  public static double strike(WeaponProfile profile, ExtraTierInfo tierInfo) {
     //Some calculations about the balance point of the weapon, using material density and profile dimensions
     double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength());
 
