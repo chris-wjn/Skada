@@ -11,15 +11,19 @@ public abstract class AttackSpeedGenerationUtil {
   public static double slash(WeaponProfile profile, ExtraTierInfo tierInfo) {
     double totalLength = profile.bladeLength() + profile.handleLength();
     double idealPointOfBalance = (profile.handleLength() / totalLength) + ((profile.bladeLength() * 0.33) / totalLength);
-    double attackSpeed = getBaseAttackSpeedMultiplier(profile, tierInfo, idealPointOfBalance);
+    return getBaseAttackSpeedMultiplier(profile, tierInfo, idealPointOfBalance);
   }
 
   public static double thrust(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    return 0.0;
+    double totalLength = profile.bladeLength() + profile.handleLength();
+    double idealPointOfBalance = profile.handleLength() / totalLength; //essentially, the very start of the blade
+    return getBaseAttackSpeedMultiplier(profile, tierInfo, idealPointOfBalance);
   }
 
   public static double strike(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    return 0.0;
+    double totalLength = profile.bladeLength() + profile.handleLength();
+    double idealPointOfBalance = (profile.handleLength() / totalLength) + ((profile.bladeLength() * 0.5) / totalLength);
+    return getBaseAttackSpeedMultiplier(profile, tierInfo, idealPointOfBalance);
   }
 
   /**
