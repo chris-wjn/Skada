@@ -2,7 +2,7 @@ package com.cwjn.skada.data;
 
 import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.damage.LethalityFunction;
-import com.cwjn.skada.data.gen.AttackTypeGeneratorConfiguration;
+import com.cwjn.skada.data.gen.*;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
@@ -30,10 +30,13 @@ public abstract class SkadaData {
   public static final LethalityFunction PERCENT_DAMAGE_BONUS = new LethalityFunction(Util::percentBonusDamage, MULTIPLY_WITH_DAMAGE);
   public static final LethalityFunction PERCENT_HEALTH_DAMAGE = new LethalityFunction(Util::percentHealthDamage, SUM_WITH_DAMAGE);
   public static final LethalityFunction PERCENT_REDUC = new LethalityFunction(Util::percentReduc, MULTIPLY_WITH_ARMOUR);
-  public static final AttackTypeGeneratorConfiguration SLASH_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::slashAccuracyCalculation, Util::slashLethalityCalculation, Util::slashCriticalFailCalculation);
-  public static final AttackTypeGeneratorConfiguration STRIKE_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::strikeAccuracyCalculation, Util::strikeLethalityCalculation, Util::strikeCriticalFailCalculation);
-  public static final AttackTypeGeneratorConfiguration THRUST_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(Util::thrustAccuracyCalculation, Util::thrustLethalityCalculation, Util::thrustCriticalFailCalculation);
-  public static final AttackTypeGeneratorConfiguration NULL_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a, b, c, d, e, f) -> 0, (a, b, c, d, e, f) -> 0, (a, b, c, d, e, f) -> 0);
+  public static final AttackTypeGeneratorConfiguration SLASH_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(
+          PrecisionGenerationUtil::slash, LethalityGenerationUtil::slash, CriticalFailGenerationUtil::slash, AttackSpeedGenerationUtil::slash);
+  public static final AttackTypeGeneratorConfiguration STRIKE_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(
+          PrecisionGenerationUtil::strike, LethalityGenerationUtil::strike, CriticalFailGenerationUtil::strike, AttackSpeedGenerationUtil::strike);
+  public static final AttackTypeGeneratorConfiguration THRUST_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(
+          PrecisionGenerationUtil::thrust, LethalityGenerationUtil::thrust, CriticalFailGenerationUtil::thrust, AttackSpeedGenerationUtil::thrust);
+  public static final AttackTypeGeneratorConfiguration NULL_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a, b) -> 0, (a, b) -> 0, (a, b) -> 0, (a, b) -> 0);
   public static final String WEAPON_INFO_TAG_KEY = "skada.weapon_info.tagkey";
   public static final String ARMOUR_INFO_TAG_KEY = "skada.armour_info.tagkey";
   public static final String CURRENT_ATTACK_TYPE_TAG_KEY = "skada.current_attack_type.tagKey";
@@ -63,5 +66,6 @@ public abstract class SkadaData {
   public static final double EDGE_RADIUS_DEFAULT = 5.0; //nanometres
   public static final double EDGE_ANGLE_DEFAULT = 32.5; //degrees
   public static final double BEVEL_ANGLE_DEFAULT = 22.5; //degrees
+  public static final double BLADE_WEIGHT_DEFAULT = 1300; //grams
 
 }

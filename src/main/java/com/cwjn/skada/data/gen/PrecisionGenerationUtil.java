@@ -3,9 +3,9 @@ package com.cwjn.skada.data.gen;
 import static com.cwjn.skada.data.SkadaData.EDGE_ANGLE_DEFAULT;
 import static com.cwjn.skada.data.SkadaData.MATERIAL_PROPERTY_SOFT_CAP;
 
-public class PrecisionGenerationUtil {
+public abstract class PrecisionGenerationUtil {
 
-  public double slashPrecision(WeaponProfile profile, ExtraTierInfo tierInfo) {
+  public static double slash(WeaponProfile profile, ExtraTierInfo tierInfo) {
     double edgeAngleNormalized = EDGE_ANGLE_DEFAULT / profile.edgeBevel().angle(); //acuter angle means better cutting
     double bladeWeight = profile.estimateBladeVolume() * tierInfo.density(); //in grams
 
@@ -14,25 +14,63 @@ public class PrecisionGenerationUtil {
     precision *= edgeAngleNormalized; //the edge angle modifies precision
 
     double normalizedHardness = tierInfo.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
-    precision *= 1 + 0.05*normalizedHardness;
+    double normalizedFlexibility = Math.abs(tierInfo.flexibility()-MATERIAL_PROPERTY_SOFT_CAP/2)/(MATERIAL_PROPERTY_SOFT_CAP/2);
+    precision *= 1 + 0.05*normalizedHardness - 0.09*normalizedFlexibility;
 
     return precision;
   }
 
+  public static double thrust(WeaponProfile profile, ExtraTierInfo tierInfo) {
+    double tipBevelAngleNormalized = EDGE_ANGLE_DEFAULT / profile.tipSpecs().tipBevelAngle();
+    double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength()); //percentage from 0-1, where 1 is furthest from pommel
+
+    double precision = tipRadiusToPrecisionBase(profile.tipSpecs().tipRadius()); //the base for precision comes from tip radius
+    precision *= tipBevelAngleNormalized; //the tip angle modifies precision
+    precision *= 0.5 + (pointOfBalanceNormalized); //the further forward the point of balance, the more precise the thrust
+
+    double normalizedHardness = tierInfo.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
+    precision *= 1 + 0.07*normalizedHardness;
+
+    precision -= 1.5*tierInfo.flexibility(); //more flexible blades are less precise when thrusting
+
+    return precision;
+  }
+
+  public static double strike(WeaponProfile profile, ExtraTierInfo tierInfo) {
+    return 25;
+  }
+
   /**
    * Provides a precision value based on edge radius for slashing attacks.
-   * Average precision for a sword is 20, for edge radius = 5.
+   * Average precision for a sword is 20, for edge radius  5.
    * Precision decreases sharply as edge radius decreases below 5,
    * and increases sharply as edge radius increases above 5. Anything
    * above 10nm edge radius is effectively blunt.
    * @param edgeRadius The edge radius in nanometres.
    * @return A double representing precision.
    */
-  private double edgeRadiusToPrecisionBase(double edgeRadius) {
+  private static double edgeRadiusToPrecisionBase(double edgeRadius) {
     if (edgeRadius < 7)
       return -Math.pow((edgeRadius - 5), 3) + 20;
     else
       return Math.exp(-edgeRadius/2 + 6);
+  }
+
+  /**
+   * Provides a precision value based on tip radius for thrusting attacks.
+   * Average precision for a sword is 20, for tip radius = 5.
+   * Precision decreases sharply as tip radius decreases below 5,
+   * and increases sharply as tip radius increases above 5. We're
+   * more lenient on tip radius than edge radius, so the curve is
+   * less steep, and high radii still get 1 precision.
+   * @param tipRadius The tip radius in nanometres.
+   * @return A double representing precision.
+   */
+  private static double tipRadiusToPrecisionBase(double tipRadius) {
+    if (tipRadius < 7)
+      return -Math.pow((tipRadius - 5), 3) + 20;
+    else
+      return Math.exp(-tipRadius / 60 + 2) + 1;
   }
 
   /**
@@ -47,7 +85,7 @@ public class PrecisionGenerationUtil {
    * @param bladeWeight The blade weight in grams.
    * @return A double representing precision.
    */
-  private double bladeWeightToPrecisionBase2(double bladeWeight) {
+  private static double bladeWeightToPrecisionBase2(double bladeWeight) {
     if (bladeWeight >= 1300) {
       return 6 + 4 * (1 - Math.exp(-0.0005 * (bladeWeight - 1300)));
     } else {

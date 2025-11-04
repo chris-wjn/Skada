@@ -9,6 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.cwjn.skada.data.SkadaData.BLADE_WEIGHT_DEFAULT;
+
 public record WeaponProfile(
                             boolean singleEdged,
                             double handleLength,
@@ -200,6 +202,23 @@ public record WeaponProfile(
     double averageBladeWidth = (this.bladeCrossguardWidth() + this.bladeTipShoulderWidth()) * 0.5;
     if (!this.singleEdged()) averageBladeWidth *= 0.5; //if the blade is double-edged, half the width is used on each edge
     return averageBladeWidth * this.primaryBevel().percentageOfBladeWidth();
+  }
+
+  /**
+   * Normalize the blade weight to a standard value for use in calculations.
+   * We don't want to just divide a default value by the weight here, because
+   * that would make very light or very heavy blades have extreme values.
+   * Instead, we use a logarithmic scale to keep values within a reasonable range, with
+   * an average value of 1.0 for a blade weight of 1300 grams (the default).
+   * @return a double representing the normalized blade weight.
+   */
+  public double normalizeBladeWeight(ExtraTierInfo material) { //in grams, assuming iron density of 7.85 g/cm³
+    double weight = this.estimateBladeVolume() * material.density(); //in grams
+    return Math.atan((weight/(BLADE_WEIGHT_DEFAULT+200)) - (BLADE_WEIGHT_DEFAULT/(BLADE_WEIGHT_DEFAULT+200)))/2 + 1;
+  }
+
+  public double primaryBevelAngle() {
+    return -180 + this.edgeBevel().angle() + this.edgeBevel().shoulderAngle();
   }
 
 }
