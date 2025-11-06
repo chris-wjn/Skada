@@ -14,6 +14,11 @@ public abstract class CriticalFailGenerationUtil {
     } else if (profile.primaryBevel().bevelType() == WeaponProfile.BevelType.CONVEX) {
       failChance /= 2; //convex bevels are less likely to crit fail
     }
+    if (profile.edgeBevel().bevelType() == WeaponProfile.BevelType.CONCAVE) {
+      failChance *= 1.5; //concave edge bevels are more likely to crit fail
+    } else if (profile.edgeBevel().bevelType() == WeaponProfile.BevelType.CONVEX) {
+      failChance /= 1.5; //convex edge bevels are less likely to crit fail
+    }
     double normalizedToughness = tierInfo.toughness()/MATERIAL_PROPERTY_SOFT_CAP;
     double normalizedFlexibility = tierInfo.flexibility()/MATERIAL_PROPERTY_SOFT_CAP;
 

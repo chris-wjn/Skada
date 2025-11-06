@@ -11,6 +11,11 @@ public abstract class PrecisionGenerationUtil {
 
     double precision = edgeRadiusToPrecisionBase(profile.edgeBevel().edgeRadius()); //the base for precision comes from edge radius
     precision += bladeWeightToPrecisionBase2(bladeWeight); //the blade weight can help, even if the edge is blunt. Heavier blades have more momentum.
+    if (profile.edgeBevel().bevelType() == WeaponProfile.BevelType.CONCAVE) {
+      precision += 5; //concave bevels are slightly more precise
+    } else if (profile.edgeBevel().bevelType() == WeaponProfile.BevelType.CONVEX) {
+      precision -= 5; //convex bevels are slightly less precise
+    }
     precision *= edgeAngleNormalized; //the edge angle modifies precision
 
     double normalizedHardness = tierInfo.hardness()/MATERIAL_PROPERTY_SOFT_CAP;

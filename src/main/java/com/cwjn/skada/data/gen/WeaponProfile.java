@@ -141,13 +141,13 @@ public record WeaponProfile(
    *
    * @param angle angle of the bevel in degrees
    * @param shoulderAngle angle of the shoulder where the bevel meets the primary bevel in degrees
-   * @param type type of bevel (convex, concave, flat)
+   * @param bevelType type of bevel (convex, concave, flat)
    * @param edgeRadius radius of the edge in micrometers (1000 micrometers = 1 millimetre)
    */
     public record EdgeBevel(
             double angle,
             double shoulderAngle,
-            BevelType type,
+            BevelType bevelType,
             double edgeRadius
     ) {
 
@@ -155,7 +155,7 @@ public record WeaponProfile(
               instance -> instance.group(
                       Codec.DOUBLE.fieldOf("angle").forGetter(EdgeBevel::angle),
                       Codec.DOUBLE.fieldOf("shoulderAngle").forGetter(EdgeBevel::shoulderAngle),
-                      Codec.STRING.fieldOf("bevelType").forGetter(bevel -> bevel.type().name()),
+                      Codec.STRING.fieldOf("bevelType").forGetter(bevel -> bevel.bevelType().name()),
                       Codec.DOUBLE.fieldOf("edgeRadius").forGetter(EdgeBevel::edgeRadius)
               ).apply(instance, (bevelAngle, shoulderAngle, type, edgeRadius) ->
                       new EdgeBevel(bevelAngle, shoulderAngle, getBevelType(type), edgeRadius))
