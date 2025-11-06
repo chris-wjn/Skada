@@ -15,8 +15,8 @@ public abstract class LethalityGenerationUtil {
   public static double slash(WeaponProfile profile, ExtraTierInfo tierInfo) {
     //First we'll normalize our values for the weapon profile. We take 1 to be the "default" value.
     double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength()); //percentage from 0-1, where 1 is furthest from pommel
-    double primaryEdgeBevelAngle = profile.primaryBevelAngle(); //mathematically derived
-    double primaryEdgeBevelAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryEdgeBevelAngle; //acuter angle means more lethality cause better cutting
+    double primaryBevelAngle = profile.primaryBevelAngle(); //mathematically derived
+    double primaryBevelAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryBevelAngle; //acuter angle means more lethality cause better cutting
     double normalizedBladeWeight = profile.normalizeBladeWeight(tierInfo);
 
     //Some calculations about the balance point of the weapon, using material density and profile dimensions
@@ -24,7 +24,7 @@ public abstract class LethalityGenerationUtil {
     double idealPointOfBalance = bladeStartPercentage + (profile.bladeLength() * 0.33) / (profile.bladeLength() + profile.handleLength()); //ideal point of balance is 33% up the blade from the blade start
 
     // most important thing is bevel angle and length, so let's start there
-    double lethality = bevelLengthToLethalityBase(profile.absoluteBevelLength()) * primaryEdgeBevelAngleNormalized; //multiply here to make both stats relevant
+    double lethality = bevelLengthToLethalityBase(profile.absoluteBevelLength()) * primaryBevelAngleNormalized; //multiply here to make both stats relevant
     if (profile.primaryBevel().bevelType() == WeaponProfile.BevelType.CONCAVE) {
       lethality += 10; //concave bevels are slightly more lethal
     } else if (profile.primaryBevel().bevelType() == WeaponProfile.BevelType.CONVEX) {

@@ -10,8 +10,6 @@ import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.AccessWeaponInfo;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
-import com.cwjn.skada.data.gen.ExtraTierInfo;
-import com.cwjn.skada.data.gen.WeaponProfile;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.google.common.collect.ArrayListMultimap;
@@ -54,6 +52,7 @@ import java.lang.Math;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static com.cwjn.skada.Skada.LOGGER;
 import static com.cwjn.skada.data.SkadaData.*;
@@ -758,177 +757,93 @@ public abstract class Util {
   }
 
   /**
-   * Calculates the lethality value for a slash attack based on weapon properties.
-   * Each property is normalized and weighted: density (0.25), hardness (0.25), flexibility (0.5). Toughness is ignored.
-   * The result is scaled to a range from 1 to 20.
-   *
-   * @param weight      the weapon's density
-   * @param thickness   the weapon's thickness
-   * @param hardness    the weapon's material hardness
-   * @param toughness   the weapon's material toughness
-   * @param flexibility the weapon's material flexibility
-   * @param modifier    a modifier based on the weapon's shape
-   * @return the calculated lethality value for slash attack type
+   * Finds the closest matching string from a list to the given path using regex matching and Levenshtein distance.
+   * The method first attempts to find a match using regex patterns constructed from the strings in the list.
+   * If no regex match is found, it falls back to calculating the Levenshtein distance to find the closest match.
+   * This takes a long time. O(some big ass number). Try to keep usage to a minimum if possible.
+   * @param strings list of strings that are to be compared to in order to find a match
+   * @param path the string to be matched
+   * @return the string that matches
    */
-  public static double slashLethalityCalculation(double weight, double thickness, double hardness, double toughness, double flexibility, double modifier) {
-    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
-    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 1 + 10 * (0.25 * normWeight + 0.25 * normHardness + 0.0 * normToughness + 0.5 * normFlexibility);
+  public static String findClosestMatch(List<String> strings, String path) {
+    String retString = "";
+    strings.sort(Comparator.comparingInt(String::length).reversed()
+            .thenComparing(String::compareTo));
+
+    String normalizedPath = path.replace('_', ' ').toLowerCase();
+
+    for (String profileKey : strings) {
+      // split the profile key into word tokens (handles keys like "great sword", "great-sword", "great_sword")
+      String[] tokens = profileKey.toLowerCase().split("\\W+");
+      if (tokens.length == 0) continue;
+
+      // build regex: \btoken1\W*token2\W*token3\b
+      StringBuilder regex = new StringBuilder("\\b");
+      for (int i = 0; i < tokens.length; i++) {
+        regex.append(Pattern.quote(tokens[i]));
+        if (i < tokens.length - 1) regex.append("\\W*");
+      }
+      regex.append("\\b");
+
+      if (Pattern.compile(regex.toString(), Pattern.CASE_INSENSITIVE).matcher(normalizedPath).find()) {
+        retString = profileKey;
+        break;
+      }
+    }
+
+    // Fallback: if no regex match found, pick the profileKey with the smallest Levenshtein distance
+    if (retString.isEmpty()) {
+      int bestDistance = Integer.MAX_VALUE;
+      String bestKey = "";
+      for (String profileKey : strings) {
+        String candidate = profileKey.toLowerCase().replace('_', ' ').replaceAll("\\W+", " ").trim();
+        int dist = levenshteinDistance(normalizedPath, candidate);
+        if (dist < bestDistance || (dist == bestDistance && profileKey.length() > bestKey.length())) {
+          bestDistance = dist;
+          bestKey = profileKey;
+        }
+      }
+      retString = bestKey;
+    }
+
+    return retString;
   }
 
-  /**
-   * Calculates the lethality value for a thrust attack based on weapon properties.
-   * Weight and hardness are weighted at (0.5) each; toughness and flexibility are ignored.
-   * The result is scaled to a range from 1 to 20.
-   *
-   * @param weight      the weapon's density
-   * @param hardness    the weapon's material hardness
-   * @param toughness   the weapon's material toughness
-   * @param flexibility the weapon's material flexibility
-   * @return the calculated lethality value for thrust attack type
-   */
-  public static double thrustLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
-    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 1 + 10 * (0.5 * normWeight + 0.5 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
-  }
+  public static int levenshteinDistance(String str1, String str2) {
+    int m = str1.length();
+    int n = str2.length();
 
-  /**
-   * Calculates the lethality value for a strike attack based on weapon properties.
-   * Weight is weighted at (0.7), toughness at (0.3); hardness and flexibility are ignored.
-   * The result is scaled to a range from 1 to 20.
-   *
-   * @param weight      the weapon's density
-   * @param hardness    the weapon's material hardness
-   * @param toughness   the weapon's material toughness
-   * @param flexibility the weapon's material flexibility
-   * @return the calculated lethality value for strike attack type
-   */
-  public static double strikeLethalityCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
-    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 1 + 10 * (0.7 * normWeight + 0.0 * normHardness + 0.3 * normToughness + 0.0 * normFlexibility);
-  }
+    // Initializing two arrays to store the current and previous row values
+    int[] prevRow = new int[n + 1];
+    int[] currRow = new int[n + 1];
 
-  /**
-   * Calculates the precision for a slash attack based on weapon properties.
-   * Accuracy is determined by normalized density, hardness, toughness, and flexibility,
-   * with density and hardness weighted at 0.6 each, flexibility at -0.2, and toughness ignored.
-   * The result is scaled to a range from 0.01 to 1.0.
-   *
-   * @param weight the weapon's density
-   * @param hardness the weapon's material hardness
-   * @param toughness the weapon's material toughness
-   * @param flexibility the weapon's material flexibility
-   * @return the calculated precision value for slash attack type
-   */
-  public static double slashAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
-    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.33 + 0.67*(0.5 * normWeight + 0.5 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
-  }
+    // Initializing the first row with increasing integers
+    for (int j = 0; j <= n; j++) {
+      prevRow[j] = j;
+    }
 
-  /**
-   * Calculates the precision for a thrust attack based on weapon properties.
-   * Accuracy is determined by normalized hardness (0.8), toughness (0.5), flexibility (-0.3),
-   * and ignores density. The result is scaled to a range from 0.01 to 1.0.
-   *
-   * @param weight the weapon's density
-   * @param hardness the weapon's material hardness
-   * @param toughness the weapon's material toughness
-   * @param flexibility the weapon's material flexibility
-   * @return the calculated precision value for thrust attack type
-   */
-  public static double thrustAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
-    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.33 + 0.67*(0.0 * normWeight + 0.5 * normHardness + 0.5 * normToughness + 0.0 * normFlexibility);
-  }
+    // Looping through each character of str1
+    for (int i = 1; i <= m; i++) {
+      // Initializing the first element of the current row with the row number
+      currRow[0] = i;
 
-  /**
-   * Calculates the precision for a strike attack based on weapon properties.
-   * Accuracy is determined by normalized density (1.5) and flexibility (-0.5),
-   * with hardness and toughness ignored. The result is scaled to a range from 0.01 to 1.0.
-   *
-   * @param weight the weapon's density
-   * @param hardness the weapon's material hardness
-   * @param toughness the weapon's material toughness
-   * @param flexibility the weapon's material flexibility
-   * @return the calculated precision value for strike attack type
-   */
-  public static double strikeAccuracyCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
-    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.33 + 0.67*(1.0 * normWeight + 0.0 * normHardness + 0.0 * normToughness + 0.0 * normFlexibility);
-  }
+      // Looping through each character of str2
+      for (int j = 1; j <= n; j++) {
+        // If characters are equal, no operation needed, take the diagonal value
+        if (str1.charAt(i - 1) == str2.charAt(j - 1)) {
+          currRow[j] = prevRow[j - 1];
+        } else {
+          // If characters are not equal, find the minimum value of insert, delete, or replace
+          currRow[j] = 1 + Math.min(currRow[j - 1], Math.min(prevRow[j], prevRow[j - 1]));
+        }
+      }
 
-  /**
-   * Calculates the critical fail chance for a slash attack based on weapon properties.
-   * Toughness and flexibility are weighted most heavily; density and hardness are ignored.
-   * The result is scaled to a range from 0.01 to 1.0.
-   *
-   * @param weight the weapon's density
-   * @param hardness the weapon's material hardness
-   * @param toughness the weapon's material toughness
-   * @param flexibility the weapon's material flexibility
-   * @return the calculated critical fail chance for slash attack type
-   */
-  public static double slashCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
-    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.25 - 0.25*(0.0 * normWeight + 0.0 * normHardness + 0.5 * normToughness + 0.5 * normFlexibility);
-  }
+      // Update prevRow with currRow values
+      prevRow = Arrays.copyOf(currRow, currRow.length);
+    }
 
-  /**
-   * Calculates the critical fail chance for a thrust attack based on weapon properties.
-   * Toughness is weighted most heavily, hardness is weighted negatively; density and flexibility are ignored.
-   * The result is scaled to a range from 0.01 to 1.0.
-   *
-   * @param weight the weapon's density
-   * @param hardness the weapon's material hardness
-   * @param toughness the weapon's material toughness
-   * @param flexibility the weapon's material flexibility
-   * @return the calculated critical fail chance for thrust attack type
-   */
-  public static double thrustCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
-    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.25 - 0.25*(0.0 * normWeight + 0.0 * normHardness + 0.75 * normToughness + 0.25  * normFlexibility);
-  }
-
-  /**
-   * Calculates the critical fail chance for a strike attack based on weapon properties.
-   * Toughness is weighted most heavily; density, hardness, and flexibility are ignored.
-   * The result is scaled to a range from 0.01 to 1.0.
-   *
-   * @param weight the weapon's density
-   * @param hardness the weapon's material hardness
-   * @param toughness the weapon's material toughness
-   * @param flexibility the weapon's material flexibility
-   * @return the calculated critical fail chance for strike attack type
-   */
-  public static double strikeCriticalFailCalculation(double weight, double hardness, double toughness, double flexibility) {
-    double normWeight = Math.log(10*weight - WEAPON_WEIGHT_MINIMUM + 1);
-    double normHardness = (hardness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normToughness = (toughness - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    double normFlexibility = (flexibility - MATERIAL_PROPERTY_MINIMUM) / (MATERIAL_PROPERTY_SOFT_CAP - MATERIAL_PROPERTY_MINIMUM);
-    return 0.25 - 0.25*(0.0 * normWeight + 0.0 * normHardness + 1.0 * normToughness + 0.0 * normFlexibility);
+    // Return the final Levenshtein distance stored at the bottom-right corner of the matrix
+    return currRow[n];
   }
 
 }

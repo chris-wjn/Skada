@@ -67,6 +67,7 @@ public class Skada {
         Path dirWeaponGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generated");
         Path dirArmourGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generated");
         Path dirMobsGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs", "generated");
+        WeaponProfileCodecWriter.writeDefaultByItemNameJson();
         try {
             Files.createDirectories(dir);
             Files.createDirectories(dirWeapon);
