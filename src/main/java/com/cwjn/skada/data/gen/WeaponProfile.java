@@ -29,6 +29,18 @@ public record WeaponProfile(
             Map.of(AttackType.strike(), AttackTypeJsonInfo.getDefault())
     );
 
+    private static final Map<AttackType, AttackTypeJsonInfo> DEFAULT_SWORD_SLASH_MAP = new HashMap<>(
+            Map.of(AttackType.slash(), new AttackTypeJsonInfo(
+                    0.2,
+                    3.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    null
+            ))
+    );
+
     public static final Codec<WeaponProfile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.BOOL.fieldOf("singleEdged").forGetter(WeaponProfile::singleEdged),
             Codec.DOUBLE.fieldOf("handleLength").forGetter(WeaponProfile::handleLength),
@@ -76,10 +88,12 @@ public record WeaponProfile(
      * Measurements in millimetres.
      */
     public WeaponProfile() {
-        this(true, 115, 750, 6, 5, 50, 30, 120,
+        this(false, 115, 750, 6, 5, 50, 30, 120,
                 new EdgeBevel(32.5, 170, BevelType.CONVEX, 5),
                 new Bevel(0.66, BevelType.FLAT),
-                new TipSpecifications(7500, 40, 150),  DEFAULT_MAP);
+                new TipSpecifications(7500, 40, 150),
+                DEFAULT_SWORD_SLASH_MAP
+                );
     }
 
     public enum BevelType {
@@ -195,13 +209,19 @@ public record WeaponProfile(
   }
 
   /**
-   * Calculates the absolute length of the primary bevel in millimetres.
+   * Calculates the absolute length of the primary bevel in millimetres at a given distance
+   * from the start of the blade.
+   * @param pointOnBlade distance from the start of the blade in millimetres
    * @return the absolute length of the primary bevel in millimetres.
    */
-  public double absoluteBevelLength() {
-    double averageBladeWidth = (this.bladeCrossguardWidth() + this.bladeTipShoulderWidth()) * 0.5;
-    if (!this.singleEdged()) averageBladeWidth *= 0.5; //if the blade is double-edged, half the width is used on each edge
-    return averageBladeWidth * this.primaryBevel().percentageOfBladeWidth();
+  public double absoluteBevelLength(double pointOnBlade) {
+    double bladeLen = Math.max(1e-6, this.bladeLength());
+    double t = Math.max(0.0, Math.min(1.0, pointOnBlade / bladeLen)); // normalized position [0,1]
+    double baseWidth = this.bladeCrossguardWidth();
+    double tipWidth = this.bladeTipShoulderWidth();
+    double widthAtPoint = baseWidth + (tipWidth - baseWidth) * t; // linear interpolation along blade
+    if (!this.singleEdged()) widthAtPoint *= 0.5; // if double-edged, use half the width per edge
+    return widthAtPoint * this.primaryBevel().percentageOfBladeWidth();
   }
 
   /**

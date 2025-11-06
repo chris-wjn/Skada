@@ -24,7 +24,7 @@ public abstract class LethalityGenerationUtil {
     double idealPointOfBalance = bladeStartPercentage + (profile.bladeLength() * 0.33) / (profile.bladeLength() + profile.handleLength()); //ideal point of balance is 33% up the blade from the blade start
 
     // most important thing is bevel angle and length, so let's start there
-    double lethality = bevelLengthToLethalityBase(profile.absoluteBevelLength()) * primaryBevelAngleNormalized; //multiply here to make both stats relevant
+    double lethality = bevelLengthToLethalityBase(profile.absoluteBevelLength(profile.pointOfBalance())) * primaryBevelAngleNormalized; //multiply here to make both stats relevant
     if (profile.primaryBevel().bevelType() == WeaponProfile.BevelType.CONCAVE) {
       lethality += 10; //concave bevels are slightly more lethal
     } else if (profile.primaryBevel().bevelType() == WeaponProfile.BevelType.CONVEX) {

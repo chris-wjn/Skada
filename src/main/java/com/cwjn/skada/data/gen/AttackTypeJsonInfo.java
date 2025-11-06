@@ -21,7 +21,7 @@ public record AttackTypeJsonInfo(double minReach,
           instance -> instance.group(
                   Codec.DOUBLE.fieldOf("minReach").forGetter(AttackTypeJsonInfo::minReach),
                   Codec.DOUBLE.fieldOf("maxReach").forGetter(AttackTypeJsonInfo::maxReach),
-                  Codec.DOUBLE.fieldOf("attackSpeedModifier").forGetter(AttackTypeJsonInfo::attackSpeedModifier),
+                  Codec.DOUBLE.optionalFieldOf("attackSpeedModifier", 1.0).forGetter(AttackTypeJsonInfo::attackSpeedModifier),
                   Codec.DOUBLE.optionalFieldOf("lethalityModifier", 1.0).forGetter(AttackTypeJsonInfo::lethalityModifier),
                   Codec.DOUBLE.optionalFieldOf("precisionModifier", 1.0).forGetter(AttackTypeJsonInfo::precisionModifier),
                   Codec.DOUBLE.optionalFieldOf("critFailModifier", 1.0).forGetter(AttackTypeJsonInfo::critFailModifier),

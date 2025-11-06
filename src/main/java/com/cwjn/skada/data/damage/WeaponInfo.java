@@ -7,7 +7,6 @@ import com.cwjn.skada.data.gen.ExtraTierInfo;
 import com.cwjn.skada.data.gen.WeaponProfile;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
-import com.cwjn.skada.util.Util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
