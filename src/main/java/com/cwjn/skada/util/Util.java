@@ -809,7 +809,7 @@ public abstract class Util {
     return retString;
   }
 
-  public static int levenshteinDistance(String str1, String str2) {
+  private static int levenshteinDistance(String str1, String str2) {
     int m = str1.length();
     int n = str2.length();
 
@@ -842,7 +842,7 @@ public abstract class Util {
       prevRow = Arrays.copyOf(currRow, currRow.length);
     }
 
-    // Return the final Levenshtein distance stored at the bottom-right corner of the matrix
+    // Return the final Levenshtein distance stored in the bottom-right corner of the matrix
     return currRow[n];
   }
 
