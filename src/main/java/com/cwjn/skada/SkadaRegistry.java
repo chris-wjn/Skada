@@ -2,7 +2,7 @@ package com.cwjn.skada;
 
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.LethalityFunction;
-import com.cwjn.skada.data.gen.AttackTypeGeneratorConfiguration;
+import com.cwjn.skada.data.gen.attack.AttackTypeGeneratorConfiguration;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.ColourLibrary;

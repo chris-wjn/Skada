@@ -1,4 +1,4 @@
-package com.cwjn.skada.data.gen;
+package com.cwjn.skada.data.gen.weapon;
 
 import net.minecraft.util.Mth;
 

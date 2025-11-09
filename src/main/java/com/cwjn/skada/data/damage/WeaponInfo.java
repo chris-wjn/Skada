@@ -1,10 +1,10 @@
 package com.cwjn.skada.data.damage;
 
 import com.cwjn.skada.data.SkadaData;
-import com.cwjn.skada.data.gen.AttackTypeJsonInfo;
-import com.cwjn.skada.data.gen.ElementSpread;
-import com.cwjn.skada.data.gen.ExtraTierInfo;
-import com.cwjn.skada.data.gen.WeaponProfile;
+import com.cwjn.skada.data.gen.attack.AttackTypeJsonInfo;
+import com.cwjn.skada.data.gen.attack.ElementSpread;
+import com.cwjn.skada.data.gen.weapon.ExtraTierInfo;
+import com.cwjn.skada.data.gen.weapon.WeaponProfile;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.mojang.serialization.Codec;

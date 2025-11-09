@@ -1,5 +1,6 @@
-package com.cwjn.skada.data.gen;
+package com.cwjn.skada.data.gen.weapon;
 
+import com.cwjn.skada.data.gen.attack.ElementSpread;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 

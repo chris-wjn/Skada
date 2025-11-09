@@ -1,5 +1,5 @@
 package com.cwjn.skada;// java
-import com.cwjn.skada.data.gen.WeaponProfile;
+import com.cwjn.skada.data.gen.weapon.WeaponProfile;
 import com.google.gson.*;
 import com.mojang.serialization.JsonOps;
 import net.minecraftforge.fml.loading.FMLPaths;

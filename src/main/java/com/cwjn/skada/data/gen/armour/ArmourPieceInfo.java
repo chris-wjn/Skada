@@ -1,4 +1,4 @@
-package com.cwjn.skada.data.gen;
+package com.cwjn.skada.data.gen.armour;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

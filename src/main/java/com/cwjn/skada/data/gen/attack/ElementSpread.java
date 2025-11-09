@@ -1,4 +1,4 @@
-package com.cwjn.skada.data.gen;
+package com.cwjn.skada.data.gen.attack;
 
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.ElementSpreadInstance;
@@ -7,7 +7,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.DamageTypeTags;
 
 import java.util.HashMap;
 import java.util.Map;
