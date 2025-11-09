@@ -74,21 +74,11 @@ public class Blade {
 
     for (Double p : points) {
       double w = interpolate(wMap, p);
-      double spineThickness = interpolate(tMap, p);
-      double bevelPct = primaryBevel.percentageOfBladeWidth();
-      double areaSpine = spineThickness * w * (1.0 - bevelPct); //area after the bevel meets the spine
-      double areaBevel; // area of bevel portion
-      if (primaryBevel.curveFactor == 0) { //if the bevel sagitta is 0, it's a flat bevel, so just a triangle
-        areaBevel = 0.5 * spineThickness * (w * bevelPct);
-      } else if (primaryBevel.curveFactor < 0) { //concave bevel
-        areaBevel = getEllipseSegmentArea(w * bevelPct / 2.0, spineThickness, primaryBevel.curveFactor);
-      } else { //convex bevel
-        double a = w * bevelPct / 2.0;
-        double b = spineThickness + primaryBevel.curveFactor;
-        double fullEllipseArea = Math.PI * a * b;
-        double segmentArea = getEllipseSegmentArea(a, b, primaryBevel.curveFactor);
-        areaBevel = fullEllipseArea - segmentArea;
-      }
+      double t = interpolate(tMap, p);
+      double wBevel = w * primaryBevel.percentageOfBladeWidth();
+      double wSpine = w * (1.0 - primaryBevel.percentageOfBladeWidth());
+      double areaSpine = t * wSpine; // rectangular spine area
+      double areaBevel = getSuperEllipseArea(wBevel*0.5, t*0.5, primaryBevel.curveFactor());
       double area = areaBevel + areaSpine; // cross-sectional area at this percentage
 
       if (prevP != null) {
@@ -103,40 +93,6 @@ public class Blade {
     }
 
     return volume;
-  }
-
-//  public static double areaRightTriangleWithCircularHypotenuse(double a, double b, double sagitta) {
-//    if (a <= 0 || b <= 0) throw new IllegalArgumentException("legs must be > 0");
-//    double triangle = 0.5 * a * b;
-//    if (sagitta == 0.0) return triangle;
-//
-//    double L = Math.hypot(a, b);
-//    double absS = Math.abs(sagitta);
-//    // compute radius using magnitude of sagitta
-//    double R = (L * L) / (8.0 * absS) + absS / 2.0;
-//    double h = R - absS;
-//    if (h >= R || Double.isNaN(h)) throw new IllegalArgumentException("invalid sagitta (produces non-real geometry)");
-//
-//    double theta = 2.0 * Math.acos(h / R); // central angle
-//    double segmentArea = 0.5 * R * R * (theta - Math.sin(theta));
-//
-//    return triangle + Math.signum(sagitta) * segmentArea;
-//  }
-
-  /**
-   * Calculates the area of an ellipse segment defined by its semi-major axis (a),
-   * semi-minor axis (b), and height (h) of the segment.
-   * @param a the longer axis
-   * @param b the shorter axis
-   * @param h the height of the segment
-   * @return the area of the ellipse segment in mm^2
-   */
-  public static double getEllipseSegmentArea(double a, double b, double h) {
-    if (a <= 0 || b <= 0) throw new IllegalArgumentException("axes must be > 0");
-    double firstTerm = a * b * Math.acos(1- (h/a));
-    double secondTerm = a * b * (1 - (h/a));
-    double thirdTerm = Math.sqrt((2*h/a) - (Math.pow(h, 2)/Math.pow(a, 2)));
-    return firstTerm - secondTerm * thirdTerm;
   }
 
   /**
