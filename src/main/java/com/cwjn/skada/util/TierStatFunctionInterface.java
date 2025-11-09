@@ -1,7 +1,7 @@
 package com.cwjn.skada.util;
 
-import com.cwjn.skada.data.gen.ExtraTierInfo;
-import com.cwjn.skada.data.gen.WeaponProfile;
+import com.cwjn.skada.data.gen.weapon.ExtraTierInfo;
+import com.cwjn.skada.data.gen.weapon.WeaponProfile;
 
 @FunctionalInterface
 public interface TierStatFunctionInterface {

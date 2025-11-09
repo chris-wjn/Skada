@@ -2,7 +2,7 @@ package com.cwjn.skada.client.gui.tooltip;
 
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
-import com.cwjn.skada.data.gen.ElementSpread;
+import com.cwjn.skada.data.gen.attack.ElementSpread;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.util.Util;
 import com.google.common.collect.HashMultimap;

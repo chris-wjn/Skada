@@ -1,9 +1,8 @@
 package com.cwjn.skada.data.armour;
 
 import com.cwjn.skada.data.SkadaData;
-import com.cwjn.skada.data.damage.WeaponInfo;
-import com.cwjn.skada.data.gen.ArmourMaterialInfo;
-import com.cwjn.skada.data.gen.ArmourPieceInfo;
+import com.cwjn.skada.data.gen.armour.ArmourMaterialInfo;
+import com.cwjn.skada.data.gen.armour.ArmourPieceInfo;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;

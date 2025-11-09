@@ -1,4 +1,4 @@
-package com.cwjn.skada.data.gen;
+package com.cwjn.skada.data.gen.armour;
 
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.registry.AttackType;

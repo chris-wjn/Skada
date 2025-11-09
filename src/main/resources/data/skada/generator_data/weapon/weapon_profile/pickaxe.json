@@ -1,0 +1,34 @@
+{
+  "attackTypes": {
+    "skada:thrust": {
+      "minReach": 0.25,
+      "maxReach": 1.75,
+      "reticleShapes": [
+        "pickaxe_swipe"
+      ]
+    },
+    "singledEdged": false,
+    "handleLength": 700.0,
+    "bladeLength": 50.0,
+    "bladeSpineCrossguardThickness": 15.0,
+    "bladeSpineTipShoulderThickness": 15.0,
+    "bladeCrossguardWidth": 450.0,
+    "bladeTipShoulderWidth": 450.0,
+    "pointOfBalance": 725.0,
+    "edgeBevel": {
+      "angle": 22.5,
+      "shoulderAngle": 180.0,
+      "bevelType": "CONVEX",
+      "edgeRadius": 5.0
+    },
+    "primaryBevel": {
+      "percentageOfBladeWidth": 0.75,
+      "bevelType": "FLAT"
+    },
+    "tipSpecifications": {
+      "tipRadius": 5.0,
+      "tipBevelAngle": 22.5,
+      "tipBevelShoulderAngle": 157.5
+    }
+  }
+}

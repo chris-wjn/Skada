@@ -3,7 +3,7 @@ package com.cwjn.skada.data.registry;
 import com.cwjn.skada.SkadaRegistry;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.LethalityFunction;
-import com.cwjn.skada.data.gen.AttackTypeGeneratorConfiguration;
+import com.cwjn.skada.data.gen.attack.AttackTypeGeneratorConfiguration;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
