@@ -1,4 +1,5 @@
 plugins {
+    id 'java'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
@@ -90,6 +91,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenCentral()
     exclusiveContent {
         forRepository {
             maven {
@@ -105,12 +107,17 @@ repositories {
 }
 
 dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     minecraft "net.neoforged:forge:${minecraft_version}-${neo_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation fg.deobf("maven.modrinth:spark:1.10.53-forge")
     implementation fg.deobf("maven.modrinth:simply-swords:1.54.0-1.20.1-forge")
     implementation fg.deobf("maven.modrinth:architectury-api:9.2.14+forge")
     implementation fg.deobf("maven.modrinth:cloth-config:11.1.118+forge")
+}
+
+tasks.test {
+    useJUnitPlatform() // run JUnit 5 tests
 }
 
 mixin {

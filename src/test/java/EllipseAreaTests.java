@@ -45,4 +45,16 @@ public class EllipseAreaTests {
     Assertions.assertEquals(expectedArea, area, 0.01);
   }
 
+  @Test
+  void testHalfArea() {
+    double a = 80;
+    double b = 8;
+    double r = 2.0/3.0;
+    double areaDoubleEdge = getSuperEllipseArea(53*0.5, 8*0.5, r);
+    double areaSingleEdge = getSuperEllipseArea(53, 8*0.5, r)*0.5;
+    System.out.println(areaSingleEdge);
+    System.out.println(areaDoubleEdge);
+    Assertions.assertEquals(areaSingleEdge, areaDoubleEdge, 0.01);
+  }
+
 }
