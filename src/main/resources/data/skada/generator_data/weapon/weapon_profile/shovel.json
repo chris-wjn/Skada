@@ -1,0 +1,29 @@
+{
+  "handle": {
+    "length": 620.0,
+    "radius": 15.0
+  },
+  "weapon_heads": [
+    {
+      "position_on_handle": 600.0,
+      "orientation": "PERPENDICULAR",
+      "head": {
+        "type": "shovel",
+        "bladeLength": 120.0,
+        "bladeWidth": 110.0,
+        "bladeThickness": 3.0,
+        "socketLength": 60.0,
+        "socketOuterRadius": 18.0,
+        "socketInnerRadius": 14.0,
+        "tipAngle": 18.0
+      }
+    }
+  ],
+  "attack_types": {
+    "skada:strike": {
+      "minReach": 0.4,
+      "maxReach": 1.6
+    }
+  }
+}
+

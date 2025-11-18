@@ -69,21 +69,21 @@ public class WeaponInfo {
     public static WeaponInfo generate(ExtraTierInfo tierInfo, WeaponProfile profile, boolean ignoreAttributes) {
       ElementSpread spread = tierInfo.spread();
       Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
-      for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : profile.attackTypes().entrySet()) {
-        double lethality = entry.getKey().tierStatFunction().lethality(profile, tierInfo);
-        double precision = entry.getKey().tierStatFunction().precision(profile, tierInfo);
-        double critFailChance = entry.getKey().tierStatFunction().criticalFail(profile, tierInfo);
-        double attackSpeed = entry.getKey().tierStatFunction().attackSpeed(profile, tierInfo);
-        retMap.put(entry.getKey(), new AttackTypeInfo(
-                lethality*entry.getValue().lethalityModifier(),
-                precision*entry.getValue().precisionModifier(),
-                entry.getValue().minReach(),
-                entry.getValue().maxReach(),
-                attackSpeed*entry.getValue().attackSpeedModifier(),
-                0.0,
-                critFailChance*entry.getValue().critFailModifier(),
-                entry.getValue().reticleShapes()));
-      }
+//      for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : profile.attackTypes().entrySet()) {
+//        double lethality = entry.getKey().tierStatFunction().lethality(profile, tierInfo);
+//        double precision = entry.getKey().tierStatFunction().precision(profile, tierInfo);
+//        double critFailChance = entry.getKey().tierStatFunction().criticalFail(profile, tierInfo);
+//        double attackSpeed = entry.getKey().tierStatFunction().attackSpeed(profile, tierInfo);
+//        retMap.put(entry.getKey(), new AttackTypeInfo(
+//                lethality*entry.getValue().lethalityModifier(),
+//                precision*entry.getValue().precisionModifier(),
+//                entry.getValue().minReach(),
+//                entry.getValue().maxReach(),
+//                attackSpeed*entry.getValue().attackSpeedModifier(),
+//                0.0,
+//                critFailChance*entry.getValue().critFailModifier(),
+//                entry.getValue().reticleShapes()));
+//      }
       return new WeaponInfo(retMap, spread, ignoreAttributes);
     }
 

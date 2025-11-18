@@ -1,12 +1,15 @@
 package com.cwjn.skada;// java
+import com.cwjn.skada.data.gen.attack.AttackTypeJsonInfo;
 import com.cwjn.skada.data.gen.weapon.WeaponProfile;
+import com.cwjn.skada.data.gen.weapon.parts.Handle;
+import com.cwjn.skada.data.gen.weapon.parts.WeaponHead;
 import com.google.gson.*;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.DataResult;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.apache.commons.io.FileUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,154 +17,144 @@ import java.util.*;
 
 /**
  * Utility to write a default mapping to
- * `skada/generator_data/weapon/by_item_name.json` under the config directory,
+ * `skada/generator_data/weapon/sword.json` under the config directory,
  * with JSON object keys ordered to match the codec field order for known types.
+ *
+ * Note: When run inside a Forge environment, this writes to the Forge config
+ * directory (FMLPaths.CONFIGDIR). When run outside Forge (for example from an
+ * IDE JVM), it falls back to the current working directory.
  */
 public final class WeaponProfileCodecWriter {
 
   private WeaponProfileCodecWriter() {}
 
-  public static void writeDefaultByItemNameJson() {
+  /**
+   * Encode the default {@link WeaponProfile#WeaponProfile()} and write it to
+   * <config>/skada/generator_data/weapon/sword.json as pretty-printed JSON.
+   * @return path to the written file
+   */
+  public static Path writeDefaultSwordJson() throws IOException {
+    WeaponProfile profile = new WeaponProfile();
+    System.out.println("Starting encoding WeaponProfile");
+    // Encode the profile to a Gson JsonElement using Mojang's JsonOps
+    DataResult<com.google.gson.JsonElement> result = WeaponProfile.CODEC.encodeStart(JsonOps.INSTANCE, profile);
+    System.out.println("Finished encoding WeaponProfile");
+    Optional<com.google.gson.JsonElement> maybeJson = result.result();
+    if (maybeJson.isEmpty()) {
+      String err = result.error().map(Object::toString).orElse("Unknown error during encoding");
+      throw new IOException("Failed to encode WeaponProfile: " + err);
+    }
+
+    com.google.gson.JsonElement jsonElem = maybeJson.get();
+
+    // Pretty print using Gson
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    String pretty = gson.toJson(jsonElem);
 
-    Map<String, WeaponProfile> map = new HashMap<>();
-    map.put("sword", new WeaponProfile());
+    // Determine config path: prefer Forge config dir, fall back to current working dir
+    Path configDir;
+    try {
+      configDir = FMLPaths.CONFIGDIR.get();
+      if (configDir == null) throw new IllegalStateException("FMLPaths.CONFIGDIR returned null");
+    } catch (Throwable t) {
+      configDir = Paths.get(".");
+    }
 
-    WeaponProfile.STRING_MAP_CODEC.encodeStart(JsonOps.INSTANCE, map).result().ifPresent(jsonElement -> {
-      // sort object keys deterministically and, for known objects, follow codec field order
-      JsonElement ordered = orderJsonAccordingToCodec(jsonElement);
-      String json = gson.toJson(ordered);
-      Path outDir = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(),
-              "skada", "generator_data", "weapon");
+    Path outDir = configDir.resolve("skada").resolve("generator_data").resolve("weapon");
+    Files.createDirectories(outDir);
+    Path outFile = outDir.resolve("sword.json");
+
+    // Use writeString for convenience
+    Files.writeString(outFile, pretty, StandardCharsets.UTF_8);
+
+    return outFile;
+  }
+
+  /** Convenient CLI entry to run the writer. */
+  public static void main(String[] args) {
+    try {
+      Path p = writeDefaultSwordJson();
+      System.out.println("Wrote default weapon profile to: " + p.toAbsolutePath());
+    } catch (IOException e) {
+      System.err.println("Error writing default weapon profile: " + e.getMessage());
+      System.exit(1);
+    }
+  }
+
+  public static void diagnoseEncode(WeaponProfile profile) {
+    // 1) Try encoding the full profile and print the DataResult and any error messages
+    System.out.println("--- Encoding full WeaponProfile ---");
+    //DataResult<com.google.gson.JsonElement> full = WeaponProfile.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, profile);
+    //System.out.println("Full DataResult: " + full);
+    //full.result().ifPresent(json -> System.out.println("Full JSON (partial): " + json));
+    //full.error().ifPresent(err -> System.err.println("Full encode error: " + err.toString()));
+
+    // 2) Try encoding individual top-level parts so we can narrow down the failure
+    System.out.println("--- Encoding handle ---");
+    try {
+      DataResult<com.google.gson.JsonElement> handleRes = Handle.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, profile.getHandle());
+      System.out.println("Handle DataResult: " + handleRes);
+      handleRes.result().ifPresent(j -> System.out.println("Handle JSON: " + j));
+      handleRes.error().ifPresent(e -> System.err.println("Handle error: " + e.toString()));
+    } catch (Throwable t) {
+      System.err.println("Exception encoding handle:"); t.printStackTrace();
+    }
+
+    System.out.println("--- Encoding weapon_heads list ---");
+    try {
+      com.mojang.serialization.Codec<java.util.List<WeaponProfile.WeaponHeadEntry>> listCodec =
+              com.mojang.serialization.Codec.list(WeaponProfile.WeaponHeadEntry.CODEC);
+      DataResult<com.google.gson.JsonElement> listRes = listCodec.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, profile.getWeaponHeads());
+      System.out.println("weapon_heads DataResult: " + listRes);
+      listRes.result().ifPresent(j -> System.out.println("weapon_heads JSON: " + j));
+      listRes.error().ifPresent(e -> System.err.println("weapon_heads error: " + e.toString()));
+    } catch (Throwable t) {
+      System.err.println("Exception encoding weapon_heads list:"); t.printStackTrace();
+    }
+
+    // 3) Encode each WeaponHeadEntry / WeaponHead individually
+    System.out.println("--- Encoding each WeaponHeadEntry ---");
+    for (int i = 0; i < profile.getWeaponHeads().size(); i++) {
+      WeaponProfile.WeaponHeadEntry entry = profile.getWeaponHeads().get(i);
+      System.out.println("Entry #" + i + " type: " + (entry.getHead() == null ? "null" : entry.getHead().getClass().getName()));
       try {
-        Files.createDirectories(outDir);
-        File outFile = new File(outDir.toFile(), "by_item_name.json");
-        FileUtils.write(outFile, json, "UTF-8");
-        Skada.LOGGER.info("Wrote default WeaponProfile map to {}", outFile.getAbsolutePath());
-      } catch (IOException e) {
-        Skada.LOGGER.error("Failed to write by_item_name.json", e);
+        DataResult<com.google.gson.JsonElement> entryRes = WeaponProfile.WeaponHeadEntry.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, entry);
+        System.out.println("Entry#" + i + " DataResult: " + entryRes);
+        int finalI2 = i;
+        entryRes.result().ifPresent(j -> System.out.println("Entry#" + finalI2 + " JSON: " + j));
+        int finalI3 = i;
+        entryRes.error().ifPresent(e -> System.err.println("Entry#" + finalI3 + " error: " + e.toString()));
+      } catch (Throwable t) {
+        System.err.println("Exception encoding entry #" + i + ":"); t.printStackTrace();
       }
-    });
+
+      // Also try the head codec directly (helps if problem is in WeaponHead)
+      try {
+        @SuppressWarnings("unchecked")
+        com.mojang.serialization.Codec<WeaponHead> headCodec = WeaponHead.CODEC;
+        DataResult<com.google.gson.JsonElement> headRes = headCodec.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, entry.getHead());
+        System.out.println("Entry#" + i + " head DataResult: " + headRes);
+        int finalI = i;
+        headRes.result().ifPresent(j -> System.out.println("Entry#" + finalI + " head JSON: " + j));
+        int finalI1 = i;
+        headRes.error().ifPresent(e -> System.err.println("Entry#" + finalI1 + " head error: " + e.toString()));
+      } catch (Throwable t) {
+        System.err.println("Exception encoding head #" + i + ":"); t.printStackTrace();
+      }
+    }
+
+    // 4) Encode attack_types map and each entry
+    System.out.println("--- Encoding attack_types map ---");
+    try {
+      com.mojang.serialization.Codec<java.util.Map<String, AttackTypeJsonInfo>> mapCodec =
+              com.mojang.serialization.Codec.unboundedMap(com.mojang.serialization.Codec.STRING, AttackTypeJsonInfo.CODEC);
+      DataResult<com.google.gson.JsonElement> mapRes = mapCodec.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, profile.attackTypeStringMap());
+      System.out.println("attack_types DataResult: " + mapRes);
+      mapRes.result().ifPresent(j -> System.out.println("attack_types JSON: " + j));
+      mapRes.error().ifPresent(e -> System.err.println("attack_types error: " + e.toString()));
+    } catch (Throwable t) {
+      System.err.println("Exception encoding attack_types:"); t.printStackTrace();
+    }
   }
 
-  // Field orders matching the RecordCodecBuilder group order in WeaponProfile and nested records
-  private static final List<String> WEAPON_ORDER = List.of(
-          "attackTypes",
-          "singleEdged",
-          "handleLength",
-          "bladeLength",
-          "bladeSpineCrossguardThickness",
-          "bladeSpineTipShoulderThickness",
-          "bladeCrossguardWidth",
-          "bladeTipShoulderWidth",
-          "pointOfBalance",
-          "edgeBevel",
-          "primaryBevel",
-          "tipSpecifications"
-  );
-
-  private static final List<String> TIP_SPEC_ORDER = List.of(
-          "tipRadius",
-          "tipBevelAngle",
-          "tipBevelShoulderAngle"
-  );
-
-  private static final List<String> BEVEL_ORDER = List.of(
-          "percentageOfBladeWidth",
-          "bevelType"
-  );
-
-  private static final List<String> EDGEBEVEL_ORDER = List.of(
-          "angle",
-          "shoulderAngle",
-          "bevelType",
-          "edgeRadius"
-  );
-
-  /**
-   * Top-level dispatcher: recursively order the JSON structure, using codec orders for known objects.
-   */
-  private static JsonElement orderJsonAccordingToCodec(JsonElement element) {
-    if (element == null || element.isJsonNull()) return JsonNull.INSTANCE;
-
-    if (element.isJsonObject()) {
-      JsonObject obj = element.getAsJsonObject();
-
-      // If this object is a WeaponProfile (has singleEdged), use WEAPON_ORDER for its members.
-      if (obj.has("singleEdged")) {
-        return orderObjectWithFieldOrder(obj, WEAPON_ORDER);
-      }
-      // TipSpecifications detection
-      if (obj.has("tipRadius") || (obj.has("tipBevelAngle") && obj.has("tipBevelShoulderAngle"))) {
-        return orderObjectWithFieldOrder(obj, TIP_SPEC_ORDER);
-      }
-      // Bevel detection (primaryBevel)
-      if (obj.has("percentageOfBladeWidth") && obj.has("bevelType")) {
-        return orderObjectWithFieldOrder(obj, BEVEL_ORDER);
-      }
-      // EdgeBevel detection
-      if (obj.has("angle") && (obj.has("edgeRadius") || obj.has("shoulderAngle"))) {
-        return orderObjectWithFieldOrder(obj, EDGEBEVEL_ORDER);
-      }
-
-      // Generic object: top-level map (e.g. by_item_name) or other unknown objects
-      // For top-level maps we want deterministic ordering: sort keys alphabetically,
-      // but for inner unknown objects we also sort keys alphabetically for determinism.
-      List<Map.Entry<String, JsonElement>> entries = new ArrayList<>(obj.entrySet());
-      entries.sort(Comparator.comparing(Map.Entry::getKey));
-
-      JsonObject out = new JsonObject();
-      for (Map.Entry<String, JsonElement> e : entries) {
-        out.add(e.getKey(), orderJsonAccordingToCodec(e.getValue()));
-      }
-      return out;
-    }
-
-    if (element.isJsonArray()) {
-      JsonArray arr = element.getAsJsonArray();
-      JsonArray outArr = new JsonArray();
-      for (JsonElement e : arr) {
-        outArr.add(orderJsonAccordingToCodec(e));
-      }
-      return outArr;
-    }
-
-    // Primitive or other - return a safe copy
-    if (element.isJsonPrimitive()) {
-      JsonPrimitive p = element.getAsJsonPrimitive();
-      if (p.isNumber()) return new JsonPrimitive(p.getAsNumber());
-      if (p.isBoolean()) return new JsonPrimitive(p.getAsBoolean());
-      return new JsonPrimitive(p.getAsString());
-    }
-
-    return element;
-  }
-
-  /**
-   * Build a new JsonObject where members from \`fieldOrder\` appear first in that order (if present),
-   * followed by any remaining members sorted alphabetically. Values are recursively ordered.
-   */
-  private static JsonObject orderObjectWithFieldOrder(JsonObject obj, List<String> fieldOrder) {
-    JsonObject out = new JsonObject();
-
-    // Add fields in the specified order if present
-    for (String key : fieldOrder) {
-      if (obj.has(key)) {
-        out.add(key, orderJsonAccordingToCodec(obj.get(key)));
-      }
-    }
-
-    // Collect remaining keys and sort them
-    List<String> remaining = new ArrayList<>();
-    for (Map.Entry<String, JsonElement> e : obj.entrySet()) {
-      if (!fieldOrder.contains(e.getKey())) remaining.add(e.getKey());
-    }
-    remaining.sort(String::compareTo);
-
-    for (String key : remaining) {
-      out.add(key, orderJsonAccordingToCodec(obj.get(key)));
-    }
-
-    return out;
-  }
 }

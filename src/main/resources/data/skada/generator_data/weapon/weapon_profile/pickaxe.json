@@ -1,34 +1,35 @@
 {
-  "attackTypes": {
+  "handle": {
+    "length": 650.0,
+    "radius": 15.0
+  },
+  "weapon_heads": [
+    {
+      "position_on_handle": 610.0,
+      "orientation": "PERPENDICULAR",
+      "head": {
+        "type": "pick",
+        "eyeLength": 60.0,
+        "eyeHeight": 40.0,
+        "eyeThickness": 20.0,
+        "eyeHoleSemiMajorAxis": 15.0,
+        "eyeHoleSemiMinorAxis": 15.0,
+        "frontSpikeLength": 160.0,
+        "frontSpikeBaseWidth": 40.0,
+        "frontSpikeBaseHeight": 40.0,
+        "rearSpikeLength": 160.0,
+        "rearSpikeBaseWidth": 40.0,
+        "rearSpikeBaseHeight": 40.0
+      }
+    }
+  ],
+  "attack_types": {
     "skada:thrust": {
-      "minReach": 0.25,
+      "minReach": 0.5,
       "maxReach": 1.75,
       "reticleShapes": [
         "pickaxe_swipe"
       ]
-    },
-    "singledEdged": false,
-    "handleLength": 700.0,
-    "bladeLength": 50.0,
-    "bladeSpineCrossguardThickness": 15.0,
-    "bladeSpineTipShoulderThickness": 15.0,
-    "bladeCrossguardWidth": 450.0,
-    "bladeTipShoulderWidth": 450.0,
-    "pointOfBalance": 725.0,
-    "edgeBevel": {
-      "angle": 22.5,
-      "shoulderAngle": 180.0,
-      "bevelType": "CONVEX",
-      "edgeRadius": 5.0
-    },
-    "primaryBevel": {
-      "percentageOfBladeWidth": 0.75,
-      "bevelType": "FLAT"
-    },
-    "tipSpecifications": {
-      "tipRadius": 5.0,
-      "tipBevelAngle": 22.5,
-      "tipBevelShoulderAngle": 157.5
     }
   }
 }

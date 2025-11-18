@@ -48,6 +48,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.cwjn.skada.Skada.LOGGER;
+import static com.cwjn.skada.WeaponProfileCodecWriter.diagnoseEncode;
+import static com.cwjn.skada.WeaponProfileCodecWriter.writeDefaultSwordJson;
 import static com.cwjn.skada.data.SkadaData.DEBUG_ENABLED;
 import static net.minecraft.commands.Commands.literal;
 
@@ -95,8 +97,20 @@ public class SkadaCommand {
                     )
             )
             .then(literal("debug").executes(stack -> toggleDebug(stack.getSource())))
+            .then(literal("test").executes(stack -> testCommand(stack.getSource())))
     );
   }
+
+  private int testCommand(CommandSourceStack source) {
+    try {
+      writeDefaultSwordJson();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return 1;
+  }
+
+
 
   private int toggleDebug(CommandSourceStack source) {
     ServerPlayer player = source.getPlayer();

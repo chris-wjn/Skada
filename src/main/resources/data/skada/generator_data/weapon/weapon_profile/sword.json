@@ -1,4 +1,36 @@
 {
+  "handle": {
+    "length": 375.0,
+    "radius": 15.0
+  },
+  "weapon_heads": [
+    {
+      "position_on_handle": 115.0,
+      "orientation": "PARALLEL",
+      "head": {
+        "typeKey": "blade",
+        "length": 625.0,
+        "thicknessAtBase": 12.0,
+        "thicknessAtTip": 12.0,
+        "widthAtBase": 80.0,
+        "widthAtTip": 80.0,
+        "primaryBevel": {
+          "percentageOfBladeWidth": 1.0,
+          "curveFactor": 1.0
+        },
+        "edgeBevel": {
+          "angle": 22.5,
+          "shoulderAngle": 180.0,
+          "edgeRadius": 5.0
+        },
+        "tipSpecifications": {
+          "tipRadius": 5.0,
+          "tipBevelAngle": 22.5,
+          "tipBevelShoulderAngle": 157.5
+        }
+      }
+    }
+  ],
   "attackTypes": {
     "skada:slash": {
       "minReach": 0.25,
@@ -8,28 +40,5 @@
       "minReach": 0.7,
       "maxReach": 2.25
     }
-  },
-  "singleEdged": false,
-  "handleLength": 375.0,
-  "bladeLength": 625.0,
-  "bladeSpineCrossguardThickness": 12.0,
-  "bladeSpineTipShoulderThickness": 12.0,
-  "bladeCrossguardWidth": 80.0,
-  "bladeTipShoulderWidth": 80.0,
-  "pointOfBalance": 400.0,
-  "edgeBevel": {
-    "angle": 22.5,
-    "shoulderAngle": 180.0,
-    "bevelType": "CONVEX",
-    "edgeRadius": 5.0
-  },
-  "primaryBevel": {
-    "percentageOfBladeWidth": 1.0,
-    "bevelType": "CONVEX"
-  },
-  "tipSpecifications": {
-    "tipRadius": 5.0,
-    "tipBevelAngle": 22.5,
-    "tipBevelShoulderAngle": 157.5
   }
 }
