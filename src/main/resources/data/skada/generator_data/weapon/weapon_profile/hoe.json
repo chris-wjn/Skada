@@ -1,12 +1,10 @@
 {
   "handle": {
-    "length": 650.0,
+    "length": 600.0,
     "radius": 15.0
   },
   "weapon_heads": [
     {
-      "position_on_handle": 610.0,
-      "orientation": "PERPENDICULAR",
       "head": {
         "type": "pick",
         "eyeLength": 60.0,
@@ -14,22 +12,22 @@
         "eyeThickness": 20.0,
         "eyeHoleSemiMajorAxis": 15.0,
         "eyeHoleSemiMinorAxis": 15.0,
-        "frontSpikeLength": 160.0,
+        "frontSpikeLength": 180.0,
         "frontSpikeBaseWidth": 40.0,
         "frontSpikeBaseHeight": 40.0,
-        "rearSpikeLength": 160.0,
-        "rearSpikeBaseWidth": 40.0,
-        "rearSpikeBaseHeight": 40.0
-      }
+        "rearSpikeLength": 0.0,
+        "rearSpikeBaseWidth": 0.0,
+        "rearSpikeBaseHeight": 0.0
+      },
+      "position_on_handle": 560.0,
+      "orientation": "PERPENDICULAR"
     }
   ],
   "attack_types": {
     "skada:thrust": {
-      "minReach": 0.5,
-      "maxReach": 1.75,
-      "reticleShapes": [
-        "pickaxe_swipe"
-      ]
+      "minReach": 0.1,
+      "maxReach": 1.6
     }
   }
 }
+

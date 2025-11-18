@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.cwjn.skada.SkadaRegistry.*;
+import static com.cwjn.skada.WeaponProfileCodecWriter.writeDefaultSwordJson;
 import static com.cwjn.skada.client.Particles.PARTICLES;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -67,7 +68,6 @@ public class Skada {
         Path dirWeaponGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generated");
         Path dirArmourGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generated");
         Path dirMobsGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs", "generated");
-        WeaponProfileCodecWriter.writeDefaultByItemNameJson();
         try {
             Files.createDirectories(dir);
             Files.createDirectories(dirWeapon);
