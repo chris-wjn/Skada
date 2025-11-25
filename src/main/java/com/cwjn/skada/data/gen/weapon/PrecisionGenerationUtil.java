@@ -1,35 +1,39 @@
 package com.cwjn.skada.data.gen.weapon;
 
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
+
 import static com.cwjn.skada.data.SkadaData.EDGE_ANGLE_DEFAULT;
 import static com.cwjn.skada.data.SkadaData.MATERIAL_PROPERTY_SOFT_CAP;
 
 public abstract class PrecisionGenerationUtil {
 
-  public static double slash(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    double edgeAngleNormalized = EDGE_ANGLE_DEFAULT / profile.edgeBevel().angle(); //acuter angle means better cutting
-    double bladeWeight = profile.estimateBladeVolume() * tierInfo.density(); //in grams
+  public static double slash(WeaponProfile profile, ExtraTierInfo material) {
+    WeaponProfile.WeaponHeadEntry head = profile.getSlashHead();
+    if (head.getMaterial().isPresent()) material = head.getMaterial().get();
+    SlashCapable slashHead = (SlashCapable) head.getHead(); //this is a bit dubious but it should be fine
+    double edgeAngleNormalized = EDGE_ANGLE_DEFAULT / slashHead.edgeBevel().angle(); //acuter angle means better cutting
+    double bladeWeight = profile.getVolume() * material.density(); //in grams
 
-    double precision = edgeRadiusToPrecisionBase(profile.edgeBevel().edgeRadius()); //the base for precision comes from edge radius
+    double precision = edgeRadiusToPrecisionBase(slashHead.edgeBevel().edgeRadius()); //the base for precision comes from edge radius
     precision += bladeWeightToPrecisionBase2(bladeWeight); //the blade weight can help, even if the edge is blunt. Heavier blades have more momentum.
-    if (profile.edgeBevel().bevelType() == WeaponProfile.BevelType.CONCAVE) {
-      precision += 5; //concave bevels are slightly more precise
-    } else if (profile.edgeBevel().bevelType() == WeaponProfile.BevelType.CONVEX) {
-      precision -= 5; //convex bevels are slightly less precise
-    }
     precision *= edgeAngleNormalized; //the edge angle modifies precision
 
-    double normalizedHardness = tierInfo.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
-    double normalizedFlexibility = Math.abs(tierInfo.flexibility()-MATERIAL_PROPERTY_SOFT_CAP/2)/(MATERIAL_PROPERTY_SOFT_CAP/2);
+    double normalizedHardness = material.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
+    double normalizedFlexibility = Math.abs(material.flexibility()-MATERIAL_PROPERTY_SOFT_CAP/2)/(MATERIAL_PROPERTY_SOFT_CAP/2);
     precision *= 1 + 0.05*normalizedHardness - 0.09*normalizedFlexibility;
 
     return precision;
   }
 
   public static double thrust(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    double tipBevelAngleNormalized = EDGE_ANGLE_DEFAULT / profile.tipSpecs().tipBevelAngle();
-    double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength()); //percentage from 0-1, where 1 is furthest from pommel
+    WeaponProfile.WeaponHeadEntry thrustHead = profile.getThrustHead();
+    if (thrustHead.getMaterial().isPresent()) tierInfo = thrustHead.getMaterial().get();
+    ThrustCapable head = (ThrustCapable) thrustHead.getHead();
+    double tipBevelAngleNormalized = EDGE_ANGLE_DEFAULT / head.tipSpecs().tipBevelAngle();
+    double pointOfBalanceNormalized = profile.getPointOfBalance() / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
 
-    double precision = tipRadiusToPrecisionBase(profile.tipSpecs().tipRadius()); //the base for precision comes from tip radius
+    double precision = tipRadiusToPrecisionBase(head.tipSpecs().tipRadius()); //the base for precision comes from tip radius
     precision *= tipBevelAngleNormalized; //the tip angle modifies precision
     precision *= 0.5 + (pointOfBalanceNormalized); //the further forward the point of balance, the more precise the thrust
 

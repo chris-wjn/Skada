@@ -1,12 +1,15 @@
 package com.cwjn.skada.data.gen.weapon.parts;
 
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import java.util.Arrays;
 
 /**
   * Class that represents the axe head part of a weapon.
  */
-public class AxeHead extends WeaponHead {
+public class AxeHead extends WeaponHead implements SlashCapable {
 
   public static final Codec<AxeHead> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<AxeHead> instance) ->
           instance.group(
@@ -69,7 +72,7 @@ public class AxeHead extends WeaponHead {
   /*
     * Bevel profile of the axehead. We'll use the same bevel classes as Blade, since they are applicable here as well.
     * Primary bevel is the main bevel along the edge of the axehead, while edge bevel is any additional beveling
-    * done to the edge (e.g. secondary bevel). Since an axehead is made of a rectangle and potentially two more triangles,
+    * done to the edge (e.g. secondary bevel). Since an axehead is made of two rectangles and potentially two more triangles,
     * we'll treat the triangles as rectangles for the purpose of calculating percentage of blade width, then apply the
     * bevels to the triangles. Whatever portion of the bevel exceeds the triangle's width will be ignored.
    */
@@ -97,6 +100,87 @@ public class AxeHead extends WeaponHead {
     this.edgeBevel = edgeBevel;
   }
 
+  @Override
+  public double getLength() {
+    return Math.max(0.0, eyeLength) + Math.max(0.0, cheekLength);
+  }
+
+  @Override
+  public double getWidth() {
+    double cheekTop = cheekHeight + Math.max(0.0, toeHeight);
+    double cheekBottom = -beardHeight;
+    return Math.max(eyeHeight, cheekTop - cheekBottom);
+  }
+
+  @Override
+  public double getSlashNormalizedIdealPointOfBalance() {
+    //the ideal PoB for an axe is where the handle intersects the head, so 0mm up the head.
+    return 0.0;
+  }
+
+  @Override
+  public double getMedianWidth() {
+    double eLen = Math.max(0.0, eyeLength);
+    double cLen = Math.max(0.0, cheekLength);
+    double cH = Math.max(0.0, cheekHeight);
+    double bH = Math.max(0.0, beardHeight);
+    double tH = Math.max(0.0, toeHeight);
+
+    if (cLen <= 0.0) return 0.0;
+
+    double minY = (bH > 0.0) ? -bH : 0.0;
+    double maxY = cH + tH;
+    if (maxY < minY) maxY = minY;
+
+    int steps = 25;
+    double[] distances = new double[steps + 1];
+    for (int i = 0; i <= steps; i++) {
+      double frac = (double) i / steps;
+      double y = minY + (maxY - minY) * frac;
+      double edgeX = bladeEdgeX(eLen, cLen, cH, bH, tH, beardTipDistance, toeTipDistance, y);
+      distances[i] = Math.max(0.0, edgeX - eLen);
+    }
+
+    Arrays.sort(distances);
+    int n = distances.length;
+    return (n % 2 == 1)
+            ? distances[n / 2]
+            : 0.5 * (distances[n / 2 - 1] + distances[n / 2]);
+  }
+
+  private double bladeEdgeX(double eLen, double cLen, double cH, double bH, double tH,
+                            double beardTipDistance, double toeTipDistance, double y) {
+    double frontX = eLen + cLen;
+
+    if (y >= 0.0 && y <= cH) {
+      return frontX;
+    }
+    if (y > cH) {
+      if (tH <= 0.0) return frontX;
+      double cappedY = Math.min(y, cH + tH);
+      double progress = (cappedY - cH) / tH;
+      double apexX = eLen + toeTipDistance;
+      return frontX + (apexX - frontX) * progress;
+    }
+
+    if (bH <= 0.0) return frontX;
+    double cappedY = Math.max(y, -bH);
+    double progress = (0.0 - cappedY) / bH;
+    double apexX = eLen + beardTipDistance;
+    return frontX + (apexX - frontX) * progress;
+  }
+
+  @Override
+  public Blade.Bevel primaryBevel() {
+    return primaryBevel;
+  }
+
+  @Override
+  public Blade.EdgeBevel edgeBevel() {
+    return edgeBevel;
+  }
+
+  @Override
   public double getVolume() {
     if (eyeThickness <= 0.0) return 0.0;
 
@@ -152,6 +236,7 @@ public class AxeHead extends WeaponHead {
     return Math.max(finalVol, 0.0);
   }
 
+  @Override
   public double getPointOfBalance() {
     // Point of balance measured from the start of the eye rectangle (x = 0)
     // If volume is zero, default to half of total length (eyeLength + cheekLength)/2

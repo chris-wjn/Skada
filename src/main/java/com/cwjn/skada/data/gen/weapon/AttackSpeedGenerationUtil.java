@@ -1,5 +1,6 @@
 package com.cwjn.skada.data.gen.weapon;
 
+import com.cwjn.skada.data.registry.AttackType;
 import net.minecraft.util.Mth;
 
 /**
@@ -8,21 +9,27 @@ import net.minecraft.util.Mth;
  */
 public abstract class AttackSpeedGenerationUtil {
 
-  public static double slash(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    double totalLength = profile.bladeLength() + profile.handleLength();
-    double idealPointOfBalance = (profile.handleLength() / totalLength) + ((profile.bladeLength() * 0.33) / totalLength);
-    return getBaseAttackSpeedMultiplier(profile, tierInfo, idealPointOfBalance);
+  public static double slash(WeaponProfile profile, ExtraTierInfo material) {
+    WeaponProfile.WeaponHeadEntry head = profile.getSlashHead();
+    if (head.getMaterial().isPresent()) material = head.getMaterial().get();
+    double totalLength = profile.getTotalLength();
+    double idealPointOfBalance = profile.getIdealPointOfBalanceWithHead(head, AttackType.slash())/totalLength;
+    return getBaseAttackSpeedMultiplier(profile, material, idealPointOfBalance);
   }
 
   public static double thrust(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    double totalLength = profile.bladeLength() + profile.handleLength();
-    double idealPointOfBalance = profile.handleLength() / totalLength; //essentially, the very start of the blade
+    WeaponProfile.WeaponHeadEntry head = profile.getThrustHead();
+    if (head.getMaterial().isPresent()) tierInfo = head.getMaterial().get();
+    double totalLength = profile.getTotalLength();
+    double idealPointOfBalance = profile.getIdealPointOfBalanceWithHead(head, AttackType.thrust())/ totalLength; //essentially, the very start of the head
     return getBaseAttackSpeedMultiplier(profile, tierInfo, idealPointOfBalance);
   }
 
   public static double strike(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    double totalLength = profile.bladeLength() + profile.handleLength();
-    double idealPointOfBalance = (profile.handleLength() / totalLength) + ((profile.bladeLength() * 0.5) / totalLength);
+    WeaponProfile.WeaponHeadEntry head = profile.getStrikeHead();
+    if (head.getMaterial().isPresent()) tierInfo = head.getMaterial().get();
+    double totalLength = profile.getTotalLength();
+    double idealPointOfBalance = profile.getIdealPointOfBalanceWithHead(head, AttackType.strike())/ totalLength;
     return getBaseAttackSpeedMultiplier(profile, tierInfo, idealPointOfBalance);
   }
 
@@ -38,7 +45,7 @@ public abstract class AttackSpeedGenerationUtil {
    */
   private static double getBaseAttackSpeedMultiplier(WeaponProfile profile, ExtraTierInfo tierInfo, double idealPointOfBalance) {
     idealPointOfBalance = Mth.clamp(idealPointOfBalance, 0.001, 0.999); //this should never be exactly 0 or 1, but just in case
-    double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength()); //percentage from 0-1, where 1 is furthest from pommel
+    double pointOfBalanceNormalized = profile.getPointOfBalance() / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
     //we'll normalize the differential between actual and ideal point of balance. -1.0 for furthest from ideal towards tip, +1.0 for furthest from ideal towards handle.
     double POBDifferential = idealPointOfBalance - pointOfBalanceNormalized;
     //if the POBDifferential is 0, return 1.0 immediately. Leave room for some delta, since we're dealing with doubles.

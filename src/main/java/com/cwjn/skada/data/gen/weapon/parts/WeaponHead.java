@@ -11,10 +11,34 @@ import com.mojang.serialization.JsonOps;
 
 public abstract class WeaponHead {
 
+  /**
+   * Get the length of the weapon head in its primary dimension (e.g., blade length, axe head width).
+   * @return Length in millimeters.
+   */
+  public double getLength() {
+    return 0;
+  }
+
+  /**
+   * Get the width of the weapon head in its secondary dimension (e.g., blade width, axe head height).
+   * @return Width in millimeters.
+   */
+  public double getWidth() {
+    return 0;
+  }
+
+  /**
+   * Get the volume of the weapon head.
+   * @return Volume in cubic millimeters.
+   */
   public double getVolume() {
     return 0;
   }
 
+  /**
+   * Get the point of balance for the weapon head.
+   * @return Point of balance in millimeters from the base.
+   */
   public double getPointOfBalance() {
     return 0;
   }

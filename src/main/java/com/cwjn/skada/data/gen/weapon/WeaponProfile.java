@@ -1,12 +1,17 @@
 package com.cwjn.skada.data.gen.weapon;
 
+import com.cwjn.skada.Skada;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.gen.attack.AttackTypeJsonInfo;
 import com.cwjn.skada.data.gen.weapon.parts.*;
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.StrikeCapable;
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 import com.cwjn.skada.data.registry.AttackType;
 
 import java.util.*;
+
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
@@ -19,122 +24,193 @@ import javax.annotation.Nullable;
  */
 public class WeaponProfile {
 
-    private static final double BLADE_WEIGHT_DEFAULT = 1300.0; // Default blade weight in grams
+  private Optional<WeaponHeadEntry> slashHead = Optional.empty();
+  private Optional<WeaponHeadEntry> thrustHead = Optional.empty();
+  private Optional<WeaponHeadEntry> strikeHead = Optional.empty();
+  private static final double BLADE_WEIGHT_DEFAULT = 1300.0; // Default blade weight in grams
 
+  /**
+   * Enum to describe how a weapon head is oriented relative to the handle axis.
+   */
+  public enum HeadOrientation {
     /**
-     * Enum to describe how a weapon head is oriented relative to the handle axis.
+     * Head extends along the handle axis (e.g., blade, spear point)
      */
-    public enum HeadOrientation {
-        /** Head extends along the handle axis (e.g., blade, spear point) */
-        PARALLEL,
-        /** Head extends perpendicular to the handle axis (e.g., axe, mace, pick) */
-        PERPENDICULAR
+    PARALLEL,
+    /**
+     * Head extends perpendicular to the handle axis (e.g., axe, mace, pick)
+     */
+    PERPENDICULAR
+  }
+
+  /**
+   * Entry class to store a weapon head with its position and orientation on the handle.
+   */
+  public static class WeaponHeadEntry {
+    private final WeaponHead head;
+    private final @Nullable ExtraTierInfo material;
+    private final double positionOnHandle; // Distance from base of handle in mm
+    private final HeadOrientation orientation;
+
+    public WeaponHeadEntry(WeaponHead head, double positionOnHandle, HeadOrientation orientation, @Nullable ExtraTierInfo material) {
+      this.head = head;
+      this.positionOnHandle = positionOnHandle;
+      this.orientation = orientation;
+      this.material = material;
     }
 
-    /**
-     * Entry class to store a weapon head with its position and orientation on the handle.
-     */
-    public static class WeaponHeadEntry {
-      private final WeaponHead head;
-      private final @Nullable ExtraTierInfo material;
-      private final double positionOnHandle; // Distance from base of handle in mm
-      private final HeadOrientation orientation;
-
-      public WeaponHeadEntry(WeaponHead head, double positionOnHandle, HeadOrientation orientation, @Nullable ExtraTierInfo material) {
-        this.head = head;
-        this.positionOnHandle = positionOnHandle;
-        this.orientation = orientation;
-        this.material = material;
-      }
-
-      public WeaponHead getHead() {
-        return head;
-      }
-
-      public double getPositionOnHandle() {
-        return positionOnHandle;
-      }
-
-      public HeadOrientation getOrientation() {
-        return orientation;
-      }
-
-      public Optional<ExtraTierInfo> getMaterial() {
-        return Optional.ofNullable(material);
-      }
-
-      public static final Codec<WeaponHeadEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-              WeaponHead.DISPATCH_CODEC.fieldOf("head").forGetter(WeaponHeadEntry::getHead),
-              Codec.DOUBLE.fieldOf("position_on_handle").forGetter(WeaponHeadEntry::getPositionOnHandle),
-              Codec.STRING.fieldOf("orientation").forGetter((WeaponHeadEntry e) -> e.getOrientation().name()),
-              ExtraTierInfo.CODEC.optionalFieldOf("material").forGetter(WeaponHeadEntry::getMaterial)
-      ).apply(instance, (head, pos, oriStr, materialOpt) ->
-              new WeaponHeadEntry(head, pos, HeadOrientation.valueOf(oriStr), materialOpt.orElse(null))
-      ));
+    public WeaponHead getHead() {
+      return head;
     }
 
-    private final Handle handle;
-    private final List<WeaponHeadEntry> weaponHeads;
-    private final Map<AttackType, AttackTypeJsonInfo> attackTypes;
+    public double getPositionOnHandle() {
+      return positionOnHandle;
+    }
+
+    public HeadOrientation getOrientation() {
+      return orientation;
+    }
+
+    public Optional<ExtraTierInfo> getMaterial() {
+      return Optional.ofNullable(material);
+    }
+
+    public static final Codec<WeaponHeadEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            WeaponHead.DISPATCH_CODEC.fieldOf("head").forGetter(WeaponHeadEntry::getHead),
+            Codec.DOUBLE.fieldOf("position_on_handle").forGetter(WeaponHeadEntry::getPositionOnHandle),
+            Codec.STRING.fieldOf("orientation").forGetter((WeaponHeadEntry e) -> e.getOrientation().name()),
+            ExtraTierInfo.CODEC.optionalFieldOf("material").forGetter(WeaponHeadEntry::getMaterial)
+    ).apply(instance, (head, pos, oriStr, materialOpt) ->
+            new WeaponHeadEntry(head, pos, HeadOrientation.valueOf(oriStr), materialOpt.orElse(null))
+    ));
+  }
+
+  private final Handle handle;
+  private final List<WeaponHeadEntry> weaponHeads;
+  private final Map<AttackType, AttackTypeJsonInfo> attackTypes;
 
   public List<WeaponHeadEntry> getWeaponHeads() {
     return weaponHeads;
   }
 
   /**
-     * Constructor for WeaponProfile.
-     * @param handle The handle of the weapon
-     * @param weaponHeads List of weapon heads with their positions and orientations on the handle
-     * @param attackTypes Map of attack types for this weapon
+   * Constructor for WeaponProfile.
+   *
+   * @param handle      The handle of the weapon
+   * @param weaponHeads List of weapon heads with their positions and orientations on the handle
+   * @param attackTypes Map of attack types for this weapon
+   */
+  public WeaponProfile(Handle handle,
+                       List<WeaponHeadEntry> weaponHeads,
+                       Map<AttackType, AttackTypeJsonInfo> attackTypes) {
+    this.handle = handle;
+    this.weaponHeads = weaponHeads != null ? weaponHeads : new ArrayList<>();
+    this.attackTypes = attackTypes != null ? attackTypes : new HashMap<>();
+    /*
+      We'll take note of the "main" weapon head for each attack type for quick access later.
+      My best idea right now is to just take the one with the largest volume for each type.
+      TODO: maybe improve this selection logic later?
      */
-    public WeaponProfile(Handle handle,
-                        List<WeaponHeadEntry> weaponHeads,
-                        Map<AttackType, AttackTypeJsonInfo> attackTypes) {
-        this.handle = handle;
-        this.weaponHeads = weaponHeads != null ? weaponHeads : new ArrayList<>();
-        this.attackTypes = attackTypes != null ? attackTypes : new HashMap<>();
+    for (WeaponHeadEntry entry : this.weaponHeads) {
+      if (entry.head instanceof SlashCapable) {
+        if (slashHead.isEmpty()) slashHead = Optional.of(entry);
+        else {
+          if (slashHead.get().head.getVolume() < entry.head.getVolume()) {
+            slashHead = Optional.of(entry);
+          }
+        }
+      }
+      if (entry.head instanceof ThrustCapable) {
+        if (thrustHead.isEmpty()) thrustHead = Optional.of(entry);
+        else {
+          if (thrustHead.get().head.getVolume() < entry.head.getVolume()) {
+            thrustHead = Optional.of(entry);
+          }
+        }
+      }
+      if (entry.head instanceof StrikeCapable) {
+        if (strikeHead.isEmpty()) strikeHead = Optional.of(entry);
+        else {
+          if (strikeHead.get().head.getVolume() < entry.head.getVolume()) {
+            strikeHead = Optional.of(entry);
+          }
+        }
+      }
     }
+  }
 
-    /**
-     * Default constructor with reasonable defaults for a one-handed sword.
-     * Uses a <a href="https://kvetun-armoury.com/assets/images/products/163/caroling.png">Carolingian sword</a> as a model.
-     * Measurements in millimetres.
-     */
-    public WeaponProfile() {
-      this.handle = new Handle(115, 15, null); // 115mm length, 15mm radius
-      Blade blade = new Blade(
-              false, 50, 30, null,
-              8, 6, null, 750,
-              new Blade.Bevel(60, 1.5),
-              new Blade.EdgeBevel(22.5, 180, 5),
-              new Blade.TipSpecifications(1000, 40, 150),
-              new Blade.Fuller(true, 40, 4)
-      );
-      this.weaponHeads = new ArrayList<>();
-      weaponHeads.add(new WeaponHeadEntry(blade, 115, HeadOrientation.PARALLEL, null)); // Blade starts at 115mm from base of handle
-      this.attackTypes = new HashMap<>(
-              Map.of(AttackType.slash(), new AttackTypeJsonInfo(
-                      0.2, 3.0, 1.0, 1.0, 1.0, 1.0, List.of()
-              ))
-      );
-    }
+  /**
+   * Default constructor with reasonable defaults for a one-handed sword.
+   * Uses a <a href="https://kvetun-armoury.com/assets/images/products/163/caroling.png">Carolingian sword</a> as a model.
+   * Measurements in millimetres.
+   */
+  public WeaponProfile() {
+    this.handle = new Handle(115, 15, null); // 115mm length, 15mm radius
+    Blade blade = new Blade(
+            false, 50, 30, null,
+            8, 6, null, 750,
+            new Blade.Bevel(60, 1.5),
+            new Blade.EdgeBevel(22.5, 180, 5),
+            new Blade.TipSpecifications(1000, 40, 150),
+            new Blade.Fuller(true, 40, 4)
+    );
+    this.weaponHeads = new ArrayList<>();
+    weaponHeads.add(new WeaponHeadEntry(blade, 115, HeadOrientation.PARALLEL, null)); // Blade starts at 115mm from base of handle
+    this.attackTypes = new HashMap<>(
+            Map.of(AttackType.slash(), new AttackTypeJsonInfo(
+                    0.2, 3.0, 1.0, 1.0, 1.0, 1.0, List.of()
+            ))
+    );
+  }
 
-    /**
-     * Calculate the total volume of the weapon, using
-     * the volumes of the handle and weapon heads.
-     * @return total volume in mm³
-     */
-    public double getVolume() {
-        return handle.getVolume() + weaponHeads.stream()
-                .mapToDouble(entry -> entry.getHead().getVolume())
-                .sum();
-    }
+  public boolean canSlash() {
+    return slashHead.isPresent();
+  }
+
+  public boolean canThrust() {
+    return thrustHead.isPresent();
+  }
+
+  public boolean canStrike() {
+    return strikeHead.isPresent();
+  }
+
+  public WeaponHeadEntry getSlashHead() {
+    return this.slashHead.orElseThrow(() ->
+            new IllegalStateException("Tried to get slash head of a weapon that cannot slash!")
+    );
+  }
+
+  public WeaponHeadEntry getThrustHead() {
+    return thrustHead.orElseThrow(() ->
+            new IllegalStateException("Tried to get thrust head of a weapon that cannot thrust!")
+    );
+  }
+
+  public WeaponHeadEntry getStrikeHead() {
+    return strikeHead.orElseThrow(() ->
+            new IllegalStateException("Tried to get strike head of a weapon that cannot strike!")
+    );
+  }
+
+  /**
+   * Calculate the total volume of the weapon, using
+   * the volumes of the handle and weapon heads.
+   *
+   * @return total volume in mm³
+   */
+  public double getVolume() {
+    return handle.getVolume() + weaponHeads.stream()
+            .mapToDouble(entry -> entry.getHead().getVolume())
+            .sum();
+  }
 
   /**
    * Get the point of balance (center of mass) from the base of the handle.
    * Assumes uniform density for all components.
    * For perpendicular heads (axe, mace, pick), the head's internal PoB doesn't shift
    * the balance along the handle axis - only its mounting position matters.
+   *
    * @return point of balance in millimeters from the base of the handle
    */
   public double getPointOfBalance() {
@@ -173,15 +249,87 @@ public class WeaponProfile {
     return totalMoment / totalVolume;
   }
 
-    public Handle getHandle() {
+  /**
+   * Get the ideal point of balance along the total weapon length when accounting for a given weapon head
+   * and attack type.
+   * @param headEntry the weapon head
+   * @param attackType the attack type to calculate ideal PoB for
+   * @return the ideal point of balance in mm from the base of the handle
+   */
+  public double getIdealPointOfBalanceWithHead(WeaponHeadEntry headEntry, AttackType attackType) {
+    double bladeStart = headEntry.getPositionOnHandle();
+    if (headEntry.getOrientation() == HeadOrientation.PERPENDICULAR) {
+      return bladeStart;
+    }
+    else {
+      double headIdealPoB = 0.0;
+      // Determine the normalized ideal PoB based on attack type and head capabilities
+      WeaponHead head = headEntry.getHead();
+      if (attackType.equals(AttackType.slash()) && head instanceof SlashCapable slashHead) {
+        headIdealPoB = slashHead.getSlashNormalizedIdealPointOfBalance();
+      } else if (attackType.equals(AttackType.thrust()) && head instanceof ThrustCapable thrustHead) {
+        headIdealPoB = thrustHead.getThrustNormalizedIdealPointOfBalance();
+      } else if (attackType.equals(AttackType.strike()) && head instanceof StrikeCapable strikeHead) {
+        headIdealPoB = strikeHead.getStrikeNormalizedIdealPointOfBalance();
+      }
+      return bladeStart + headEntry.getHead().getLength() * headIdealPoB;
+    }
+  }
+
+  /**
+   * Get the distance that the head(s) extend beyond the handle.
+   * Most likely caused by just 1 head, but technically could be multiple.
+   * @return length of head beyond handle in mm
+   */
+  public double getHeadExtension() {
+    double maxHeadEnd = 0.0;
+    for (WeaponHeadEntry entry : weaponHeads) {
+      double headEnd = entry.getPositionOnHandle();
+      if (entry.getOrientation() == HeadOrientation.PARALLEL) {
+        headEnd += entry.getHead().getLength();
+      }
+      else {
+        headEnd += entry.getHead().getWidth();
+      }
+      if (headEnd > maxHeadEnd) {
+        maxHeadEnd = headEnd;
+      }
+    }
+    double headLength = maxHeadEnd - handle.getLength();
+    return Math.max(0.0, headLength);
+  }
+
+  public double getTotalLength() {
+    double maxLength = handle.getLength();
+    for (WeaponHeadEntry entry : weaponHeads) {
+      double headEnd = entry.getPositionOnHandle();
+      if (entry.getOrientation() == HeadOrientation.PARALLEL) {
+        headEnd += entry.getHead().getLength();
+      }
+      else {
+        headEnd += entry.getHead().getWidth();
+      }
+      if (headEnd > maxLength) {
+        maxLength = headEnd;
+      }
+    }
+    return maxLength;
+  }
+
+  public Handle getHandle() {
     return handle;
+  }
+
+  public Map<AttackType, AttackTypeJsonInfo> getAttackTypes() {
+    return attackTypes;
   }
 
   /**
    * Estimate the total volume of all weapon heads (blades).
+   *
    * @return total blade volume in mm³
    */
-  private double estimateBladeVolume() {
+  private double getBladeVolume() {
     return weaponHeads.stream()
             .mapToDouble(entry -> entry.getHead().getVolume())
             .sum();
@@ -193,16 +341,17 @@ public class WeaponProfile {
    * that would make very light or very heavy blades have extreme values.
    * Instead, we use a logarithmic scale to keep values within a reasonable range, with
    * an average value of 1.0 for a blade weight of 1300 grams (the default).
+   *
    * @return a double representing the normalized blade weight.
    */
   public double normalizeBladeWeight(ExtraTierInfo material) { //in grams, assuming iron density of 7.85 g/cm³
-    double weight = this.estimateBladeVolume() * material.density(); //in grams
-    return Math.atan((weight/(BLADE_WEIGHT_DEFAULT+200)) - (BLADE_WEIGHT_DEFAULT/(BLADE_WEIGHT_DEFAULT+200)))/2 + 1;
+    double weight = this.getBladeVolume() * material.density(); //in grams
+    return Math.atan((weight / (BLADE_WEIGHT_DEFAULT + 200)) - (BLADE_WEIGHT_DEFAULT / (BLADE_WEIGHT_DEFAULT + 200))) / 2 + 1;
   }
 
   public WeaponInfo generate(ExtraTierInfo material) {
     // We'll check the best stats for each weapon head and use the best one
-        return WeaponInfo.generate(material, this, false);
+    return WeaponInfo.generate(material, this, false);
   }
 
   public Map<String, AttackTypeJsonInfo> attackTypeStringMap() {

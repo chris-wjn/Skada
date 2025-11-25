@@ -1,4 +1,7 @@
 package com.cwjn.skada.data.gen.weapon;
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
+import com.cwjn.skada.data.registry.AttackType;
 
 import static com.cwjn.skada.data.SkadaData.BEVEL_ANGLE_DEFAULT;
 import static com.cwjn.skada.data.SkadaData.MATERIAL_PROPERTY_SOFT_CAP;
@@ -9,34 +12,35 @@ public abstract class LethalityGenerationUtil {
    * Calculates lethality for slashing attacks.
    * Average lethality for a sword should be around 50-70
    * @param profile The weapon profile of the weapon
-   * @param tierInfo The weapon material info
+   * @param material The weapon material info
    * @return a double representing lethality
    */
-  public static double slash(WeaponProfile profile, ExtraTierInfo tierInfo) {
+  public static double slash(WeaponProfile profile, ExtraTierInfo material) {
     //First we'll normalize our values for the weapon profile. We take 1 to be the "default" value.
-    double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength()); //percentage from 0-1, where 1 is furthest from pommel
-    double primaryBevelAngle = profile.primaryBevelAngle(); //mathematically derived
+    WeaponProfile.WeaponHeadEntry head = profile.getSlashHead();
+    if (head.getMaterial().isPresent()) material = head.getMaterial().get();
+    SlashCapable slashHead = (SlashCapable) head.getHead(); //this is a bit dubious but it should be fine
+    double pointOfBalanceNormalized = profile.getPointOfBalance() / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
+    double primaryBevelAngle = slashHead.primaryBevelAngle();
     double primaryBevelAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryBevelAngle; //acuter angle means more lethality cause better cutting
-    double normalizedBladeWeight = profile.normalizeBladeWeight(tierInfo);
+    double normalizedBladeWeight = profile.normalizeBladeWeight(material);
 
     //Some calculations about the balance point of the weapon, using material density and profile dimensions
-    double bladeStartPercentage = profile.handleLength() / (profile.bladeLength() + profile.handleLength()); //the distance up the weapon where the blade portion starts, as a percentage of total length
-    double idealPointOfBalance = bladeStartPercentage + (profile.bladeLength() * 0.33) / (profile.bladeLength() + profile.handleLength()); //ideal point of balance is 33% up the blade from the blade start
+    double bladeStartPercentage = profile.getHandle().getLength() / profile.getTotalLength(); //the distance up the weapon where the blade portion starts, as a percentage of total length
+    double idealPointOfBalanceNormalized = profile.getIdealPointOfBalanceWithHead(head, AttackType.slash())/profile.getTotalLength();
 
     // most important thing is bevel angle and length, so let's start there
-    double lethality = bevelLengthToLethalityBase(profile.absoluteBevelLength(profile.pointOfBalance())) * primaryBevelAngleNormalized; //multiply here to make both stats relevant
-    if (profile.primaryBevel().bevelType() == WeaponProfile.BevelType.CONCAVE) {
-      lethality += 10; //concave bevels are slightly more lethal
-    } else if (profile.primaryBevel().bevelType() == WeaponProfile.BevelType.CONVEX) {
-      lethality -= 10; //convex bevels are slightly less lethal
-    }
+    double lethality = bevelLengthToLethalityBase(slashHead.absoluteBevelLength()) * primaryBevelAngleNormalized; //multiply here to make both stats relevant
+
+    lethality *= bevelCurvatureToLethalityMult(slashHead.primaryBevel().curveFactor());
+
     if (pointOfBalanceNormalized >= bladeStartPercentage) {
       lethality += bladeStartPercentage*10; //if the point of balance is on the blade, give a little bonus
     }
-    lethality *= 0.5 + ((pointOfBalanceNormalized/(2*idealPointOfBalance))); //the ideal point of balance is where lethality and attack speed are balanced, higher = more lethality, lower = more speed.
+    lethality *= 0.5 + ((pointOfBalanceNormalized/(2*idealPointOfBalanceNormalized))); //the ideal point of balance is where lethality and attack speed are balanced, higher = more lethality, lower = more speed.
 
-    double normalizedHardness = tierInfo.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
-    double normalizedFlexibility = Math.abs(tierInfo.flexibility()-MATERIAL_PROPERTY_SOFT_CAP/2)/(MATERIAL_PROPERTY_SOFT_CAP/2);
+    double normalizedHardness = material.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
+    double normalizedFlexibility = Math.abs(material.flexibility()-MATERIAL_PROPERTY_SOFT_CAP/2)/(MATERIAL_PROPERTY_SOFT_CAP/2);
     lethality *= 1 + 0.04*normalizedHardness + 0.07*normalizedBladeWeight - 0.05*normalizedFlexibility; //factor material properties
     /*
       increases with hardness (keeps a sharp edge), flexibility has a sweet spot
@@ -63,12 +67,30 @@ public abstract class LethalityGenerationUtil {
     }
   }
 
+  /**
+   * Derives a lethality multiplier from the bevel curvature factor.
+   * Convex bevels (higher curve factor) are more lethal, concave bevels (lower curve factor) are less lethal.
+   * The curve factor is expected to be between 0.33 and 2.0, but could be higher or lower.
+   * @param curveFactor the curve factor of the bevel.
+   * @return a lethality multiplier, where 1.0 is neutral.
+   */
+  private static double bevelCurvatureToLethalityMult(double curveFactor) {
+    if (curveFactor <= 0) return 1;
+    return 1/(2*curveFactor) + 0.5;
+  }
+
   public static double thrust(WeaponProfile profile, ExtraTierInfo tierInfo) {
+    WeaponProfile.WeaponHeadEntry thrustHead = profile.getThrustHead();
+    if (thrustHead.getMaterial().isPresent()) tierInfo = thrustHead.getMaterial().get();
+    ThrustCapable head = (ThrustCapable) thrustHead.getHead();
     //weapon profile values and normalizations
-    double primaryAngle = -180 + profile.tipSpecs().tipBevelAngle() + profile.tipSpecs().tipBevelShoulderAngle(); //mathematically derived
+    double primaryAngle = -180 + head.tipSpecs().tipBevelAngle() + head.tipSpecs().tipBevelShoulderAngle(); //mathematically derived
     double primaryAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryAngle; //acuter angle means more lethality cause better piercing
-    double lethality = primaryAngleNormalized * bladeDimensionsToLethalityBase(profile.bladeLength(), profile.bladeTipShoulderWidth(), profile.bladeCrossguardWidth());
-    if (profile.singleEdged()) lethality*=0.5;
+    double lethality = primaryAngleNormalized * bladeDimensionsToLethalityBase(head);
+
+    if (head instanceof SlashCapable slashCapable && slashCapable.isSingleEdged()) {
+      lethality *= 0.5;
+    }
 
     double normalizedHardness = tierInfo.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
     double normalizedFlexibility = tierInfo.flexibility()/MATERIAL_PROPERTY_SOFT_CAP;
@@ -105,12 +127,28 @@ public abstract class LethalityGenerationUtil {
     }
   }
 
+  /**
+   * Calculates a base lethality value for thrust from the dimensions of a ThrustCapable head.
+   * The head could be any shape, blade, spike, cone, etc, so we need the head to provide its
+   * own taper value.
+   * @param head the ThrustCapable head of the weapon
+   * @return the base lethality value, somewhere between 0 and ~80.
+   */
+  public static double bladeDimensionsToLethalityBase(ThrustCapable head) {
+    double taperValue = head.getTaperValue();
+    if (taperValue <= 91.3) {
+      return 0.82 * taperValue;
+    } else {
+      return 75.0 + 5*Math.log(1 + 0.1*(taperValue-91.3));
+    }
+  }
+
   public static double strike(WeaponProfile profile, ExtraTierInfo tierInfo) {
     //Some calculations about the balance point of the weapon, using material density and profile dimensions
-    double pointOfBalanceNormalized = profile.pointOfBalance() / (profile.bladeLength() + profile.handleLength());
+    double pointOfBalanceNormalized = profile.getPointOfBalance() / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
 
-    double bladeWeight = profile.estimateBladeVolume() * tierInfo.density(); //in grams
-    double lethality = weightToLethalityBase(bladeWeight);
+    double weight = profile.getVolume() * tierInfo.density(); //in grams
+    double lethality = weightToLethalityBase(weight);
 
     lethality *= 0.5 + 0.75*pointOfBalanceNormalized;
 

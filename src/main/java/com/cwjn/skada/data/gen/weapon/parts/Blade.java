@@ -1,5 +1,7 @@
 package com.cwjn.skada.data.gen.weapon.parts;
 
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -11,7 +13,7 @@ import java.util.TreeSet;
 /**
  * A class that represents a blade, like on a sword or knife.
  */
-public class Blade extends WeaponHead {
+public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
 
   public static final Codec<Blade> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<Blade> instance) ->
           instance.group(
@@ -38,6 +40,69 @@ public class Blade extends WeaponHead {
   @Override
   public String typeKey() {
     return "blade";
+  }
+
+  @Override
+  public double getLength() {
+    return this.length;
+  }
+
+  public Bevel primaryBevel() {
+    return this.primaryBevel;
+  }
+
+  public EdgeBevel edgeBevel() {
+    return this.edgeBevel;
+  }
+
+  @Override
+  public double getMedianWidth() {
+    if (length <= 0.0) return 0.0;
+    if ((widthAtBase <= 0.0) && (widthAtTip <= 0.0)) return 0.0;
+
+    TreeMap<Double, Double> wMap = buildNormalizedMap(widthAtPoints, widthAtBase, widthAtTip);
+    int steps = 25;
+    double[] samples = new double[steps + 1];
+    for (int i = 0; i <= steps; i++) {
+      double frac = (double) i / steps; // normalized position along blade length
+      double w = interpolate(wMap, frac);
+      // Guard against negative or NaN widths
+      if (Double.isNaN(w) || w < 0.0) w = 0.0;
+      samples[i] = w;
+    }
+    java.util.Arrays.sort(samples);
+    int n = samples.length;
+    return (n % 2 == 1) ? samples[n / 2] : 0.5 * (samples[n / 2 - 1] + samples[n / 2]);
+  }
+
+  @Override
+  public boolean isSingleEdged() {
+    return this.singleEdged;
+  }
+
+  @Override
+  public TipSpecifications tipSpecs() {
+    return this.tipSpecifications;
+  }
+
+  @Override
+  public double getTaperValue() {
+    double median = getMedianWidth();
+    double baseRatio = length / median;
+    TreeMap<Double, Double> wMap = buildNormalizedMap(widthAtPoints, widthAtBase, widthAtTip);
+    int steps = 25;
+    double prevW = interpolate(wMap, 1.0); // start at tip (1.0) and move toward base (0.0)
+    for (int i = 1; i <= steps; i++) {
+      double frac = 1.0 - (double) i / steps;
+      double currW = interpolate(wMap, frac);
+      double diff = prevW - currW; // difference between sequential points from tip -> base
+      if (diff > 0.0) {
+        baseRatio -= diff / median; // subtract normalized difference to keep units consistent
+      }
+      prevW = currW;
+    }
+    if (Double.isNaN(baseRatio) || baseRatio < 0.0) return 0.0;
+    return baseRatio;
   }
 
   private final boolean singleEdged; // true if the blade is single-edged, false if double-edged
@@ -94,19 +159,8 @@ public class Blade extends WeaponHead {
     this.pointOfBalance = getPointOfBalance();
   }
 
-  public double primaryBevelAngle() {
-    return -180 + this.edgeBevel.angle() + this.edgeBevel.shoulderAngle();
-  }
-
-  public double getWidthAtPercentage(double percentage) {
-    return widthAtPoints.getOrDefault(percentage, (widthAtBase+widthAtTip)/2);
-  }
-
-  public double getThicknessAtPercentage(double percentage) {
-    return thicknessAtPoints.getOrDefault(percentage, (thicknessAtBase+thicknessAtTip)/2);
-  }
-
   public double getVolume() {
+    if (volume > 0.0) return volume;
     TreeMap<Double, Double> wMap = buildNormalizedMap(widthAtPoints, widthAtBase, widthAtTip);
     TreeMap<Double, Double> tMap = buildNormalizedMap(thicknessAtPoints, thicknessAtBase, thicknessAtTip);
 
@@ -197,7 +251,6 @@ public class Blade extends WeaponHead {
     }
   }
 
-
   public static double circleSegmentArea(double c, double h) {
     double cSquared = c * c;
     double hSquared = h * h;
@@ -207,61 +260,35 @@ public class Blade extends WeaponHead {
     return (firstTerm * secondTerm) - thirdTerm;
   }
 
-
   /**
-   * Calculates the area of a superellipse given its semi-major axis (a), semi-minor axis (b), and exponent (r).
-   * r > 0. For r = 2, this is a normal ellipse. For r < 2, the shape is more "pointed", and for r > 2, the shape is more "squared".
+   * Calculates the area of a modified superellipse given its semi-width (a), semi-thickness (b), and exponent (r).
+   * Uses the equation |x/a|^r + |y/b| = 1, where the exponent only applies to the width dimension.
+   * This better approximates blade cross-sections than the standard superellipse.
+   * r > 0. For r = 1, this is a diamond. For r = 2, this is an ellipse. For r > 2, the shape becomes more squared in the width direction.
    *
-   * @param a the half-diameter of the long part of the superellipse, in mm
-   * @param b the half-diameter of the short part of the superellipse, in mm
-   * @param r the exponent defining the shape of the superellipse
-   * @return the area of the superellipse in mm^2
+   * @param a the half-width of the blade cross-section, in mm
+   * @param b the half-thickness of the blade cross-section, in mm
+   * @param r the exponent defining the shape of the cross-section (applied only to width)
+   * @return the area of the cross-section in mm^2
    */
   public static double getSuperEllipseArea(double a, double b, double r) {
     if (a <= 0.0 || b <= 0.0) throw new IllegalArgumentException("a and b must be > 0");
     if (r <= 0.0) throw new IllegalArgumentException("r must be > 0");
-    double g1 = gamma(1.0 + 1.0 / r);
-    double g2 = gamma(1.0 + 2.0 / r);
-    return 4.0 * a * b * (g1 * g1) / g2;
+    // For |x/a|^r + |y/b| = 1, the area is 4ab * r/(r+1)
+    return 4.0 * a * b * r / (r + 1.0);
   }
 
   /**
-   * Calculates the superellipse coefficient used in area calculations.
+   * Calculates the modified superellipse coefficient used in area calculations.
+   * For the equation |x/a|^r + |y/b| = 1, the coefficient is 4r/(r+1).
+   * Since we normalize by 4ab elsewhere, this returns r/(r+1).
    *
-   * @param r the exponent defining the shape of the superellipse
-   * @return the superellipse coefficient
+   * @param r the exponent defining the shape of the cross-section
+   * @return the superellipse coefficient: r/(r+1)
    */
   public static double superEllipseCoefficient(double r) {
-    // returns (Gamma(1 + 1/r)^2) / Gamma(1 + 2/r)
-    double g1 = gamma(1.0 + 1.0 / r);
-    double g2 = gamma(1.0 + 2.0 / r);
-    return (g1 * g1) / g2;
-  }
-
-  // Lanczos approximation for Gamma(z)
-  private static double gamma(double z) {
-    double[] p = {
-            676.5203681218851,
-            -1259.1392167224028,
-            771.32342877765313,
-            -176.61502916214059,
-            12.507343278686905,
-            -0.13857109526572012,
-            9.9843695780195716e-6,
-            1.5056327351493116e-7
-    };
-    double g = 7.0;
-    if (z < 0.5) {
-      return Math.PI / (Math.sin(Math.PI * z) * gamma(1.0 - z));
-    } else {
-      z -= 1.0;
-      double x = 0.99999999999980993;
-      for (int i = 0; i < p.length; i++) {
-        x += p[i] / (z + i + 1.0);
-      }
-      double t = z + g + 0.5;
-      return Math.sqrt(2.0 * Math.PI) * Math.pow(t, z + 0.5) * Math.exp(-t) * x;
-    }
+    if (r <= 0.0) return 0.0;
+    return r / (r + 1.0);
   }
 
   private static TreeMap<Double, Double> buildNormalizedMap(Map<Double, Double> src, double startValue, double endValue) {

@@ -31,7 +31,7 @@
       }
     }
   ],
-  "attackTypes": {
+  "attack_types": {
     "skada:slash": {
       "minReach": 0.25,
       "maxReach": 2.25

@@ -1,5 +1,6 @@
 package com.cwjn.skada.data.gen.weapon.parts;
 
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.StrikeCapable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -7,7 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  * Class that represents a mace head part of a weapon.
  * A mace head is typically a heavy mass (sphere, cylinder, or flanged) on a socket.
  */
-public class MaceHead extends WeaponHead {
+public class MaceHead extends WeaponHead implements StrikeCapable {
 
   public static final Codec<MaceHead> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<MaceHead> instance) ->
           instance.group(
@@ -75,6 +76,12 @@ public class MaceHead extends WeaponHead {
     this.socketLength = socketLength;
     this.socketOuterRadius = socketOuterRadius;
     this.socketInnerRadius = socketInnerRadius;
+  }
+
+  @Override
+  public double getLength() {
+    // primary dimension is socketLength + headLength
+    return Math.max(0.0, socketLength) + Math.max(0.0, headLength);
   }
 
   /**
