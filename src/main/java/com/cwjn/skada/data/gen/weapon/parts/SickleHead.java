@@ -1,14 +1,15 @@
 package com.cwjn.skada.data.gen.weapon.parts;
 
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Class that represents a sickle or scythe head. We'll treat this
  * as a curved blade with one edge and a pointed tip.
  */
-public class SickleHead extends WeaponHead {
+public class SickleHead extends WeaponHead implements ThrustCapable, SlashCapable {
 
   public static final Codec<SickleHead> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<SickleHead> instance) ->
           instance.group(
@@ -82,6 +83,71 @@ public class SickleHead extends WeaponHead {
     this.spineThickness = spineThickness;
     this.primaryBevel = primaryBevel;
     this.edgeBevel = edgeBevel;
+  }
+
+  @Override
+  public double getMedianWidth() {
+    return 0;
+  }
+
+  @Override
+  public boolean isSingleEdged() {
+    return true;
+  }
+
+  @Override
+  public Blade.TipSpecifications tipSpecs() {
+    double epsilon = 1e-6;
+    boolean arcsMeet = Math.abs(spineTipToBladeTipDistance) < epsilon;
+
+    double spineRadius = getCircleRadius(spineChordLength, spineSagittaHeight);
+    double bladeRadius = getCircleRadius(bladeChordLength, bladeSagittaHeight);
+
+    if (spineRadius <= 0 || bladeRadius <= 0) {
+      return Blade.TipSpecifications.noTip();
+    }
+
+    double spineTheta = 2.0 * Math.asin(Math.min(1.0, spineChordLength / (2.0 * spineRadius))); // radians
+    double bladeTheta = 2.0 * Math.asin(Math.min(1.0, bladeChordLength / (2.0 * bladeRadius))); // radians
+
+    // Tangent-chord endpoint angle is θ/2 for each arc; take average then convert to degrees.
+    double tangentAngleSpine = spineTheta / 2.0;
+    double tangentAngleBlade = bladeTheta / 2.0;
+    double bevelAngleRadians = (tangentAngleSpine + tangentAngleBlade) / 2.0;
+    double bevelAngleDegrees = Math.toDegrees(bevelAngleRadians);
+
+    // Clamp bevel angle to a reasonable physical range if extreme.
+    if (Double.isNaN(bevelAngleDegrees) || bevelAngleDegrees <= 0) bevelAngleDegrees = 15.0;
+    if (bevelAngleDegrees > 120.0) bevelAngleDegrees = 120.0;
+
+    double tipRadiusNm = arcsMeet ? 5.0 : 10.0; // nm
+
+    return new Blade.TipSpecifications(
+            tipRadiusNm,
+            bevelAngleDegrees,
+            180.0
+    );
+  }
+
+  @Override
+  public double getTaperValue() {
+    return 0;
+  }
+
+  @Override
+  public double getSlashNormalizedIdealPointOfBalance() {
+    return 0.0;
+  }
+
+  @Override
+  public double getThrustNormalizedIdealPointOfBalance() {
+    return 0.0;
+  }
+
+  @Override
+  public double getLength() {
+    if (spineChordLength > 0.0) return spineChordLength;
+    return bladeChordLength;
   }
 
   @Override
@@ -188,7 +254,10 @@ public class SickleHead extends WeaponHead {
 
   /**
    * Calculates the width between spine and blade at a given parameter t (0 to 1).
-   * Uses the base and tip distances to interpolate, accounting for the curved geometry.
+   * Assumes the spine arc sits above the blade arc (closer to the observer looking at the concave side),
+   * so width is computed as (spineY - bladeY) + interpolated chord offset. If parameters violate this
+   * assumption (producing a negative width), the result is clamped to 0.
+   *
    * @param t Parameter from 0 (base) to 1 (tip)
    * @param spineRadius Radius of the spine arc
    * @param bladeRadius Radius of the blade arc
@@ -198,30 +267,20 @@ public class SickleHead extends WeaponHead {
    */
   private double getWidthAtParameter(double t, double spineRadius, double bladeRadius,
                                      double spineTheta, double bladeTheta) {
-    // Get the perpendicular distance at this parameter
-    // The actual geometry is complex, but we can approximate by:
-    // 1. Getting the y-offset on each arc at the same x-position
-    // 2. Adding the base/tip distance interpolation
-
-    // Calculate the angle along each arc
-    double spineAngle = spineTheta * t - spineTheta / 2.0; // center the arc
+    double spineAngle = spineTheta * t - spineTheta / 2.0;
     double bladeAngle = bladeTheta * t - bladeTheta / 2.0;
 
-    // Get y-coordinates on each circle (relative to chord)
-    double spineY = spineRadius - spineRadius * Math.cos(Math.abs(spineAngle));
-    double bladeY = bladeRadius - bladeRadius * Math.cos(Math.abs(bladeAngle));
+    double spineLocalSagitta = spineRadius - spineRadius * Math.cos(Math.abs(spineAngle));
+    double bladeLocalSagitta = bladeRadius - bladeRadius * Math.cos(Math.abs(bladeAngle));
 
-    // Adjust for sagitta (spine curves up, blade curves down typically)
-    spineY = spineSagittaHeight - spineY; // distance from chord
-    bladeY = bladeSagittaHeight - bladeY;
+    double spineY = spineSagittaHeight - spineLocalSagitta; // expected >= bladeY
+    double bladeY = bladeSagittaHeight - bladeLocalSagitta;
 
-    // Interpolate the offset distance between base and tip
     double offsetDistance = spineBaseToBladeBaseDistance + (spineTipToBladeTipDistance - spineBaseToBladeBaseDistance) * t;
 
-    // Total width is the sum of geometric separation and offset
-    double width = Math.abs(spineY - bladeY) + offsetDistance;
-
-    return Math.max(0.0, width);
+    double width = (spineY - bladeY) + offsetDistance;
+    if (width < 0.0) return 0.0; // guard against inverted inputs
+    return width;
   }
 
   /**

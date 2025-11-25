@@ -1,5 +1,6 @@
 package com.cwjn.skada.data.gen.weapon.parts;
 
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.StrikeCapable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -7,7 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  * Class that represents a shovel head part of a weapon.
  * A shovel head consists of a blade (the flat digging surface) and a socket (where it connects to the handle).
  */
-public class ShovelHead extends WeaponHead {
+public class ShovelHead extends WeaponHead implements StrikeCapable {
 
   public static final Codec<ShovelHead> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<ShovelHead> instance) ->
           instance.group(
@@ -57,6 +58,12 @@ public class ShovelHead extends WeaponHead {
     this.socketOuterRadius = socketOuterRadius;
     this.socketInnerRadius = socketInnerRadius;
     this.tipAngle = tipAngle;
+  }
+
+  @Override
+  public double getLength() {
+    // primary length is socket length + blade length
+    return Math.max(0.0, socketLength) + Math.max(0.0, bladeLength);
   }
 
   /**

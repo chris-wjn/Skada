@@ -110,8 +110,6 @@ public class SkadaCommand {
     return 1;
   }
 
-
-
   private int toggleDebug(CommandSourceStack source) {
     ServerPlayer player = source.getPlayer();
     if (player == null) {
@@ -209,8 +207,10 @@ public class SkadaCommand {
       try (var reader = resource.openAsReader()) {
         String path = rl.getPath();
         if (path.startsWith("generator_data/weapon/weapon_profile/")) {
+          System.out.println("Encoding weapon profile from " + path);
           String profileName = path.substring("generator_data/weapon/weapon_profile/".length()).replace(".json", "");
           DataResult<WeaponProfile> info = WeaponProfile.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+          System.out.println("Finished parsing weapon profile " + profileName);
           info.result().ifPresent(pInfo -> {
             if (profileMap.containsKey(profileName)) {
               LOGGER.error("Duplicate weapon profile name found: {}", profileName);
@@ -231,7 +231,7 @@ public class SkadaCommand {
         player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
       }
     });
-
+    System.out.println("Done getting tiers and weapon profiles!");
     for (Item item : ForgeRegistries.ITEMS.getValues()) {
       if (!item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND).isEmpty() ||
               !item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty() ||

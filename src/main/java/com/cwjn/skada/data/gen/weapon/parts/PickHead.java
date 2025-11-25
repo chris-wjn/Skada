@@ -1,5 +1,7 @@
 package com.cwjn.skada.data.gen.weapon.parts;
 
+import com.cwjn.skada.data.SkadaData;
+import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -7,7 +9,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  * Class that represents a pick head part of a weapon.
  * A pick head typically has a pointed spike on one or both sides and a socket/eye for the handle.
  */
-public class PickHead extends WeaponHead {
+public class PickHead extends WeaponHead implements ThrustCapable {
 
   public static final Codec<PickHead> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<PickHead> instance) ->
           instance.group(
@@ -74,6 +76,45 @@ public class PickHead extends WeaponHead {
     this.rearSpikeLength = rearSpikeLength;
     this.rearSpikeBaseWidth = rearSpikeBaseWidth;
     this.rearSpikeBaseHeight = rearSpikeBaseHeight;
+  }
+
+  @Override
+  public Blade.TipSpecifications tipSpecs() {
+    return new Blade.TipSpecifications(
+            10,
+            SkadaData.EDGE_ANGLE_DEFAULT,
+            180
+    );
+  }
+
+  @Override
+  public double getTaperValue() {
+    if (frontSpikeLength <= 0.0) return 10.0;
+    
+    double baseAvg = (frontSpikeBaseWidth + frontSpikeBaseHeight) / 2.0;
+    if (baseAvg <= 0.0) return 10.0;
+
+    double ratio = frontSpikeLength / baseAvg;
+
+    double scaled = 10.0 + ratio * 6.0;
+
+    if (scaled < 10.0) scaled = 10.0;
+    if (scaled > 90.0) scaled = 90.0;
+    
+    return scaled;
+  }
+
+  @Override
+  public double getThrustNormalizedIdealPointOfBalance() {
+    // For a pick, ideal thrust PoB is near the eye where the handle connects
+    // to provide maximum penetration force. Return 0.0 (at the base/eye).
+    return 0.0;
+  }
+
+  @Override
+  public double getLength() {
+    // primary length is eyeLength + front spike length (rear spike goes backward)
+    return Math.max(0.0, eyeLength) + Math.max(0.0, frontSpikeLength) + Math.max(0.0, rearSpikeLength);
   }
 
   /**
