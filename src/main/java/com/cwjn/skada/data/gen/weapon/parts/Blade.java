@@ -5,10 +5,7 @@ import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * A class that represents a blade, like on a sword or knife.
@@ -20,15 +17,15 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
                   Codec.BOOL.optionalFieldOf("singleEdged", false).forGetter(b -> b.singleEdged),
                   Codec.DOUBLE.fieldOf("widthAtBase").forGetter(b -> b.widthAtBase),
                   Codec.DOUBLE.fieldOf("widthAtTip").forGetter(b -> b.widthAtTip),
-                  Codec.unboundedMap(Codec.DOUBLE, Codec.DOUBLE).optionalFieldOf("widthAtPoints", null).forGetter(b -> b.widthAtPoints),
+                  Codec.unboundedMap(Codec.DOUBLE, Codec.DOUBLE).optionalFieldOf("widthAtPoints", Map.of()).forGetter(b -> b.widthAtPoints),
                   Codec.DOUBLE.fieldOf("thicknessAtBase").forGetter(b -> b.thicknessAtBase),
                   Codec.DOUBLE.fieldOf("thicknessAtTip").forGetter(b -> b.thicknessAtTip),
-                  Codec.unboundedMap(Codec.DOUBLE, Codec.DOUBLE).optionalFieldOf("thicknessAtPoints", null).forGetter(b -> b.thicknessAtPoints),
+                  Codec.unboundedMap(Codec.DOUBLE, Codec.DOUBLE).optionalFieldOf("thicknessAtPoints", Map.of()).forGetter(b -> b.thicknessAtPoints),
                   Codec.DOUBLE.fieldOf("length").forGetter(b -> b.length),
-                  Bevel.CODEC.optionalFieldOf("primaryBevel", Bevel.defaultBevel()).forGetter(b -> b.primaryBevel),
-                  EdgeBevel.CODEC.optionalFieldOf("edgeBevel", EdgeBevel.noBevel()).forGetter(b -> b.edgeBevel),
-                  TipSpecifications.CODEC.optionalFieldOf("tipSpecifications", TipSpecifications.noTip()).forGetter(b -> b.tipSpecifications),
-                  Fuller.CODEC.optionalFieldOf("fuller", null).forGetter(b -> b.fuller)
+                  Bevel.CODEC.fieldOf("primaryBevel").forGetter(b -> b.primaryBevel),
+                  EdgeBevel.CODEC.fieldOf("edgeBevel").forGetter(b -> b.edgeBevel),
+                  TipSpecifications.CODEC.fieldOf("tipSpecifications").forGetter(b -> b.tipSpecifications),
+                  Fuller.CODEC.optionalFieldOf("fuller", Fuller.noFuller()).forGetter(b -> b.fuller)
           ).apply(instance, Blade::new)
   );
 
@@ -88,6 +85,8 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
   @Override
   public double getTaperValue() {
     double median = getMedianWidth();
+    if (!(Double.isFinite(median)) || median <= 1e-9) return 0.0;
+
     double baseRatio = length / median;
     TreeMap<Double, Double> wMap = buildNormalizedMap(widthAtPoints, widthAtBase, widthAtTip);
     int steps = 25;
@@ -101,7 +100,7 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
       }
       prevW = currW;
     }
-    if (Double.isNaN(baseRatio) || baseRatio < 0.0) return 0.0;
+    if (!Double.isFinite(baseRatio) || baseRatio < 0.0) return 0.0;
     return baseRatio;
   }
 
@@ -136,7 +135,7 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
     // before we calculate volume and PoB, we need to make sure the fuller and the primary bevel check out mathematically.
     // Specifically, if the chord of the circle segment defined by the fuller is longer than the width of non-bevel portion of
     // the blade, we cut off the bevel early to make room.
-    if (fuller != null) {
+    if (this.fuller.chordLengthByPercent <= 0.0001) {
       if (singleEdged) this.primaryBevel = primaryBevel; // single-edged blades don't have to worry about fullers taking up too much space, because the fuller can go on the bevel.
       else {
         double chordPct = fuller.chordLengthByPercent();
@@ -419,22 +418,25 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
    * @param tipRadius the radius of the tip in micrometers (1000 micrometers = 1 millimetre)
    * @param tipBevelAngle the angle of the bevel at the tip in degrees
    * @param tipBevelShoulderAngle the angle of the shoulder where the tip bevel meets the rest of the blade in degrees
+   * @param tipShoulderRoundedness the roundedness of the tip shoulder, from 0 (sharp) to 1 (fully rounded)
    */
   public record TipSpecifications(
           double tipRadius,
           double tipBevelAngle,
-          double tipBevelShoulderAngle
+          double tipBevelShoulderAngle,
+          double tipShoulderRoundedness
   ) {
     public static final Codec<TipSpecifications> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
                     Codec.DOUBLE.fieldOf("tipRadius").forGetter(TipSpecifications::tipRadius),
                     Codec.DOUBLE.fieldOf("tipBevelAngle").forGetter(TipSpecifications::tipBevelAngle),
-                    Codec.DOUBLE.fieldOf("tipBevelShoulderAngle").forGetter(TipSpecifications::tipBevelShoulderAngle)
+                    Codec.DOUBLE.fieldOf("tipBevelShoulderAngle").forGetter(TipSpecifications::tipBevelShoulderAngle),
+                    Codec.DOUBLE.fieldOf("tipShoulderRoundedness").forGetter(TipSpecifications::tipShoulderRoundedness)
             ).apply(instance, TipSpecifications::new)
     );
 
     public static TipSpecifications noTip() {
-      return new TipSpecifications(10000, 90, 180);
+      return new TipSpecifications(10000, 90, 180, 0);
     }
 
   }
@@ -517,6 +519,11 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
                     Codec.DOUBLE.fieldOf("height").forGetter(Fuller::sagitta)
             ).apply(instance, Fuller::new)
     );
+
+    public static Fuller noFuller() {
+      return new Fuller(false, 0.0, 0.0);
+    }
+
   }
 
 }

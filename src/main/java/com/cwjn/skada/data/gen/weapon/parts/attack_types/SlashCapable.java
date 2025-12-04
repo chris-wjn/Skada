@@ -1,6 +1,7 @@
 package com.cwjn.skada.data.gen.weapon.parts.attack_types;
 
 import com.cwjn.skada.data.gen.weapon.parts.Blade;
+import com.cwjn.skada.util.Util;
 
 /**
  * Interface indicating the weapon head can perform slashing attacks. Includes default
@@ -23,7 +24,7 @@ public interface SlashCapable {
    * @return the primary bevel angle in degrees.
    */
   default double primaryBevelAngle() {
-    return -180 + edgeBevel().angle() + edgeBevel().shoulderAngle();
+    return Util.findBevelAngle(edgeBevel().angle(), edgeBevel().shoulderAngle());
   }
 
   /**

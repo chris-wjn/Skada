@@ -8,7 +8,7 @@
       "position_on_handle": 600.0,
       "orientation": "PERPENDICULAR",
       "head": {
-        "type": "shovel",
+        "typeKey": "shovel",
         "bladeLength": 120.0,
         "bladeWidth": 110.0,
         "bladeThickness": 3.0,

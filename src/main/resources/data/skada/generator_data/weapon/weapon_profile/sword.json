@@ -26,7 +26,8 @@
         "tipSpecifications": {
           "tipRadius": 5.0,
           "tipBevelAngle": 22.5,
-          "tipBevelShoulderAngle": 157.5
+          "tipBevelShoulderAngle": 157.5,
+          "tipShoulderRoundedness": 0.0
         }
       }
     }

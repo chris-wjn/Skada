@@ -11,23 +11,21 @@ import java.util.Arrays;
  */
 public class AxeHead extends WeaponHead implements SlashCapable {
 
-  public static final Codec<AxeHead> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<AxeHead> instance) ->
-          instance.group(
-                  Codec.DOUBLE.fieldOf("eyeLength").forGetter(a -> a.eyeLength),
-                  Codec.DOUBLE.fieldOf("eyeHeight").forGetter(a -> a.eyeHeight),
-                  Codec.DOUBLE.fieldOf("cheekLength").forGetter(a -> a.cheekLength),
-                  Codec.DOUBLE.fieldOf("cheekHeight").forGetter(a -> a.cheekHeight),
-                  Codec.DOUBLE.fieldOf("beardHeight").forGetter(a -> a.beardHeight),
-                  Codec.DOUBLE.fieldOf("beardTipDistance").forGetter(a -> a.beardTipDistance),
-                  Codec.DOUBLE.fieldOf("toeHeight").forGetter(a -> a.toeHeight),
-                  Codec.DOUBLE.fieldOf("toeTipDistance").forGetter(a -> a.toeTipDistance),
-                  Codec.DOUBLE.fieldOf("eyeThickness").forGetter(a -> a.eyeThickness),
-                  Codec.DOUBLE.fieldOf("eyeHoleSemiMajorAxis").forGetter(a -> a.eyeHoleSemiMajorAxis),
-                  Codec.DOUBLE.fieldOf("eyeHoleSemiMinorAxis").forGetter(a -> a.eyeHoleSemiMinorAxis),
-                  Blade.Bevel.CODEC.optionalFieldOf("primaryBevel", null).forGetter(a -> a.primaryBevel),
-                  Blade.EdgeBevel.CODEC.optionalFieldOf("edgeBevel", null).forGetter(a -> a.edgeBevel)
-          ).apply(instance, AxeHead::new)
-  );
+  public static final Codec<AxeHead> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<AxeHead> instance) -> instance.group(
+          Codec.DOUBLE.fieldOf("eyeLength").forGetter(a -> a.eyeLength),
+          Codec.DOUBLE.fieldOf("eyeHeight").forGetter(a -> a.eyeHeight),
+          Codec.DOUBLE.fieldOf("cheekLength").forGetter(a -> a.cheekLength),
+          Codec.DOUBLE.fieldOf("cheekHeight").forGetter(a -> a.cheekHeight),
+          Codec.DOUBLE.fieldOf("beardHeight").forGetter(a -> a.beardHeight),
+          Codec.DOUBLE.fieldOf("beardTipDistance").forGetter(a -> a.beardTipDistance),
+          Codec.DOUBLE.fieldOf("toeHeight").forGetter(a -> a.toeHeight),
+          Codec.DOUBLE.fieldOf("toeTipDistance").forGetter(a -> a.toeTipDistance),
+          Codec.DOUBLE.fieldOf("eyeThickness").forGetter(a -> a.eyeThickness),
+          Codec.DOUBLE.fieldOf("eyeHoleSemiMajorAxis").forGetter(a -> a.eyeHoleSemiMajorAxis),
+          Codec.DOUBLE.fieldOf("eyeHoleSemiMinorAxis").forGetter(a -> a.eyeHoleSemiMinorAxis),
+          Blade.Bevel.CODEC.optionalFieldOf("primaryBevel", null).forGetter(a -> a.primaryBevel),
+          Blade.EdgeBevel.CODEC.optionalFieldOf("edgeBevel", null).forGetter(a -> a.edgeBevel)
+  ).apply(instance, (eyeLen, eyeHt, cheekLen, cheekHt, beardHt, beardDist, toeHt, toeDist, eyeThick, holeMaj, holeMin, primBev, edgeBev) -> new AxeHead(eyeLen, eyeHt, cheekLen, cheekHt, beardHt, beardDist, toeHt, toeDist, eyeThick, holeMaj, holeMin, primBev, edgeBev)));
 
   @Override
   public Codec<? extends WeaponHead> type() {

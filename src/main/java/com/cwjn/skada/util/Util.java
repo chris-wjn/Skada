@@ -757,56 +757,110 @@ public abstract class Util {
   }
 
   /**
-   * Finds the closest matching string from a list to the given path using regex matching and Levenshtein distance.
-   * The method first attempts to find a match using regex patterns constructed from the strings in the list.
-   * If no regex match is found, it falls back to calculating the Levenshtein distance to find the closest match.
-   * This takes a long time. O(some big ass number). Try to keep usage to a minimum if possible.
+   * Given an edge angle phi and shoulder angle theta, calculate the angle
+   * of a primary bevel by imagining what it would look like with
+   * no edge bevel. Can produce impossible geometry if phi + theta &lt= 180.
+   * In this case, we'll return a bevel angle less than or equal to 0, and
+   * let the caller handle it appropriately.
+   *
+   * @param phi edge angle in degrees
+   * @param theta shoulder angle in degrees
+   * @return a bevel angle in degrees, which can be less than or equal to 0.
+   */
+  public static double findBevelAngle(double phi, double theta) {
+    return phi + theta - 180;
+  }
+
+  /**
+   * Normalizes a bevel angle for use in damage calculations,
+   * according to the "average" bevel angle, which we take to be
+   * 22.5 degrees.
+   * @param angle bevel angle in degrees
+   * @return the bevel angle normalized according to the default bevel angle.
+   */
+  public static double normalizeBevelAngle(double angle) {
+    if (angle <= 0) return 1.0;
+    else return BEVEL_ANGLE_DEFAULT/angle;
+  }
+
+  /**
+   * Finds the closest matching string from a list to the given path using exact matching, word boundary matching,
+   * and Levenshtein distance as fallback.
+   * The method first attempts exact match, then word boundary match with all tokens present,
+   * and finally falls back to Levenshtein distance for fuzzy matching.
+   * This takes a long time. O(big number). Try to keep usage to a minimum if possible.
    * @param strings list of strings that are to be compared to in order to find a match
    * @param path the string to be matched
-   * @return the string that matches
+   * @return the string that matches, or empty string if input list is empty
    */
   public static String findClosestMatch(List<String> strings, String path) {
-    String retString = "";
-    strings.sort(Comparator.comparingInt(String::length).reversed()
+    if (strings == null || strings.isEmpty()) {
+      return "";
+    }
+
+    // Normalize the path: lowercase, replace underscores/non-word chars with spaces, trim
+    String normalizedPath = path.toLowerCase().replaceAll("[_\\W]+", " ").trim();
+
+    // First pass: Try exact match (case-insensitive, normalized)
+    for (String profileKey : strings) {
+      String normalizedKey = profileKey.toLowerCase().replaceAll("[_\\W]+", " ").trim();
+      if (normalizedPath.equals(normalizedKey)) {
+        return profileKey;
+      }
+    }
+
+    // Create a sorted copy for prioritizing longer (more specific) matches
+    List<String> sortedStrings = new ArrayList<>(strings);
+    sortedStrings.sort(Comparator.comparingInt(String::length).reversed()
             .thenComparing(String::compareTo));
 
-    String normalizedPath = path.replace('_', ' ').toLowerCase();
+    // Second pass: Try word boundary matching with ALL tokens present
+    for (String profileKey : sortedStrings) {
+      String normalizedKey = profileKey.toLowerCase().replaceAll("[_\\W]+", " ").trim();
+      String[] keyTokens = normalizedKey.split("\\s+");
+      if (keyTokens.length == 0) continue;
 
-    for (String profileKey : strings) {
-      // split the profile key into word tokens (handles keys like "great sword", "great-sword", "great_sword")
-      String[] tokens = profileKey.toLowerCase().split("\\W+");
-      if (tokens.length == 0) continue;
-
-      // build regex: \btoken1\W*token2\W*token3\b
-      StringBuilder regex = new StringBuilder("\\b");
-      for (int i = 0; i < tokens.length; i++) {
-        regex.append(Pattern.quote(tokens[i]));
-        if (i < tokens.length - 1) regex.append("\\W*");
-      }
-      regex.append("\\b");
-
-      if (Pattern.compile(regex.toString(), Pattern.CASE_INSENSITIVE).matcher(normalizedPath).find()) {
-        retString = profileKey;
-        break;
-      }
-    }
-
-    // Fallback: if no regex match found, pick the profileKey with the smallest Levenshtein distance
-    if (retString.isEmpty()) {
-      int bestDistance = Integer.MAX_VALUE;
-      String bestKey = "";
-      for (String profileKey : strings) {
-        String candidate = profileKey.toLowerCase().replace('_', ' ').replaceAll("\\W+", " ").trim();
-        int dist = levenshteinDistance(normalizedPath, candidate);
-        if (dist < bestDistance || (dist == bestDistance && profileKey.length() > bestKey.length())) {
-          bestDistance = dist;
-          bestKey = profileKey;
+      // Check if ALL tokens from the key are present as complete words in the path
+      boolean allTokensPresent = true;
+      for (String token : keyTokens) {
+        // Use word boundaries to match complete words only
+        String wordBoundaryPattern = "\\b" + Pattern.quote(token) + "\\b";
+        if (!Pattern.compile(wordBoundaryPattern, Pattern.CASE_INSENSITIVE).matcher(normalizedPath).find()) {
+          allTokensPresent = false;
+          break;
         }
       }
-      retString = bestKey;
+
+      if (allTokensPresent) {
+        // Verify the tokens appear in order (allows words between them)
+        StringBuilder orderedRegex = new StringBuilder();
+        for (int i = 0; i < keyTokens.length; i++) {
+          orderedRegex.append("\\b").append(Pattern.quote(keyTokens[i])).append("\\b");
+          if (i < keyTokens.length - 1) {
+            orderedRegex.append(".*?"); // non-greedy match allowing any text between tokens
+          }
+        }
+        Pattern orderedPattern = Pattern.compile(orderedRegex.toString(), Pattern.CASE_INSENSITIVE);
+        if (orderedPattern.matcher(normalizedPath).find()) {
+          return profileKey;
+        }
+      }
     }
 
-    return retString;
+    // Third pass: Fallback to Levenshtein distance for fuzzy matching
+    int bestDistance = Integer.MAX_VALUE;
+    String bestKey = "";
+    for (String profileKey : sortedStrings) {
+      String normalizedKey = profileKey.toLowerCase().replaceAll("[_\\W]+", " ").trim();
+      int dist = levenshteinDistance(normalizedPath, normalizedKey);
+      // Prefer shorter distance; if equal distance, prefer longer key (more specific match)
+      if (dist < bestDistance || (dist == bestDistance && profileKey.length() > bestKey.length())) {
+        bestDistance = dist;
+        bestKey = profileKey;
+      }
+    }
+
+    return bestKey;
   }
 
   private static int levenshteinDistance(String str1, String str2) {

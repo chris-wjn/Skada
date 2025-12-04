@@ -83,7 +83,8 @@ public class PickHead extends WeaponHead implements ThrustCapable {
     return new Blade.TipSpecifications(
             10,
             SkadaData.EDGE_ANGLE_DEFAULT,
-            180
+            180,
+            0.5
     );
   }
 
@@ -100,7 +101,11 @@ public class PickHead extends WeaponHead implements ThrustCapable {
 
     if (scaled < 10.0) scaled = 10.0;
     if (scaled > 90.0) scaled = 90.0;
-    
+
+    if (Double.isNaN(scaled) || Double.isInfinite(scaled)) {
+      return 10.0;
+    }
+
     return scaled;
   }
 

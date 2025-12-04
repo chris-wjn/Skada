@@ -44,8 +44,7 @@ public class Handle {
 
   public static final Codec<Handle> CODEC = RecordCodecBuilder.create(instance -> instance.group(
           Codec.DOUBLE.fieldOf("length").forGetter(Handle::getLength),
-          Codec.DOUBLE.fieldOf("radius").forGetter(Handle::getRadius),
-          ExtraTierInfo.CODEC.optionalFieldOf("material", null).forGetter(h -> h.material)
-  ).apply(instance, Handle::new));
+          Codec.DOUBLE.fieldOf("radius").forGetter(Handle::getRadius)
+  ).apply(instance, (len, rad) -> new Handle(len, rad, null)));
 
 }
