@@ -1,9 +1,9 @@
 package com.cwjn.skada.data.gen.weapon;
 
-import com.cwjn.skada.Skada;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.gen.attack.AttackTypeJsonInfo;
+import com.cwjn.skada.data.gen.attack.ElementSpread;
 import com.cwjn.skada.data.gen.weapon.parts.*;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.StrikeCapable;
@@ -78,11 +78,8 @@ public class WeaponProfile {
     public static final Codec<WeaponHeadEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             WeaponHead.DISPATCH_CODEC.fieldOf("head").forGetter(WeaponHeadEntry::getHead),
             Codec.DOUBLE.fieldOf("position_on_handle").forGetter(WeaponHeadEntry::getPositionOnHandle),
-            Codec.STRING.fieldOf("orientation").forGetter((WeaponHeadEntry e) -> e.getOrientation().name()),
-            ExtraTierInfo.CODEC.optionalFieldOf("material").forGetter(WeaponHeadEntry::getMaterial)
-    ).apply(instance, (head, pos, oriStr, materialOpt) ->
-            new WeaponHeadEntry(head, pos, HeadOrientation.valueOf(oriStr), materialOpt.orElse(null))
-    ));
+            Codec.STRING.fieldOf("orientation").forGetter((WeaponHeadEntry e) -> e.getOrientation().name())
+    ).apply(instance, (head, pos, oriStr) -> new WeaponHeadEntry(head, pos, HeadOrientation.valueOf(oriStr), null)));
   }
 
   private final Handle handle;
@@ -151,7 +148,7 @@ public class WeaponProfile {
             8, 6, null, 750,
             new Blade.Bevel(60, 1.5),
             new Blade.EdgeBevel(22.5, 180, 5),
-            new Blade.TipSpecifications(1000, 40, 150),
+            new Blade.TipSpecifications(1000, 40, 150, 0.5),
             new Blade.Fuller(true, 40, 4)
     );
     this.weaponHeads = new ArrayList<>();
@@ -161,6 +158,34 @@ public class WeaponProfile {
                     0.2, 3.0, 1.0, 1.0, 1.0, 1.0, List.of()
             ))
     );
+  }
+
+  public static WeaponProfile axeTest() {
+    Handle handle = new Handle(500.0, 15.0, null);
+
+    AxeHead axe = new AxeHead(
+            300.0, // eyeLength
+            100.0, // eyeHeight
+            300.0, // cheekLength
+            100.0, // cheekHeight
+            50.0,  // beardHeight
+            150.0, // beardTipDistance
+            50.0,  // toeHeight
+            150.0, // toeTipDistance
+            15.0,  // eyeThickness
+            15.0,  // eyeHoleSemiMajorAxis
+            15.0,  // eyeHoleSemiMinorAxis
+            new Blade.Bevel(0.33, 1.3),
+            new Blade.EdgeBevel(22.5, 180.0, 5.0)
+    );
+
+    List<WeaponHeadEntry> heads = new ArrayList<>();
+    heads.add(new WeaponHeadEntry(axe, 450.0, HeadOrientation.PERPENDICULAR, new ExtraTierInfo(1.0, 1.0, 1.0, 1.0, new ElementSpread())));
+
+    Map<AttackType, AttackTypeJsonInfo> attacks = new HashMap<>();
+    attacks.put(AttackType.slash(), new AttackTypeJsonInfo(0.25, 2.0, 1.0, 1.0, 1.0, 1.0, List.of()));
+
+    return new WeaponProfile(handle, heads, attacks);
   }
 
   public boolean canSlash() {
@@ -370,10 +395,12 @@ public class WeaponProfile {
     return retMap;
   }
 
-  public static final Codec<WeaponProfile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-          Handle.CODEC.fieldOf("handle").forGetter(WeaponProfile::getHandle),
-          Codec.list(WeaponHeadEntry.CODEC).fieldOf("weapon_heads").forGetter(wp -> wp.weaponHeads),
-          Codec.unboundedMap(Codec.STRING, AttackTypeJsonInfo.CODEC).fieldOf("attack_types").forGetter(WeaponProfile::attackTypeStringMap)
-  ).apply(instance, (handle, heads, attackMap) -> new WeaponProfile(handle, heads, fromStringMap(attackMap))));
+  public static final Codec<WeaponProfile> CODEC = RecordCodecBuilder.create(instance -> {
+    return instance.group(
+            Handle.CODEC.fieldOf("handle").forGetter(WeaponProfile::getHandle),
+            Codec.list(WeaponHeadEntry.CODEC).fieldOf("weapon_heads").forGetter(wp -> wp.weaponHeads),
+            Codec.unboundedMap(Codec.STRING, AttackTypeJsonInfo.CODEC).fieldOf("attack_types").forGetter(WeaponProfile::attackTypeStringMap)
+    ).apply(instance, (handle, heads, attackMap) -> new WeaponProfile(handle, heads, fromStringMap(attackMap)));
+  });
 
 }

@@ -7,6 +7,7 @@ import com.cwjn.skada.data.gen.weapon.ExtraTierInfo;
 import com.cwjn.skada.data.gen.weapon.WeaponProfile;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
+import com.cwjn.skada.util.Util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
@@ -75,13 +76,13 @@ public class WeaponInfo {
         double critFailChance = entry.getKey().tierStatFunction().criticalFail(profile, tierInfo);
         double attackSpeed = entry.getKey().tierStatFunction().attackSpeed(profile, tierInfo);
         retMap.put(entry.getKey(), new AttackTypeInfo(
-                lethality*entry.getValue().lethalityModifier(),
-                precision*entry.getValue().precisionModifier(),
+                Util.round(lethality*entry.getValue().lethalityModifier(), 2),
+                Util.round(precision*entry.getValue().precisionModifier(), 2),
                 entry.getValue().minReach(),
                 entry.getValue().maxReach(),
-                attackSpeed*entry.getValue().attackSpeedModifier(),
+                Util.round(attackSpeed*entry.getValue().attackSpeedModifier(), 3),
                 0.0,
-                critFailChance*entry.getValue().critFailModifier(),
+                Util.round(critFailChance*entry.getValue().critFailModifier(), 3),
                 entry.getValue().reticleShapes()));
       }
       return new WeaponInfo(retMap, spread, ignoreAttributes);

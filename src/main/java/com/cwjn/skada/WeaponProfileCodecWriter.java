@@ -34,7 +34,7 @@ public final class WeaponProfileCodecWriter {
    * @return path to the written file
    */
   public static Path writeDefaultSwordJson() throws IOException {
-    WeaponProfile profile = new WeaponProfile();
+    WeaponProfile profile = WeaponProfile.axeTest();
     System.out.println("Starting encoding WeaponProfile");
     // Encode the profile to a Gson JsonElement using Mojang's JsonOps
     DataResult<com.google.gson.JsonElement> result = WeaponProfile.CODEC.encodeStart(JsonOps.INSTANCE, profile);
@@ -62,7 +62,7 @@ public final class WeaponProfileCodecWriter {
 
     Path outDir = configDir.resolve("skada").resolve("generator_data").resolve("weapon");
     Files.createDirectories(outDir);
-    Path outFile = outDir.resolve("sword.json");
+    Path outFile = outDir.resolve("axe.json");
 
     // Use writeString for convenience
     Files.writeString(outFile, pretty, StandardCharsets.UTF_8);

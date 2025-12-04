@@ -125,7 +125,8 @@ public class SickleHead extends WeaponHead implements ThrustCapable, SlashCapabl
     return new Blade.TipSpecifications(
             tipRadiusNm,
             bevelAngleDegrees,
-            180.0
+            180.0,
+            0
     );
   }
 

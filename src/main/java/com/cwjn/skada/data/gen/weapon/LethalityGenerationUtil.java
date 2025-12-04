@@ -2,8 +2,8 @@ package com.cwjn.skada.data.gen.weapon;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 import com.cwjn.skada.data.registry.AttackType;
+import com.cwjn.skada.util.Util;
 
-import static com.cwjn.skada.data.SkadaData.BEVEL_ANGLE_DEFAULT;
 import static com.cwjn.skada.data.SkadaData.MATERIAL_PROPERTY_SOFT_CAP;
 
 public abstract class LethalityGenerationUtil {
@@ -20,9 +20,10 @@ public abstract class LethalityGenerationUtil {
     WeaponProfile.WeaponHeadEntry head = profile.getSlashHead();
     if (head.getMaterial().isPresent()) material = head.getMaterial().get();
     SlashCapable slashHead = (SlashCapable) head.getHead(); //this is a bit dubious but it should be fine
+
     double pointOfBalanceNormalized = profile.getPointOfBalance() / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
-    double primaryBevelAngle = slashHead.primaryBevelAngle();
-    double primaryBevelAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryBevelAngle; //acuter angle means more lethality cause better cutting
+    double primaryBevelAngle = slashHead.primaryBevelAngle(); //angle of the primary bevel, if the edge bevel shoulder angle is 180, this is just the edge bevel angle
+    double primaryBevelAngleNormalized = Util.normalizeBevelAngle(primaryBevelAngle); //acuter angle means more lethality cause better cutting
     double normalizedBladeWeight = profile.normalizeBladeWeight(material);
 
     //Some calculations about the balance point of the weapon, using material density and profile dimensions
@@ -32,6 +33,16 @@ public abstract class LethalityGenerationUtil {
     // most important thing is bevel angle and length, so let's start there
     double lethality = bevelLengthToLethalityBase(slashHead.absoluteBevelLength()) * primaryBevelAngleNormalized; //multiply here to make both stats relevant
 
+    // next we'll do some modifications based on the shoulder angle. Shoulder angles closer to 180 degrees are better, as the bump is less pronounced
+    // and the blade can cut more cleanly. The curve factor of the primary bevel rounds this off, causing larger shoulders to be less punishing if the bevel is more convex.
+    // shoulder angles above 180 are twice as punishing as those below 180, as they create a negative angle on the edge, meaning the blade curves "upwards", perpendicular
+    // to the direction of the cut.
+    double shoulderAngle = slashHead.edgeBevel().shoulderAngle();
+    double distFromOptimalShoulder = Math.abs(180 - shoulderAngle);
+    if (shoulderAngle > 180) distFromOptimalShoulder*=2;
+    lethality -= distFromOptimalShoulder * Math.max(0, 2-slashHead.primaryBevel().curveFactor());
+
+    // bevel curvature also affects lethality directly. more convex bevels cut better, more concave bevels cut worse
     lethality *= bevelCurvatureToLethalityMult(slashHead.primaryBevel().curveFactor());
 
     if (pointOfBalanceNormalized >= bladeStartPercentage) {
@@ -41,7 +52,7 @@ public abstract class LethalityGenerationUtil {
 
     double normalizedHardness = material.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
     double normalizedFlexibility = Math.abs(material.flexibility()-MATERIAL_PROPERTY_SOFT_CAP/2)/(MATERIAL_PROPERTY_SOFT_CAP/2);
-    lethality *= 1 + 0.04*normalizedHardness + 0.07*normalizedBladeWeight - 0.05*normalizedFlexibility; //factor material properties
+    lethality *= 1 + 0.08*normalizedHardness + 0.14*normalizedBladeWeight - 0.1*normalizedFlexibility; //factor material properties
     /*
       increases with hardness (keeps a sharp edge), flexibility has a sweet spot
       at flexibility = 5. Too low flexibility and the blade can't flex at all
@@ -84,9 +95,14 @@ public abstract class LethalityGenerationUtil {
     if (thrustHead.getMaterial().isPresent()) tierInfo = thrustHead.getMaterial().get();
     ThrustCapable head = (ThrustCapable) thrustHead.getHead();
     //weapon profile values and normalizations
-    double primaryAngle = -180 + head.tipSpecs().tipBevelAngle() + head.tipSpecs().tipBevelShoulderAngle(); //mathematically derived
-    double primaryAngleNormalized = BEVEL_ANGLE_DEFAULT / primaryAngle; //acuter angle means more lethality cause better piercing
+    double primaryAngle = Util.findBevelAngle(head.tipSpecs().tipBevelAngle(), head.tipSpecs().tipBevelShoulderAngle());
+    double primaryAngleNormalized = Util.normalizeBevelAngle(primaryAngle); //acuter angle means more lethality cause better piercing
     double lethality = primaryAngleNormalized * bladeDimensionsToLethalityBase(head);
+
+    double shoulderAngle = head.tipSpecs().tipBevelShoulderAngle();
+    double distFromOptimalShoulder = Math.abs(180 - shoulderAngle);
+    if (shoulderAngle > 180) distFromOptimalShoulder*=2;
+    lethality -= distFromOptimalShoulder * (1-head.tipSpecs().tipShoulderRoundedness());
 
     if (head instanceof SlashCapable slashCapable && slashCapable.isSingleEdged()) {
       lethality *= 0.5;
@@ -97,34 +113,6 @@ public abstract class LethalityGenerationUtil {
     lethality *= 1.0 + 0.1 * normalizedHardness - 0.06 * normalizedFlexibility;
 
     return lethality;
-  }
-
-  /**
-   * Calculates a base lethality value for thrust from sword dimensions.
-   * Formula considers blade length, which increases lethality, and blade width.
-   * The narrower the blade, the higher the lethality, and vice versa.
-   * The wider the blade is at any particular point, the less the length of the blade
-   * contributes to lethality.
-   * @param bladeLength the length of the blade in millimetres
-   * @param bladeTipWidth the width of the blade at the tip shoulder bevel in millimetres
-   * @param bladeCrossguardWidth the width of the blade at the crossguard in millimetres
-   * @return the base lethality value, somewhere between 0 and ~80.
-   */
-  public static double bladeDimensionsToLethalityBase(double bladeLength, double bladeTipWidth, double bladeCrossguardWidth) {
-    //the average blade length is around 750mm, with 1500mm being a top 1% and 300mm being a bottom 1%.
-    //the amount the length contributes should be calculated based on how wide the blade is at that point.
-    //the average blade has width of roughly 50mm at crossguard and 30mm at tip shoulder, so average is 40mm.
-    //the ratio of length to avg width to achieve 75 lethality is 91.3, because the average blade isn't
-    //a good thrusting sword. Instead, the average rapier is 1050mm long, 15mm at crossguard and 8mm at tip shoulder.
-    double averageBladeWidth = (bladeTipWidth + bladeCrossguardWidth) * 0.5;
-    double lengthContribution = (bladeLength / averageBladeWidth);
-    //so, we need a function that linearly increases lethality based on length contribution from
-    //0 to 91.3, achieving y = 75 at x = 91.3, and then diminishing returns after that.
-    if (lengthContribution <= 91.3) {
-      return 0.82 * lengthContribution;
-    } else {
-      return 75.0 + 5*Math.log(1 + 0.1*(lengthContribution-91.3));
-    }
   }
 
   /**

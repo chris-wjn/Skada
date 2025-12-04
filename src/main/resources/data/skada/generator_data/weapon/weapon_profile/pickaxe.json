@@ -8,7 +8,7 @@
       "position_on_handle": 610.0,
       "orientation": "PERPENDICULAR",
       "head": {
-        "type": "pick",
+        "typeKey": "pick",
         "eyeLength": 60.0,
         "eyeHeight": 40.0,
         "eyeThickness": 20.0,
