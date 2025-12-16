@@ -1,4 +1,5 @@
 package com.cwjn.skada.data.gen.weapon;
+import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 import com.cwjn.skada.data.registry.AttackType;
@@ -10,7 +11,7 @@ public abstract class LethalityGenerationUtil {
 
   /**
    * Calculates lethality for slashing attacks.
-   * Average lethality for a sword should be around 50-70
+   * Average lethality for a sword should be around
    * @param profile The weapon profile of the weapon
    * @param material The weapon material info
    * @return a double representing lethality
@@ -21,7 +22,7 @@ public abstract class LethalityGenerationUtil {
     if (head.getMaterial().isPresent()) material = head.getMaterial().get();
     SlashCapable slashHead = (SlashCapable) head.getHead(); //this is a bit dubious but it should be fine
 
-    double pointOfBalanceNormalized = profile.getPointOfBalance() / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
+    double pointOfBalanceNormalized = profile.getPointOfBalance(material) / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
     double primaryBevelAngle = slashHead.primaryBevelAngle(); //angle of the primary bevel, if the edge bevel shoulder angle is 180, this is just the edge bevel angle
     double primaryBevelAngleNormalized = Util.normalizeBevelAngle(primaryBevelAngle); //acuter angle means more lethality cause better cutting
     double normalizedBladeWeight = profile.normalizeBladeWeight(material);
@@ -30,8 +31,16 @@ public abstract class LethalityGenerationUtil {
     double bladeStartPercentage = profile.getHandle().getLength() / profile.getTotalLength(); //the distance up the weapon where the blade portion starts, as a percentage of total length
     double idealPointOfBalanceNormalized = profile.getIdealPointOfBalanceWithHead(head, AttackType.slash())/profile.getTotalLength();
 
-    // most important thing is bevel angle and length, so let's start there
-    double lethality = bevelLengthToLethalityBase(slashHead.absoluteBevelLength()) * primaryBevelAngleNormalized; //multiply here to make both stats relevant
+    /*
+       Lethality is based primarily on a few things:
+       - The angular momentum the weapon can generate: longer, heavier weapons generate more angular momentum when swung,
+                                                       increasing cutting power. Point of Balance plays a role in moment of inertia.
+       - The angle of the primary bevel: a larger angle means a wider "wedge", which doesn't cut better, but makes the cut
+                                         wider, causing more damage overall.
+    */
+    double momentOfInertia = profile.getMomentOfInertia(material);
+    double lethalityAngularMomentum = angularMomentumToLethalityBase(momentOfInertia, Util.angularVelocity(momentOfInertia, SkadaData.PLAYER_TORQUE));
+    double lethality = lethalityAngularMomentum * primaryBevelAngleNormalized;
 
     // next we'll do some modifications based on the shoulder angle. Shoulder angles closer to 180 degrees are better, as the bump is less pronounced
     // and the blade can cut more cleanly. The curve factor of the primary bevel rounds this off, causing larger shoulders to be less punishing if the bevel is more convex.
@@ -61,6 +70,22 @@ public abstract class LethalityGenerationUtil {
     */
 
     return lethality;
+  }
+
+  /**
+   * Calculates a base lethality value for a slashing weapon based on the
+   * angular momentum it can generate from its length and weight. Longer,
+   * heavier weapons generate more angular momentum when swung, increasing
+   * their cutting power.
+   *
+   * @return the base lethality value, somewhere between 0 and ~80.
+   */
+  private static double angularMomentumToLethalityBase(double momentOfInertia, double angularVelocity) {
+    System.out.println("Moment of Inertia: " + momentOfInertia);
+    System.out.println("Angular Velocity: " + angularVelocity);
+    double angularMomentum = momentOfInertia * angularVelocity;
+    System.out.println("Angular Momentum: " + angularMomentum);
+    return angularMomentum;
   }
 
   /**
@@ -133,7 +158,7 @@ public abstract class LethalityGenerationUtil {
 
   public static double strike(WeaponProfile profile, ExtraTierInfo tierInfo) {
     //Some calculations about the balance point of the weapon, using material density and profile dimensions
-    double pointOfBalanceNormalized = profile.getPointOfBalance() / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
+    double pointOfBalanceNormalized = profile.getPointOfBalance(tierInfo) / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
 
     double weight = profile.getVolume() * tierInfo.density(); //in grams
     double lethality = weightToLethalityBase(weight);

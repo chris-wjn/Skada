@@ -4,6 +4,7 @@ import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.gen.armour.ArmourMaterialInfo;
 import com.cwjn.skada.data.gen.armour.ArmourPieceInfo;
+import com.cwjn.skada.data.gen.attack.ElementSpread;
 import com.cwjn.skada.data.gen.weapon.ExtraTierInfo;
 import com.cwjn.skada.data.gen.weapon.WeaponProfile;
 import com.cwjn.skada.data.damage.WeaponInfo;
@@ -14,7 +15,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.DataResult;
@@ -49,7 +49,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.cwjn.skada.Skada.LOGGER;
-import static com.cwjn.skada.WeaponProfileCodecWriter.diagnoseEncode;
 import static com.cwjn.skada.WeaponProfileCodecWriter.writeDefaultSwordJson;
 import static com.cwjn.skada.data.SkadaData.DEBUG_ENABLED;
 import static net.minecraft.commands.Commands.literal;
@@ -98,7 +97,7 @@ public class SkadaCommand {
                     )
             )
             .then(literal("debug").executes(stack -> toggleDebug(stack.getSource())))
-            .then(literal("test").executes(stack -> testDecodeAxe(stack.getSource())))
+            .then(literal("test").executes(stack -> testInertia(stack.getSource())))
     );
   }
 
@@ -111,94 +110,11 @@ public class SkadaCommand {
     return 1;
   }
 
-  private int testDecodeAxe(CommandSourceStack source) {
-    Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    // First, encode the axe profile
-    WeaponProfile axe = WeaponProfile.axeTest();
-
-    System.out.println("=== ENCODING ===");
-    var encodeResult = WeaponProfile.CODEC.encodeStart(JsonOps.INSTANCE, axe);
-    if (encodeResult.error().isPresent()) {
-      System.err.println("Encode error: " + encodeResult.error().get());
-      return 0;
-    }
-
-    JsonElement encoded = encodeResult.result().get();
-    System.out.println("Encoded JSON:");
-    System.out.println(GSON.toJson(encoded));
-
-    System.out.println("\n=== DECODING ===");
-    System.out.println("About to call WeaponProfile.CODEC.parse()...");
-    System.out.println("CODEC instance: " + WeaponProfile.CODEC);
-    System.out.println("JsonOps instance: " + JsonOps.INSTANCE);
-    System.out.println("Encoded JSON element: " + encoded.getClass().getName());
-
-    DataResult<WeaponProfile> decodeResult = null;
-    try {
-      System.out.println("Calling parse NOW...");
-      decodeResult = WeaponProfile.CODEC.parse(JsonOps.INSTANCE, encoded);
-      System.out.println("Parse call returned!");
-    } catch (Exception e) {
-      System.err.println("!!! EXCEPTION during CODEC.parse !!!");
-      System.err.println("Exception type: " + e.getClass().getName());
-      System.err.println("Exception message: " + e.getMessage());
-      e.printStackTrace();
-      return 0;
-    } catch (Throwable t) {
-      System.err.println("!!! THROWABLE during CODEC.parse !!!");
-      System.err.println("Throwable type: " + t.getClass().getName());
-      System.err.println("Throwable message: " + t.getMessage());
-      t.printStackTrace();
-      return 0;
-    }
-
-    System.out.println("Parse returned, checking result...");
-
-    // Force evaluation by trying to get either result or error
-    java.util.Optional<WeaponProfile> resultOpt = null;
-    java.util.Optional<com.mojang.serialization.DataResult.PartialResult<WeaponProfile>> errorOpt = null;
-
-    try {
-      System.out.println("Getting result...");
-      resultOpt = decodeResult.result();
-      System.out.println("Getting error...");
-      errorOpt = decodeResult.error();
-      System.out.println("Got both!");
-    } catch (Exception e) {
-      System.err.println("Exception while getting result/error: " + e.getMessage());
-      e.printStackTrace();
-      return 0;
-    }
-
-    System.out.println("Has result: " + resultOpt.isPresent());
-    System.out.println("Has error: " + errorOpt.isPresent());
-
-    if (errorOpt.isPresent()) {
-      var error = errorOpt.get();
-      System.err.println("Decode error: " + error);
-      System.err.println("Error message: " + error.message());
-      // Try to get partial result if available
-      decodeResult.resultOrPartial(err -> System.err.println("Partial error: " + err));
-    }
-
-    if (resultOpt.isPresent()) {
-      System.out.println("Decode successful!");
-      WeaponProfile decoded = resultOpt.get();
-      System.out.println("Handle length: " + decoded.getHandle().getLength());
-      System.out.println("Weapon heads: " + decoded.getWeaponHeads().size());
-    } else if (!errorOpt.isPresent()) {
-      System.err.println("NEITHER result nor error present - this is the problem!");
-      // Try lifecycle
-      System.err.println("Lifecycle: " + decodeResult.lifecycle());
-      // Try to see what happens if we force a result
-      try {
-        var partial = decodeResult.resultOrPartial(System.err::println);
-        System.err.println("Partial result present: " + partial.isPresent());
-      } catch (Exception e) {
-        System.err.println("Exception getting partial: " + e.getMessage());
-        e.printStackTrace();
-      }
-    }
+  private int testInertia(CommandSourceStack source) {
+    WeaponProfile profile = WeaponProfile.defaultSword();
+    System.out.println(profile.getHandle().getMomentOfInertia());
+    System.out.println(profile.getSlashHead().getHead().getMomentOfInertia(115, 7.0, WeaponProfile.HeadOrientation.PARALLEL));
+    System.out.println(profile.getMomentOfInertia(new ExtraTierInfo(7.0, 3, 4, 5, new ElementSpread())));
     return 1;
   }
 
@@ -335,6 +251,7 @@ public class SkadaCommand {
           WeaponProfile profile = profileMap.get(Util.findClosestMatch(profileMap.keySet().stream().toList(), path));
           if (item instanceof TieredItem tItem) {
             String matName = tItem.getTier().toString().toLowerCase();
+            System.out.println("Generating item: " + path + " with material " + matName);
             //first we'll check the item's namespace for tiers, then any namespace
             for (String s : tierMap.keySet().stream().filter(s -> s.startsWith(namespace)).toList()) {
               if (s.equals(namespace + "." + matName)) {

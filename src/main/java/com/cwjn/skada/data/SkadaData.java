@@ -26,6 +26,7 @@ import static com.cwjn.skada.data.damage.LethalityFunction.Operation.*;
  */
 public abstract class SkadaData {
 
+  public static final double PLAYER_TORQUE = 350;
   public static boolean DEBUG_ENABLED = false;
   public static final double DEFAULT_ACCURACY = 0.75;
   public static Supplier<IForgeRegistry<AttackType>> REGISTRY_ATTACK_TYPE;
@@ -85,6 +86,6 @@ public abstract class SkadaData {
   public static final double EDGE_ANGLE_DEFAULT = 32.5; //degrees
   public static final double BEVEL_ANGLE_DEFAULT = 22.5; //degrees
   public static final double BLADE_WEIGHT_DEFAULT = 1300; //grams
-  public static final double WOOD_DENSITY = 0.007; //grams per cubic centimetre
+  public static final double WOOD_DENSITY = 0.7; //grams per cubic centimeter (g/cm³)
 
 }

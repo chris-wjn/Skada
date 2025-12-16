@@ -774,13 +774,45 @@ public abstract class Util {
   /**
    * Normalizes a bevel angle for use in damage calculations,
    * according to the "average" bevel angle, which we take to be
-   * 22.5 degrees.
+   * 22.5 degrees. If the angle is less than 22.5, the normalized
+   * value will be greater than 1, indicating a more effective bevel.
+   * If the angle is greater than 22.5, the normalized value will be
+   * less than 1, indicating a less effective bevel.
    * @param angle bevel angle in degrees
    * @return the bevel angle normalized according to the default bevel angle.
    */
   public static double normalizeBevelAngle(double angle) {
     if (angle <= 0) return 1.0;
-    else return BEVEL_ANGLE_DEFAULT/angle;
+    else return BEVEL_ANGLE_DEFAULT / angle;
+  }
+
+  /*
+    * Calculate the moment of inertia for a rectangular prism (a weapon)
+   */
+  public static double momentOfInertia(double mass, double length, double centreOfMass) {
+    double term1 = (mass * length * length) / 12.0;
+    double term2_1 = 1;
+    double term2_2 = 6 * (centreOfMass/length);
+    double term2_3 = 12 * (centreOfMass/length) * (centreOfMass/length);
+    double term2 = term2_1 + term2_2 - term2_3;
+    return term1 * term2;
+  }
+
+  /**
+   * Get some angular velocity value based on the moment of inertia and applied torque,
+   * which is taken to be the players "strength". Uses the work-energy theorem to derive
+   * the angular velocity from torque and moment of inertia.
+   * <a href="https://phys.libretexts.org/Bookshelves/University_Physics/University_Physics_(OpenStax)/Book%3A_University_Physics_I_-_Mechanics_Sound_Oscillations_and_Waves_(OpenStax)/10%3A_Fixed-Axis_Rotation__Introduction/10.09%3A_Work_and_Power_for_Rotational_Motion">...</a>
+   *
+   * @param inertia the moment of inertia of the object i kg·m²
+   * @param torque the applied torque
+   * @return the angular velocity in radians per second
+   */
+  public static double angularVelocity(double inertia, double torque) {
+    double x = torque * 0.5*Math.PI; //torque multiplied by a quarter-rotation in radians
+    x *= 2;
+    x /= inertia;
+    return Math.sqrt(x);
   }
 
   /**

@@ -1,5 +1,6 @@
 package com.cwjn.skada.data.gen.weapon.parts;
 
+import com.cwjn.skada.data.gen.weapon.WeaponProfile;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 import com.mojang.serialization.Codec;
@@ -39,9 +40,208 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
     return "blade";
   }
 
+
   @Override
-  public double getLength() {
+  public double getPrimaryAxisLength() {
     return this.length;
+  }
+
+  @Override
+  public double getSecondaryAxisLength() {
+    double maxW = Math.max(widthAtBase, widthAtTip);
+    if (widthAtPoints != null) {
+      for (double w : widthAtPoints.values()) {
+        maxW = Math.max(maxW, w);
+      }
+    }
+    return maxW;
+  }
+
+  /**
+   * Calculates the moment of inertia of the blade attached to a weapon.
+   * distanceFromPivot describes the distance in mm from the end of the handle, the pivot point, to the base of the blade.
+   * If orientation is parallel, the blade's length axis is aligned with the pivot axis. If perpendicular, the blade's width axis is aligned with the pivot axis.
+   * We can treat the blade as a 3d solid such that its length is along the x-axis, its width along the y-axis, and its thickness along the z-axis.
+   * Then, we can use integration techniques to calculate the moment of inertia about the pivot point using a given density.
+   *
+   * @param distanceFromPivot the distance from the pivot point in millimeters.
+   * @param density the density of the blade material in g/cm³.
+   * @param orientation the orientation of the blade relative to the pivot axis.
+   * @return the moment of inertia in g/cm^2.
+   */
+  @Override
+  public double getMomentOfInertia(double distanceFromPivot, double density, WeaponProfile.HeadOrientation orientation) {
+    // Convert density from g/cm³ to g/mm³ for calculations
+    double densityPerMM3 = density / 1000.0;
+
+    if (length <= 0.0) return 0.0;
+    if ((widthAtBase <= 0.0 && widthAtTip <= 0.0) || (thicknessAtBase <= 0.0 && thicknessAtTip <= 0.0)) {
+      return 0.0;
+    }
+
+    TreeMap<Double, Double> wMap = buildNormalizedMap(widthAtPoints, widthAtBase, widthAtTip);
+    TreeMap<Double, Double> tMap = buildNormalizedMap(thicknessAtPoints, thicknessAtBase, thicknessAtTip);
+
+    TreeSet<Double> points = getIntegrationPoints(wMap, tMap);
+
+    if (points.isEmpty()) return 0.0;
+
+    double totalInertia = 0.0;
+    Double prevP = null;
+    double prevW = 0.0;
+    double prevT = 0.0;
+
+    // Bevel parameters
+    double r = primaryBevel.curveFactor();
+    double pBevel = primaryBevel.percentageOfBladeWidth();
+    double coeff = superEllipseCoefficient(r);
+    // Kbase is the area factor relative to a rectangle W*T
+    double Kbase = (1.0 - pBevel) + pBevel * coeff;
+
+    // Calculate accurate inertia shape factor kLocal = I_centroid / (Area * W^2)
+    // This accounts for the mass distribution of the flat center and tapered bevels
+    double kShape = calculateInertiaShapeFactor(pBevel, r);
+    double kLocal = kShape / Kbase;
+
+    for (Double p : points) {
+      double w = interpolate(wMap, p);
+      double t = interpolate(tMap, p);
+
+      if (prevP != null) {
+        double delta = p - prevP;
+        double w0 = prevW;
+        double w1 = w;
+        double t0 = prevT;
+        double t1 = t;
+
+        double segLen = delta * length;
+        double distStart = prevP * length; // Distance from blade base
+
+        // Simpson's rule integration
+        // I_slice(s) = rho * A(s) * [ D_axis(s)^2 + kLocal * W(s)^2 ]
+        // A(s) = W(s) * T(s) * Kbase
+
+        // s=0
+        double area0 = w0 * t0 * Kbase;
+        double dAxisSq0 = getDistAxisSq(distanceFromPivot, distStart, orientation);
+        double f0 = area0 * (dAxisSq0 + kLocal * w0 * w0);
+
+        // s=L/2
+        double wMid = (w0 + w1) / 2.0;
+        double tMid = (t0 + t1) / 2.0;
+        double areaMid = wMid * tMid * Kbase;
+        double dAxisSqMid = getDistAxisSq(distanceFromPivot, distStart + segLen / 2.0, orientation);
+        double fMid = areaMid * (dAxisSqMid + kLocal * wMid * wMid);
+
+        // s=L
+        double area1 = w1 * t1 * Kbase;
+        double dAxisSq1 = getDistAxisSq(distanceFromPivot, distStart + segLen, orientation);
+        double f1 = area1 * (dAxisSq1 + kLocal * w1 * w1);
+
+        // Use adaptive Simpson's rule for better accuracy on nonlinear blade geometry
+        double segInertia = adaptiveSimpsonsRule(f0, f1, fMid, segLen, 1e-6, 0) * densityPerMM3;
+        if (fuller != null && fuller.sagittaHeightByPercent() > 0.0 && fuller.chordLengthByPercent() > 0.0) {
+             double chordPct = fuller.chordLengthByPercent();
+             double depthPct = fuller.sagittaHeightByPercent();
+             int sides = fuller.bothSides() ? 2 : 1;
+
+             // Calculate sagitta from percentage and local thickness
+             double maxDepthPct = (sides == 2) ? 0.5 : 1.0;
+             double effectiveDepthPct = Math.min(depthPct, maxDepthPct);
+
+             // Calculate local thickness at fuller position (assume centered at 0.5)
+             double tLocal0 = getLocalThickness(t0, primaryBevel, singleEdged, 0.5);
+             double tLocalMid = getLocalThickness(tMid, primaryBevel, singleEdged, 0.5);
+             double tLocal1 = getLocalThickness(t1, primaryBevel, singleEdged, 0.5);
+
+             double sag0 = effectiveDepthPct * tLocal0;
+             double sagMid = effectiveDepthPct * tLocalMid;
+             double sag1 = effectiveDepthPct * tLocal1;
+
+             // Use accurate circular segment moment of inertia
+             double c0 = chordPct * w0;
+             double I_seg0 = getCircleSegmentInertia(c0, sag0);
+             double af0 = getCircleSegmentArea(c0, sag0);
+             // I_pivot = I_centroid + A * d_pivot^2
+             double ff0 = I_seg0 * densityPerMM3 + af0 * dAxisSq0 * densityPerMM3;
+
+             double cMid = chordPct * wMid;
+             double I_segMid = getCircleSegmentInertia(cMid, sagMid);
+             double afMid = getCircleSegmentArea(cMid, sagMid);
+             double ffMid = I_segMid * densityPerMM3 + afMid * dAxisSqMid * densityPerMM3;
+
+             double c1 = chordPct * w1;
+             double I_seg1 = getCircleSegmentInertia(c1, sag1);
+             double af1 = getCircleSegmentArea(c1, sag1);
+             double ff1 = I_seg1 * densityPerMM3 + af1 * dAxisSq1 * densityPerMM3;
+
+             // Use adaptive Simpson's rule for accurate fuller inertia integration
+             double fullerInertia = adaptiveSimpsonsRule(ff0, ff1, ffMid, segLen, 1e-6, 0) * sides;
+
+             // Safety clamp
+             if (fullerInertia > segInertia) fullerInertia = segInertia;
+
+             segInertia -= fullerInertia;
+        }
+        totalInertia += segInertia;
+      }
+      prevP = p;
+      prevW = w;
+      prevT = t;
+    }
+
+    return totalInertia;
+  }
+
+  /**
+   * Calculates the inertia shape factor k = I / (W^3 * T) for the blade cross-section.
+   * The cross-section consists of a central rectangular part (width fraction 1-p)
+   * and two superelliptical bevels (width fraction p).
+   * @param p bevel percentage (0 to 1)
+   * @param r bevel curve factor
+   * @return shape factor k
+   */
+  private double calculateInertiaShapeFactor(double p, double r) {
+      if (p <= 0.0) return 1.0/12.0; // Rectangle
+      if (p >= 1.0) {
+          // Full superellipse (split in two halves meeting at center)
+          // I = 2 * ( a^3 * r/(3(r+3)) ) where a = W/2.
+          // I = 2 * (W/2)^3 * ... = W^3/4 * ...
+          // k = 1/4 * r/(3(r+3)) = r / (12(r+3)).
+          return r / (12.0 * (r + 3.0));
+      }
+
+      // Normalized dimensions for W=2, T=1
+      double x0 = 1.0 - p; // Half-width of flat part
+      double a = p;        // Width of one bevel
+
+      // Inertia of flat part (from -x0 to x0)
+      double I_flat = (2.0/3.0) * Math.pow(x0, 3);
+
+      // Inertia of one bevel (shifted by x0)
+      // Terms from integration of (u+x0)^2 * (1 - (u/a)^r)
+      double term1 = Math.pow(a, 3) * r / (3.0 * (r + 3.0));
+      double term2 = x0 * Math.pow(a, 2) * r / (r + 2.0);
+      double term3 = Math.pow(x0, 2) * a * r / (r + 1.0);
+
+      double I_bevel = term1 + term2 + term3;
+
+      double I_total = I_flat + 2.0 * I_bevel;
+
+      // Normalize by W^3 = 8
+      return I_total / 8.0;
+  }
+
+  private double getDistAxisSq(double dPivot, double s, WeaponProfile.HeadOrientation orientation) {
+      if (orientation == WeaponProfile.HeadOrientation.PARALLEL) {
+          // Blade along radial axis. Distance from pivot = dPivot + s.
+          return Math.pow(dPivot + s, 2);
+      } else {
+          // Blade perpendicular to radial axis.
+          // Radial distance = dPivot. Tangential distance = s.
+          // R^2 = dPivot^2 + s^2.
+          return dPivot * dPivot + s * s;
+      }
   }
 
   public Bevel primaryBevel() {
@@ -135,7 +335,7 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
     // before we calculate volume and PoB, we need to make sure the fuller and the primary bevel check out mathematically.
     // Specifically, if the chord of the circle segment defined by the fuller is longer than the width of non-bevel portion of
     // the blade, we cut off the bevel early to make room.
-    if (this.fuller.chordLengthByPercent <= 0.0001) {
+    if (this.fuller.chordLengthByPercent >= 0.0001) {
       if (singleEdged) this.primaryBevel = primaryBevel; // single-edged blades don't have to worry about fullers taking up too much space, because the fuller can go on the bevel.
       else {
         double chordPct = fuller.chordLengthByPercent();
@@ -207,18 +407,38 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
         double segmentVol = segmentLength * Kbase * integralWT;
 
         // subtract fuller volume if present
-        if (fuller != null && fuller.sagitta() > 0.0 && fuller.chordLengthByPercent() > 0.0) {
+        if (fuller != null && fuller.sagittaHeightByPercent() > 0.0 && fuller.chordLengthByPercent() > 0.0) {
           double chordPct = fuller.chordLengthByPercent();
-          double sag = fuller.sagitta();
+          double depthPct = fuller.sagittaHeightByPercent();
           int sides = fuller.bothSides() ? 2 : 1;
 
-          // Simpson's rule on fuller area (nonlinear in w): sample at s=0,0.5,1
+          // Clamp sagitta to local thickness
+          double maxDepthPct = (sides == 2) ? 0.5 : 1.0;
+          double effectiveDepthPct = Math.min(depthPct, maxDepthPct);
+
           double wMid = 0.5 * (w0 + w1);
-          double f0 = getCircleSegmentArea(chordPct * w0, sag);
-          double f1 = getCircleSegmentArea(chordPct * w1, sag);
-          double fmid = getCircleSegmentArea(chordPct * wMid, sag);
-          double simpson = (f0 + 4.0 * fmid + f1) / 6.0;
-          double fullerVol = simpson * segmentLength * sides;
+          double tMid = 0.5 * (t0 + t1);
+
+          // Calculate local thickness at fuller position (assume centered at 0.5)
+          double tLocal0 = getLocalThickness(t0, primaryBevel, singleEdged, 0.5);
+          double tLocalMid = getLocalThickness(tMid, primaryBevel, singleEdged, 0.5);
+          double tLocal1 = getLocalThickness(t1, primaryBevel, singleEdged, 0.5);
+
+          double sag0 = effectiveDepthPct * tLocal0;
+          double sagMid = effectiveDepthPct * tLocalMid;
+          double sag1 = effectiveDepthPct * tLocal1;
+
+          // Simpson's rule on fuller area (nonlinear in w): sample at s=0,0.5,1
+          double f0 = getCircleSegmentArea(chordPct * w0, sag0);
+          double f1 = getCircleSegmentArea(chordPct * w1, sag1);
+          double fmid = getCircleSegmentArea(chordPct * wMid, sagMid);
+
+          // Use adaptive Simpson's rule for better accuracy on nonlinear fuller geometry
+          double fullerAreaIntegral = adaptiveSimpsonsRule(f0, f1, fmid, segmentLength, 1e-6, 0);
+          double fullerVol = fullerAreaIntegral * sides;
+
+          if (fullerVol > segmentVol) fullerVol = segmentVol;
+
           segmentVol -= fullerVol;
         }
 
@@ -260,15 +480,37 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
   }
 
   /**
-   * Calculates the area of a modified superellipse given its semi-width (a), semi-thickness (b), and exponent (r).
-   * Uses the equation |x/a|^r + |y/b| = 1, where the exponent only applies to the width dimension.
-   * This better approximates blade cross-sections than the standard superellipse.
-   * r > 0. For r = 1, this is a diamond. For r = 2, this is an ellipse. For r > 2, the shape becomes more squared in the width direction.
+   * Calculates the area of a modified superellipse defined by |x/a|^r + |y/b| = 1.
    *
-   * @param a the half-width of the blade cross-section, in mm
-   * @param b the half-thickness of the blade cross-section, in mm
-   * @param r the exponent defining the shape of the cross-section (applied only to width)
-   * @return the area of the cross-section in mm^2
+   * IMPORTANT: This is NOT a standard superellipse, and the result differs from an ellipse when r=2.
+   * This modified form uses different exponents for different axes, making it asymmetric in exponent application.
+   * It is specifically designed to approximate beveled blade cross-sections.
+   *
+   * Mathematical definition:
+   * - The width dimension (x) follows: |x/a|^r
+   * - The thickness dimension (y) follows: |y/b|^1 (linear, no exponent)
+   * - Together they satisfy: |x/a|^r + |y/b| = 1
+   *
+   * This differs from the standard symmetric superellipse |x/a|^r + |y/b|^r = 1 because:
+   * - Standard superellipse with r=2 gives area = πab (true ellipse)
+   * - Our modified form with r=2 gives area = 4ab × (2/3) ≈ 2.667ab (different shape!)
+   *
+   * The asymmetry is intentional: it better models how blades taper (curved edge, straighter spine/back).
+   *
+   * Area Formula: A = 4ab × r/(r+1)
+   *
+   * Examples:
+   * - r=1 (diamond shape):     Area = 4ab × 1/2 = 2ab
+   * - r=2 (modified ellipse):  Area = 4ab × 2/3 ≈ 2.667ab
+   * - r=3 (rounded square):    Area = 4ab × 3/4 = 3ab
+   * - r→∞ (approaches square): Area → 4ab
+   *
+   * @param a the half-width of the blade cross-section, in mm (dimension with the exponent applied)
+   * @param b the half-thickness of the blade cross-section, in mm (linear dimension without exponent)
+   * @param r the exponent defining the shape of the width dimension (r > 0)
+   * @return the area of the cross-section in mm²
+   *
+   * @throws IllegalArgumentException if a ≤ 0, b ≤ 0, or r ≤ 0
    */
   public static double getSuperEllipseArea(double a, double b, double r) {
     if (a <= 0.0 || b <= 0.0) throw new IllegalArgumentException("a and b must be > 0");
@@ -338,11 +580,9 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
     TreeMap<Double, Double> wMap = buildNormalizedMap(widthAtPoints, widthAtBase, widthAtTip);
     TreeMap<Double, Double> tMap = buildNormalizedMap(thicknessAtPoints, thicknessAtBase, thicknessAtTip);
 
-    TreeSet<Double> points = new TreeSet<>();
-    points.addAll(wMap.keySet());
-    points.addAll(tMap.keySet());
+    TreeSet<Double> points = getIntegrationPoints(wMap, tMap);
 
-    if (points.isEmpty()) return length / 2.0;
+    if (points.isEmpty()) return 0.0;
 
     Double prevP = null;
     double prevW = 0.0;
@@ -379,24 +619,49 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
         double segmentFirstMoment = (L * L) * Kbase * D * (p0 * term1 + D * term2);
 
         // subtract fuller first moment if present (approximate with Simpson weighting of x*f(w))
-        if (fuller != null && fuller.sagitta() > 0.0 && fuller.chordLengthByPercent() > 0.0) {
+        if (fuller != null && fuller.sagittaHeightByPercent() > 0.0 && fuller.chordLengthByPercent() > 0.0) {
           double chordPct = fuller.chordLengthByPercent();
-          double sag = fuller.sagitta();
+          double depthPct = fuller.sagittaHeightByPercent();
           int sides = fuller.bothSides() ? 2 : 1;
 
+          // Clamp sagitta
+          double maxDepthPct = (sides == 2) ? 0.5 : 1.0;
+          double effectiveDepthPct = Math.min(depthPct, maxDepthPct);
+
           double wMid = 0.5 * (w0 + w1);
-          // positions p at s=0,0.5,1
+          double tMid = 0.5 * (t0 + t1);
+
+          // Calculate local thickness at fuller position (assume centered at 0.5)
+          double tLocal0 = getLocalThickness(t0, primaryBevel, singleEdged, 0.5);
+          double tLocalMid = getLocalThickness(tMid, primaryBevel, singleEdged, 0.5);
+          double tLocal1 = getLocalThickness(t1, primaryBevel, singleEdged, 0.5);
+
+          double sag0 = effectiveDepthPct * tLocal0;
+          double sagMid = effectiveDepthPct * tLocalMid;
+          double sag1 = effectiveDepthPct * tLocal1;
+
+          // positions p at s=0,0.5,1 (in normalized coordinates)
           double pA = p0;
           double pB = p0 + D * 0.5;
           double pC = p0 + D;
 
-          double f0 = getCircleSegmentArea(chordPct * w0, sag);
-          double fmid = getCircleSegmentArea(chordPct * wMid, sag);
-          double f1 = getCircleSegmentArea(chordPct * w1, sag);
+          double f0 = getCircleSegmentArea(chordPct * w0, sag0);
+          double fmid = getCircleSegmentArea(chordPct * wMid, sagMid);
+          double f1 = getCircleSegmentArea(chordPct * w1, sag1);
 
-          // Simpson for integral of p * f(w(p)) over s; convert to percent-space then multiply by L^2 * D * sides
-          double simpsonPf = (pA * f0 + 4.0 * pB * fmid + pC * f1) / 6.0;
-          double fullerFirstMoment = (L * L) * D * simpsonPf * sides;
+          // Weight fuller area by position for first moment calculation
+          // First moment = L^2 * integral of p * area over normalized coordinate
+          double pf0 = pA * f0;
+          double pfmid = pB * fmid;
+          double pf1 = pC * f1;
+
+          // Use adaptive Simpson's rule for integral of p * f(w(p)) over normalized p
+          // The segment length in parameter space is D (normalized), multiply by L^2 for physical units
+          double positionWeightedIntegral = adaptiveSimpsonsRule(pf0, pf1, pfmid, D, 1e-6, 0);
+          double fullerFirstMoment = (L * L) * positionWeightedIntegral * sides;
+
+          if (fullerFirstMoment > segmentFirstMoment) fullerFirstMoment = segmentFirstMoment;
+
           segmentFirstMoment -= fullerFirstMoment;
         }
 
@@ -498,25 +763,25 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
   /**
    * Fuller specifications for the blade. A fuller is a groove or channel
    * that runs along the length of the blade to reduce weight while maintaining strength.
-   * We treat the fuller as a circular segment cut out of the blade, defined by its chord length
-   * and sagitta (height). We treat the superimposition as the chord being flush with the surface of the blade,
-   * and the sagitta being the depth of the fuller into the blade. If bothSides is true,
-   * the fuller is mirrored on both sides of the blade.
+   * We treat the fuller as a circular segment cut out of the blade cross-sections, defined by its chord length
+   * and sagitta. We treat the superimposition as the chord being flush with the surface of the blade,
+   * and the sagitta being the depth of the fuller into the blade as a percentage of the blade thickness.
+   * If bothSides is true, the fuller is mirrored on both sides of the blade.
    *
    * @param bothSides true if the fuller is on both sides of the blade
    * @param chordLengthByPercent the chord length of the fuller as a percentage of the blade width (0.0 - 1.0)
-   * @param sagitta the height (depth) of the fuller in mm
+   * @param sagittaHeightByPercent the depth of the fuller as a percentage of the blade thickness (0.0 - 1.0)
    */
   public record Fuller(
           boolean bothSides,
           double chordLengthByPercent,
-          double sagitta
+          double sagittaHeightByPercent
   ) {
     public static final Codec<Fuller> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
                     Codec.BOOL.fieldOf("bothSides").forGetter(Fuller::bothSides),
                     Codec.DOUBLE.fieldOf("chordLengthPercentage").forGetter(Fuller::chordLengthByPercent),
-                    Codec.DOUBLE.fieldOf("height").forGetter(Fuller::sagitta)
+                    Codec.DOUBLE.fieldOf("sagittaHeightByPercent").forGetter(Fuller::sagittaHeightByPercent)
             ).apply(instance, Fuller::new)
     );
 
@@ -524,6 +789,152 @@ public class Blade extends WeaponHead implements SlashCapable, ThrustCapable {
       return new Fuller(false, 0.0, 0.0);
     }
 
+  }
+
+  private TreeSet<Double> getIntegrationPoints(TreeMap<Double, Double> wMap, TreeMap<Double, Double> tMap) {
+    TreeSet<Double> points = new TreeSet<>();
+    points.addAll(wMap.keySet());
+    points.addAll(tMap.keySet());
+
+    // Ensure minimum segment count
+    int minSegments = 20;
+    for (int i = 0; i < minSegments; i++) {
+      points.add((double) i / minSegments);
+    }
+    points.add(1.0);
+
+    return points;
+  }
+
+  private double getLocalThickness(double t, Bevel bevel, boolean singleEdged, double widthFraction) {
+    double p = bevel.percentageOfBladeWidth();
+    double r = bevel.curveFactor();
+
+    if (singleEdged) {
+      // Spine at 0, Edge at 1.
+      // Flat from 0 to 1-p.
+      if (widthFraction <= (1.0 - p)) {
+        return t;
+      } else {
+        // In bevel
+        double u = (widthFraction - (1.0 - p)) / p; // 0 to 1
+        if (u >= 1.0) return 0.0;
+        return t * (1.0 - Math.pow(u, r));
+      }
+    } else {
+      // Double edged. Symmetric about 0.5.
+      double distFromCenter = Math.abs(widthFraction - 0.5) * 2.0; // 0 at center, 1 at edges.
+      double flatWidthFraction = 1.0 - p;
+
+      if (distFromCenter <= flatWidthFraction) {
+        return t;
+      } else {
+        double u = (distFromCenter - flatWidthFraction) / p;
+        if (u >= 1.0) return 0.0;
+        return t * (1.0 - Math.pow(u, r));
+      }
+    }
+  }
+
+  /**
+   * Calculates the moment of inertia of a circular segment about its centroid.
+   * Used for accurate fuller inertia calculations.
+   *
+   * For a circular segment with chord length c and sagitta h:
+   * - Calculate the radius R = (c² + 4h²) / (8h)
+   * - Calculate the central angle θ = 2 × arcsin(c / (2R))
+   * - Calculate centroid distance from chord: d_c = (4R × sin³(θ/2)) / (3(θ - sin(θ)))
+   * - Calculate I_centroid = (R⁴ / 4) × (θ - sin(θ) - (8/3) × sin⁴(θ/2) / (θ - sin(θ)))
+   *
+   * @param c the chord length in mm
+   * @param h the sagitta (height) in mm
+   * @return the moment of inertia about the centroid in mm⁴
+   */
+  private double getCircleSegmentInertia(double c, double h) {
+    if (c <= 0.0 || h <= 0.0) return 0.0;
+
+    try {
+      double cSq = c * c;
+      double hSq = h * h;
+      double R = (cSq + 4 * hSq) / (8 * h);
+
+      if (R <= 0.0) return 0.0;
+
+      // Central angle
+      double sinTerm = c / (2 * R);
+      if (Math.abs(sinTerm) > 1.0) sinTerm = Math.signum(sinTerm);
+      double theta = 2 * Math.asin(sinTerm);
+
+      double sinTheta = Math.sin(theta);
+      double cosTheta = Math.cos(theta);
+
+      // Area of segment
+      double A = R * R * (theta - sinTheta) / 2;
+      if (A <= 0.0) return 0.0;
+
+      // Centroid distance from chord (measured toward center)
+      double sinHalf = Math.sin(theta / 2);
+      double denominator = theta - sinTheta;
+      if (Math.abs(denominator) < 1e-10) return 0.0;
+
+      double d_c = (4 * R * sinHalf * sinHalf * sinHalf) / (3 * denominator);
+
+      // Moment of inertia about centroid using integration
+      // I_chord = R^4 * (θ - sin(θ)) / 8
+      // I_centroid = I_chord - A * d_c^2
+      double I_chord = R * R * R * R * (theta - sinTheta) / 8;
+      double I_centroid = I_chord - A * d_c * d_c;
+
+      if (Double.isNaN(I_centroid) || I_centroid < 0.0) return 0.0;
+      return I_centroid;
+    } catch (Exception ex) {
+      return 0.0;
+    }
+  }
+
+  /**
+   * Recursively integrates a function over a segment using adaptive Simpson's rule.
+   * Divides segments until the change between successive approximations is below tolerance.
+   *
+   * @param f0 function value at segment start
+   * @param f1 function value at segment end
+   * @param fMid function value at segment midpoint
+   * @param segmentLen length of the segment
+   * @param tolerance acceptable error threshold
+   * @param depth current recursion depth (to prevent infinite recursion)
+   * @return integrated value over the segment
+   */
+  private double adaptiveSimpsonsRule(double f0, double f1, double fMid, double segmentLen,
+                                       double tolerance, int depth) {
+    // Prevent infinite recursion
+    if (depth > 20) {
+      return (segmentLen / 6.0) * (f0 + 4.0 * fMid + f1);
+    }
+
+    // Simpson's rule for full segment
+    double fullSimpson = (segmentLen / 6.0) * (f0 + 4.0 * fMid + f1);
+
+    // Simpson's rule for two half-segments
+    double segLen_half = segmentLen / 2.0;
+    // We need quarter points, but we don't have them computed
+    // Use simple linear interpolation for now
+    double f_quarter1 = (f0 + fMid) / 2.0;
+    double f_quarter2 = (fMid + f1) / 2.0;
+
+    double halfSimpson1 = (segLen_half / 6.0) * (f0 + 4.0 * f_quarter1 + fMid);
+    double halfSimpson2 = (segLen_half / 6.0) * (fMid + 4.0 * f_quarter2 + f1);
+    double halfSimpson = halfSimpson1 + halfSimpson2;
+
+    // Check if refinement is needed
+    double error = Math.abs(halfSimpson - fullSimpson) / 15.0; // Simpson's rule error estimate
+
+    if (error < tolerance) {
+      return halfSimpson; // Refined estimate is likely more accurate
+    } else {
+      // Recursively refine the two halves
+      return adaptiveSimpsonsRule(f0, fMid, f_quarter1, segLen_half, tolerance / 2.0, depth + 1) +
+             adaptiveSimpsonsRule(fMid, f1, f_quarter2, segLen_half, tolerance / 2.0, depth + 1);
+    }
   }
 
 }

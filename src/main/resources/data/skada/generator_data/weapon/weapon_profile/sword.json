@@ -1,25 +1,25 @@
 {
   "handle": {
-    "length": 375.0,
+    "length": 150.0,
     "radius": 15.0
   },
   "weapon_heads": [
     {
-      "position_on_handle": 115.0,
+      "position_on_handle": 150.0,
       "orientation": "PARALLEL",
       "head": {
         "typeKey": "blade",
-        "length": 625.0,
-        "thicknessAtBase": 12.0,
-        "thicknessAtTip": 12.0,
-        "widthAtBase": 80.0,
-        "widthAtTip": 80.0,
+        "length": 500.0,
+        "thicknessAtBase": 20.0,
+        "thicknessAtTip": 20.0,
+        "widthAtBase": 90.0,
+        "widthAtTip": 90.0,
         "primaryBevel": {
-          "percentageOfBladeWidth": 1.0,
+          "percentageOfBladeWidth": 0.66,
           "curveFactor": 1.0
         },
         "edgeBevel": {
-          "angle": 22.5,
+          "angle": 30.0,
           "shoulderAngle": 180.0,
           "edgeRadius": 5.0
         },

@@ -141,23 +141,23 @@ public class WeaponProfile {
    * Uses a <a href="https://kvetun-armoury.com/assets/images/products/163/caroling.png">Carolingian sword</a> as a model.
    * Measurements in millimetres.
    */
-  public WeaponProfile() {
-    this.handle = new Handle(115, 15, null); // 115mm length, 15mm radius
+  public static WeaponProfile defaultSword() {
+    Handle handle = new Handle(115, 15, null); // 115mm length, 15mm radius
     Blade blade = new Blade(
             false, 50, 30, null,
             8, 6, null, 750,
             new Blade.Bevel(60, 1.5),
             new Blade.EdgeBevel(22.5, 180, 5),
             new Blade.TipSpecifications(1000, 40, 150, 0.5),
-            new Blade.Fuller(true, 40, 4)
+            new Blade.Fuller(true, 0.4, 0.1)
     );
-    this.weaponHeads = new ArrayList<>();
+    List<WeaponHeadEntry> weaponHeads = new ArrayList<>();
     weaponHeads.add(new WeaponHeadEntry(blade, 115, HeadOrientation.PARALLEL, null)); // Blade starts at 115mm from base of handle
-    this.attackTypes = new HashMap<>(
+    return new WeaponProfile(handle, weaponHeads, new HashMap<>(
             Map.of(AttackType.slash(), new AttackTypeJsonInfo(
                     0.2, 3.0, 1.0, 1.0, 1.0, 1.0, List.of()
             ))
-    );
+    ));
   }
 
   public static WeaponProfile axeTest() {
@@ -231,47 +231,49 @@ public class WeaponProfile {
   }
 
   /**
-   * Get the point of balance (center of mass) from the base of the handle.
-   * Assumes uniform density for all components.
-   * For perpendicular heads (axe, mace, pick), the head's internal PoB doesn't shift
-   * the balance along the handle axis - only its mounting position matters.
+   * Get the total weight of the weapon assuming a given material density for the
+   * weapon heads. Assume the handle is made of oak wood with density 0.7 g/cm³.
+   * @param material the material info for the weapon heads
+   */
+  public double getWeight(ExtraTierInfo material) {
+    double handleWeight = handle.getWeight(); // Oak wood density in g/cm³
+    double headsWeight = weaponHeads.stream()
+            .mapToDouble(entry -> entry.getHead().getVolume() * material.density() / 1000.0)
+            .sum();
+    return handleWeight + headsWeight; // Total weight in grams
+  }
+
+  /**
+   * Calculate the point of balance of the weapon in millimeters from the base of the handle
+   * by taking a weighted average of each component's point of balance, using their masses as weights.
    *
+   * @param material the fallback material for heads without an explicit material
    * @return point of balance in millimeters from the base of the handle
    */
-  public double getPointOfBalance() {
-    double totalMoment = 0.0;
-    double totalVolume = 0.0;
-
-    // Handle contribution (assuming uniform density)
-    double handleVolume = handle.getVolume();
+  public double getPointOfBalance(ExtraTierInfo material) {
+    double handleWeight = handle.getWeight(); // Oak wood density in g/cm³
     double handlePoB = handle.getPointOfBalance();
-    totalMoment += handleVolume * handlePoB;
-    totalVolume += handleVolume;
 
-    // Weapon heads contribution
+    double totalWeightedPoB = handlePoB * handleWeight;
+    double totalWeight = handleWeight;
+
     for (WeaponHeadEntry entry : weaponHeads) {
-      double headVolume = entry.getHead().getVolume();
-      double headPoBAlongHandle;
-
+      ExtraTierInfo headMaterial = entry.getMaterial().orElse(material);
+      double headWeight = entry.getHead().getVolume() * headMaterial.density() / 1000.0; // Convert from g/cm³ to g/mm³
+      double headPoB;
       if (entry.getOrientation() == HeadOrientation.PERPENDICULAR) {
-        // For perpendicular heads, the center of mass is at the mounting position
-        // The head's internal PoB is perpendicular to the handle axis, so it doesn't
-        // affect the balance along the handle
-        headPoBAlongHandle = entry.getPositionOnHandle();
-      } else {
-        // For parallel heads, add the mounting position + the head's internal PoB
-        headPoBAlongHandle = entry.getPositionOnHandle() + entry.getHead().getPointOfBalance();
+        // if the head is perpendicular, we don't use its PoB, just the centre of the head width
+        headPoB = entry.getPositionOnHandle() + (entry.getHead().getSecondaryAxisLength() / 2.0);
       }
-
-      totalMoment += headVolume * headPoBAlongHandle;
-      totalVolume += headVolume;
+      else {
+        // if the head is parallel, we include its PoB
+        headPoB = entry.getPositionOnHandle() + entry.getHead().getPointOfBalance();
+      }
+      totalWeightedPoB += headPoB * headWeight;
+      totalWeight += headWeight;
     }
 
-    if (totalVolume < 1e-6) {
-      return handle.getLength() / 2.0;
-    }
-
-    return totalMoment / totalVolume;
+    return totalWeightedPoB / totalWeight;
   }
 
   /**
@@ -297,8 +299,26 @@ public class WeaponProfile {
       } else if (attackType.equals(AttackType.strike()) && head instanceof StrikeCapable strikeHead) {
         headIdealPoB = strikeHead.getStrikeNormalizedIdealPointOfBalance();
       }
-      return bladeStart + headEntry.getHead().getLength() * headIdealPoB;
+      return bladeStart + headEntry.getHead().getPrimaryAxisLength() * headIdealPoB;
     }
+  }
+
+  /**
+   * Get the mass moment of inertia of the weapon about the handle base.
+   * @param material the material info for the weapon heads
+   * @return mass moment of inertia in kg·m²
+   */
+  public double getMomentOfInertia(ExtraTierInfo material) {
+    double gramMillimeterSquared = handle.getMomentOfInertia() + weaponHeads.stream()
+            .mapToDouble(entry -> {
+              ExtraTierInfo headMaterial = entry.getMaterial().orElse(material);
+              double distanceFromPivot = entry.getPositionOnHandle();
+              return entry.getHead().getMomentOfInertia(distanceFromPivot, headMaterial.density(), entry.getOrientation());
+            })
+            .sum();
+    // Convert from g·mm² to kg·m²: divide by 1,000,000,000 (1 billion)
+    // 1 kg = 1000 g, 1 m² = 1,000,000 mm², so 1 kg·m² = 10^9 g·mm²
+    return gramMillimeterSquared / 1_000_000_000.0;
   }
 
   /**
@@ -311,10 +331,10 @@ public class WeaponProfile {
     for (WeaponHeadEntry entry : weaponHeads) {
       double headEnd = entry.getPositionOnHandle();
       if (entry.getOrientation() == HeadOrientation.PARALLEL) {
-        headEnd += entry.getHead().getLength();
+        headEnd += entry.getHead().getPrimaryAxisLength();
       }
       else {
-        headEnd += entry.getHead().getWidth();
+        headEnd += entry.getHead().getSecondaryAxisLength();
       }
       if (headEnd > maxHeadEnd) {
         maxHeadEnd = headEnd;
@@ -329,10 +349,10 @@ public class WeaponProfile {
     for (WeaponHeadEntry entry : weaponHeads) {
       double headEnd = entry.getPositionOnHandle();
       if (entry.getOrientation() == HeadOrientation.PARALLEL) {
-        headEnd += entry.getHead().getLength();
+        headEnd += entry.getHead().getPrimaryAxisLength();
       }
       else {
-        headEnd += entry.getHead().getWidth();
+        headEnd += entry.getHead().getSecondaryAxisLength();
       }
       if (headEnd > maxLength) {
         maxLength = headEnd;

@@ -34,6 +34,21 @@ public class Handle {
     return Math.PI * Math.pow(radius, 2) * length;
   }
 
+  public double getWeight() {
+    double density = material != null ? material.density() : 0.7; // density of oak wood in g/cm³
+    return getVolume() * density / 1000.0; // volume in mm³ converted to cm³, then multiplied by density to get weight in grams
+  }
+
+  /**
+   * Calculate the moment of inertia of the handle using the base of the handle as the pivot point.
+   * @return Moment of inertia in g·mm².
+   */
+  public double getMomentOfInertia() {
+    double mass = getWeight(); // mass in grams
+    // I = 1/2 * M * R^2 + M * (L/2)^2
+    return (0.5 * mass * Math.pow(radius, 2)) + (mass * Math.pow(length / 2.0, 2));
+  }
+
   public Optional<ExtraTierInfo> getMaterial() {
     return Optional.ofNullable(material);
   }
