@@ -1,5 +1,6 @@
 package com.cwjn.skada.data.gen.weapon.parts;
 
+import com.cwjn.skada.data.gen.weapon.WeaponProfile;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -99,15 +100,145 @@ public class AxeHead extends WeaponHead implements SlashCapable {
   }
 
   @Override
-  public double getLength() {
+  public double getPrimaryAxisLength() {
     return Math.max(0.0, eyeLength) + Math.max(0.0, cheekLength);
   }
 
   @Override
-  public double getWidth() {
-    double cheekTop = cheekHeight + Math.max(0.0, toeHeight);
-    double cheekBottom = -beardHeight;
-    return Math.max(eyeHeight, cheekTop - cheekBottom);
+  public double getSecondaryAxisLength() {
+    return Math.max(0.0, toeHeight) + Math.max(0.0, cheekHeight) + Math.max(0.0, beardHeight);
+  }
+
+  @Override
+  public double getMomentOfInertia(double distanceFromPivot, double density, WeaponProfile.HeadOrientation orientation) {
+    // Convert density from g/cm³ to g/mm³ for calculations
+    double densityPerMM3 = density / 1000.0;
+
+    // Calculate moment of inertia about the pivot point.
+    // The pivot is at distance 'distanceFromPivot' from the center of the eye (handle axis).
+    // We assume the handle is the Y-axis, and the axe head extends in the X-direction.
+    // The rotation axis is the Z-axis (perpendicular to both handle and blade length).
+    // Pivot point is at (0, -distanceFromPivot) relative to eye center (0,0).
+    // Or more simply: Eye center is at distance 'distanceFromPivot' from the pivot.
+    // So Eye Center = (0, distanceFromPivot).
+    // Rotation axis is at (0,0).
+
+    double eLen = Math.max(0.0, eyeLength);
+    double eH = Math.max(0.0, eyeHeight);
+    double cLen = Math.max(0.0, cheekLength);
+    double cH = Math.max(0.0, cheekHeight);
+    double bH = Math.max(0.0, beardHeight);
+    double tH = Math.max(0.0, toeHeight);
+    double eThick = Math.max(0.0, eyeThickness);
+
+    // Bevel factor K for volume/mass scaling
+    double p = 0.0; double r = 1.0;
+    if (primaryBevel != null) { p = primaryBevel.percentageOfBladeWidth(); r = primaryBevel.curveFactor(); }
+    p = Math.max(0.0, Math.min(1.0, p)); r = Math.max(1e-6, r);
+    double superCoeff = Blade.superEllipseCoefficient(r);
+    double K = (1.0 - p) + p * superCoeff;
+
+    double totalInertia = 0.0;
+
+    // 1. Eye (Rectangular Prism with Elliptical Hole)
+    // Center at (0, distanceFromPivot).
+    // Dimensions: eLen (X), eH (Y), eThick (Z).
+    // I_z_solid_cm = 1/12 * M_solid * (eLen^2 + eH^2)
+    double eyeSolidVol = eLen * eH * eThick;
+    double eyeSolidMass = eyeSolidVol * densityPerMM3;
+    double eyeSolidIcm = (1.0/12.0) * eyeSolidMass * (eLen*eLen + eH*eH);
+    double eyeDistSq = distanceFromPivot * distanceFromPivot;
+    totalInertia += eyeSolidIcm + eyeSolidMass * eyeDistSq;
+
+    // Subtract Hole
+    if (eyeHoleSemiMajorAxis > 0.0 && eyeHoleSemiMinorAxis > 0.0) {
+        // Hole is elliptical cylinder along Y axis.
+        // Cross section in XZ plane: semi-axes a=eyeHoleSemiMajorAxis (X), b=eyeHoleSemiMinorAxis (Z).
+        // Length = eH.
+        // I_z_hole_cm = I_x + I_y (perpendicular axis theorem? No, 3D).
+        // I_z (transverse to cylinder axis Y) = 1/4 M (a^2 + H^2/3) + 1/4 M b^2 ?
+        // For cylinder along Y: I_x = 1/12 M (3b^2 + H^2), I_z = 1/12 M (3a^2 + H^2).
+        // Wait, for elliptical cylinder x^2/a^2 + z^2/b^2 = 1.
+        // I_z = integral (x^2 + y^2) dm.
+        // integral y^2 dm = M * H^2 / 12.
+        // integral x^2 dm = M * a^2 / 4.
+        // So I_z = M * (a^2/4 + H^2/12).
+        double hVol = Math.PI * eyeHoleSemiMajorAxis * eyeHoleSemiMinorAxis * eH;
+        double hMass = hVol * densityPerMM3;
+        double hIcm = hMass * (eyeHoleSemiMajorAxis*eyeHoleSemiMajorAxis/4.0 + eH*eH/12.0);
+        totalInertia -= (hIcm + hMass * eyeDistSq);
+    }
+
+    // 2. Cheek (Rectangular Prism, Beveled)
+    // Center X: eLen/2 + cLen/2.
+    // Center Y: distanceFromPivot (assuming centered on eye).
+    // Mass scaled by K.
+    // I_cm approx: 1/12 * M * (cLen^2 + cH^2).
+    double cheekVol = cLen * cH * eThick * K;
+    double cheekMass = cheekVol * densityPerMM3;
+    double cheekCx = eLen/2.0 + cLen/2.0;
+    double cheekCy = distanceFromPivot;
+    double cheekIcm = (1.0/12.0) * cheekMass * (cLen*cLen + cH*cH);
+    double cheekDistSq = cheekCx*cheekCx + cheekCy*cheekCy;
+    totalInertia += cheekIcm + cheekMass * cheekDistSq;
+
+    // 3. Beard (Triangle)
+    // Vertices relative to pivot:
+    // Base start: (eLen/2, distanceFromPivot - cH/2)
+    // Base end: (eLen/2 + cLen, distanceFromPivot - cH/2)
+    // Tip: (eLen/2 + beardTipDistance, distanceFromPivot - cH/2 - bH)
+    if (bH > 0) {
+        double beardVol = 0.5 * cLen * bH * eThick * K;
+        double beardMass = beardVol * densityPerMM3;
+
+        double x1 = eLen/2.0;
+        double y1 = distanceFromPivot - cH/2.0;
+        double x2 = eLen/2.0 + cLen;
+        double y2 = y1;
+        double x3 = eLen/2.0 + beardTipDistance;
+        double y3 = y1 - bH;
+
+        double beardCx = (x1 + x2 + x3) / 3.0;
+        double beardCy = (y1 + y2 + y3) / 3.0;
+
+        // I_cm for triangle approx: M/18 * (b^2 + h^2) ?
+        // Let's use point mass approx for I_cm (small) + parallel axis.
+        // Or better: I_z = I_cm + M * d^2.
+        // I_cm of triangle is roughly M * (radius_gyration)^2.
+        // For right triangle, I_cm = M/18 (b^2 + h^2).
+        // Let's use that as approximation for general triangle.
+        double beardIcm = (1.0/18.0) * beardMass * (cLen*cLen + bH*bH);
+
+        double beardDistSq = beardCx*beardCx + beardCy*beardCy;
+        totalInertia += beardIcm + beardMass * beardDistSq;
+    }
+
+    // 4. Toe (Triangle)
+    // Vertices relative to pivot:
+    // Base start: (eLen/2, distanceFromPivot + cH/2)
+    // Base end: (eLen/2 + cLen, distanceFromPivot + cH/2)
+    // Tip: (eLen/2 + toeTipDistance, distanceFromPivot + cH/2 + tH)
+    if (tH > 0) {
+        double toeVol = 0.5 * cLen * tH * eThick * K;
+        double toeMass = toeVol * densityPerMM3;
+
+        double x1 = eLen/2.0;
+        double y1 = distanceFromPivot + cH/2.0;
+        double x2 = eLen/2.0 + cLen;
+        double y2 = y1;
+        double x3 = eLen/2.0 + toeTipDistance;
+        double y3 = y1 + tH;
+
+        double toeCx = (x1 + x2 + x3) / 3.0;
+        double toeCy = (y1 + y2 + y3) / 3.0;
+
+        double toeIcm = (1.0/18.0) * toeMass * (cLen*cLen + tH*tH);
+
+        double toeDistSq = toeCx*toeCx + toeCy*toeCy;
+        totalInertia += toeIcm + toeMass * toeDistSq;
+    }
+
+    return totalInertia;
   }
 
   @Override
@@ -224,7 +355,7 @@ public class AxeHead extends WeaponHead implements SlashCapable {
 
     double grossVolume = eyeVolume + cheekVolume + beardVolume + toeVolume;
 
-    // Subtract elliptical eye hole
+    // Subtract elliptical eyehole
     double holeVol = 0.0;
     if (eyeHoleSemiMajorAxis > 0.0 && eyeHoleSemiMinorAxis > 0.0) {
       holeVol = Math.PI * eyeHoleSemiMajorAxis * eyeHoleSemiMinorAxis * eyeThickness;

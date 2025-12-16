@@ -45,7 +45,7 @@ public abstract class AttackSpeedGenerationUtil {
    */
   private static double getBaseAttackSpeedMultiplier(WeaponProfile profile, ExtraTierInfo tierInfo, double idealPointOfBalance) {
     idealPointOfBalance = Mth.clamp(idealPointOfBalance, 0.001, 0.999); //this should never be exactly 0 or 1, but just in case
-    double pointOfBalanceNormalized = profile.getPointOfBalance() / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
+    double pointOfBalanceNormalized = profile.getPointOfBalance(tierInfo) / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
     //we'll normalize the differential between actual and ideal point of balance. -1.0 for furthest from ideal towards tip, +1.0 for furthest from ideal towards handle.
     double POBDifferential = idealPointOfBalance - pointOfBalanceNormalized;
     //if the POBDifferential is 0, return 1.0 immediately. Leave room for some delta, since we're dealing with doubles.

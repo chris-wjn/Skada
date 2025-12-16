@@ -8,7 +8,7 @@ public record ExtraTierInfo(double density, double hardness, double toughness, d
                             ElementSpread spread) {
 
   public static ExtraTierInfo getDefault() {
-    return new ExtraTierInfo(5, 1.0, 1.0, 1.0, new ElementSpread());
+    return new ExtraTierInfo(7.78, 1.0, 1.0, 1.0, new ElementSpread());
   }
 
   public static Codec<ExtraTierInfo> CODEC = RecordCodecBuilder.create(

@@ -1,5 +1,6 @@
 package com.cwjn.skada.data.gen.weapon.parts;
 
+import com.cwjn.skada.data.gen.weapon.WeaponProfile;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 import com.mojang.serialization.Codec;
@@ -86,6 +87,121 @@ public class SickleHead extends WeaponHead implements ThrustCapable, SlashCapabl
   }
 
   @Override
+  public double getPrimaryAxisLength() {
+    return Math.max(0.0, spineChordLength);
+  }
+
+  @Override
+  public double getSecondaryAxisLength() {
+    return Math.max(0.0, spineSagittaHeight);
+  }
+
+  @Override
+  public double getMomentOfInertia(double distanceFromPivot, double density, WeaponProfile.HeadOrientation orientation) {
+    // Convert density from g/cm³ to g/mm³ for calculations
+    double densityPerMM3 = density / 1000.0;
+
+    // Calculate moment of inertia about the pivot point using numerical integration.
+    // Pivot is at (0, -distanceFromPivot) relative to spine base (0,0).
+    // Axis of rotation is Z-axis (perpendicular to plane).
+
+    if (spineThickness <= 0.0) return 0.0;
+
+    // 1. Spine Geometry
+    double L_s = spineChordLength;
+    double h_s = spineSagittaHeight;
+    if (L_s <= 0) return 0.0;
+
+    double R_s = getCircleRadius(L_s, h_s);
+    if (R_s <= 0) return 0.0;
+
+    // Spine Circle Center (assuming chord on X-axis, arc above)
+    double cx_s = L_s / 2.0;
+    double cy_s = h_s - R_s;
+
+    // 2. Blade Geometry
+    double L_b = bladeChordLength;
+    double h_b = bladeSagittaHeight;
+    if (L_b <= 0) return 0.0;
+
+    double R_b = getCircleRadius(L_b, h_b);
+    if (R_b <= 0) return 0.0;
+
+    double d_base = spineBaseToBladeBaseDistance;
+    double d_tip = spineTipToBladeTipDistance;
+
+    // Blade chord projection on X
+    double dy_b = d_base - d_tip;
+    double term = L_b * L_b - dy_b * dy_b;
+    if (term < 0) term = 0;
+    double x_tip_b = Math.sqrt(term);
+
+    // Blade Chord Angle alpha
+    double alpha = Math.atan2(d_base - d_tip, x_tip_b);
+
+    // Blade Circle Center in Global Coords
+    double cu_b = L_b / 2.0;
+    double cv_b = h_b - R_b;
+
+    double sinA = Math.sin(alpha);
+    double cosA = Math.cos(alpha);
+
+    double cx_b = cu_b * cosA - cv_b * sinA;
+    double cy_b = -d_base + cu_b * sinA + cv_b * cosA;
+
+    // 3. Integration
+    int numSamples = 200;
+    double max_x = Math.min(L_s, x_tip_b);
+    double dx = max_x / numSamples;
+
+    // Bevel factor K
+    double p = 0.0; double r = 1.0;
+    if (primaryBevel != null) { p = primaryBevel.percentageOfBladeWidth(); r = primaryBevel.curveFactor(); }
+    p = Math.max(0.0, Math.min(1.0, p)); r = Math.max(1e-6, r);
+    double superCoeff = Blade.superEllipseCoefficient(r);
+    double K = (1.0 - p) + p * superCoeff;
+
+    double totalInertia = 0.0;
+
+    for (int i = 0; i < numSamples; i++) {
+      double x = (i + 0.5) * dx; // Midpoint
+
+      // Spine Y
+      double dx_s = x - cx_s;
+      double root_s = R_s * R_s - dx_s * dx_s;
+      if (root_s < 0) continue;
+      double y_s = cy_s + Math.sqrt(root_s);
+
+      // Blade Y
+      double dx_b_val = x - cx_b;
+      double root_b = R_b * R_b - dx_b_val * dx_b_val;
+      if (root_b < 0) continue;
+      double y_b = cy_b + Math.sqrt(root_b);
+
+      // Width
+      double w = y_s - y_b;
+      if (w < 0) w = 0;
+
+      // Mass of element
+      double dm = densityPerMM3 * spineThickness * w * dx * K;
+
+      // Centroid Y
+      double y_c = (y_s + y_b) / 2.0;
+
+      // Distance from pivot
+      double distSq = x * x + Math.pow(y_c + distanceFromPivot, 2);
+
+      // Inertia of element (parallel axis theorem)
+      // I_cm of rectangle strip about Z axis
+      double dI_cm = (1.0 / 12.0) * dm * (w * w + dx * dx);
+
+      totalInertia += dI_cm + dm * distSq;
+    }
+
+    return totalInertia;
+  }
+
+  @Override
   public double getMedianWidth() {
     return 0;
   }
@@ -143,12 +259,6 @@ public class SickleHead extends WeaponHead implements ThrustCapable, SlashCapabl
   @Override
   public double getThrustNormalizedIdealPointOfBalance() {
     return 0.0;
-  }
-
-  @Override
-  public double getLength() {
-    if (spineChordLength > 0.0) return spineChordLength;
-    return bladeChordLength;
   }
 
   @Override
@@ -284,20 +394,6 @@ public class SickleHead extends WeaponHead implements ThrustCapable, SlashCapabl
     return width;
   }
 
-  /**
-   * Calculates the area of a circular segment.
-   * @param chordLength The length of the chord.
-   * @param sagitta The height from the chord to the arc.
-   * @return The area of the circular segment.
-   */
-  private double getCircularSegmentArea(double chordLength, double sagitta) {
-    if (chordLength <= 0 || sagitta <= 0) {
-      return 0;
-    }
-    double radius = (chordLength * chordLength) / (8 * sagitta) + sagitta / 2;
-    double theta = 2 * Math.asin(chordLength / (2 * radius));
-    return (radius * radius / 2) * (theta - Math.sin(theta));
-  }
 
   public double spineArcLength() { return spineArcLength; }
   public double spineChordLength() { return spineChordLength; }

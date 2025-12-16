@@ -1,6 +1,7 @@
 package com.cwjn.skada.data.gen.weapon.parts;
 
 import com.cwjn.skada.data.SkadaData;
+import com.cwjn.skada.data.gen.weapon.WeaponProfile;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -79,6 +80,117 @@ public class PickHead extends WeaponHead implements ThrustCapable {
   }
 
   @Override
+  public double getPrimaryAxisLength() {
+    return Math.max(0.0, eyeLength) + Math.max(0.0, frontSpikeLength) + Math.max(0.0, rearSpikeLength);
+  }
+
+  @Override
+  public double getSecondaryAxisLength() {
+    return Math.max(0.0, eyeHeight);
+  }
+
+  @Override
+  public double getMomentOfInertia(double distanceFromPivot, double density, WeaponProfile.HeadOrientation orientation) {
+    // Convert density from g/cm³ to g/mm³ for calculations
+    double densityPerMM3 = density / 1000.0;
+
+    // Calculate moment of inertia about the pivot point.
+    // Pick head is perpendicular to the handle.
+    // Pivot is at distance 'distanceFromPivot' from the center of the eye.
+    // We assume the handle is the Y-axis, and the pick head extends in the X-direction.
+    // Rotation axis is Z-axis (perpendicular to handle and pick length).
+    // Pivot at (0, -distanceFromPivot) relative to eye center (0,0).
+    // Eye center is at (0, distanceFromPivot) relative to pivot.
+
+    double totalInertia = 0.0;
+
+    // 1. Eye (Box with hole)
+    // Dimensions: eyeLength (x), eyeHeight (y), eyeThickness (z)
+    // Center at (0, distanceFromPivot).
+    double eLen = Math.max(0.0, eyeLength);
+    double eH = Math.max(0.0, eyeHeight);
+    double eThick = Math.max(0.0, eyeThickness);
+    double eVol = eLen * eH * eThick;
+    double eMass = eVol * densityPerMM3;
+
+    // I_cm_z for solid box = 1/12 * M * (L^2 + H^2)
+    double iEyeSolidCm = (1.0/12.0) * eMass * (eLen*eLen + eH*eH);
+    double eyeDistSq = distanceFromPivot * distanceFromPivot;
+    totalInertia += iEyeSolidCm + eMass * eyeDistSq;
+
+    // Subtract hole
+    double hMaj = Math.max(0.0, eyeHoleSemiMajorAxis);
+    double hMin = Math.max(0.0, eyeHoleSemiMinorAxis);
+    if (hMaj > 0 && hMin > 0) {
+        double hVol = Math.PI * hMaj * hMin * eThick;
+        double hMass = hVol * densityPerMM3;
+        // Hole is elliptical cylinder along Y axis.
+        // I_z = M * (a^2/4 + H^2/12) where a is semi-axis in X.
+        // Here a = hMaj (if aligned with X).
+        double iHoleCm = hMass * (hMaj*hMaj/4.0 + eH*eH/12.0);
+        totalInertia -= (iHoleCm + hMass * eyeDistSq);
+    }
+
+    // 2. Front Spike (Pyramid)
+    // Length: frontSpikeLength (L_f)
+    // Base: frontSpikeBaseWidth (W_f), frontSpikeBaseHeight (H_f)
+    // Base centered at x = eLen/2, y = distanceFromPivot.
+    // Extends to x = eLen/2 + L_f.
+    double fL = Math.max(0.0, frontSpikeLength);
+    double fW = Math.max(0.0, frontSpikeBaseWidth);
+    double fH_spike = Math.max(0.0, frontSpikeBaseHeight);
+
+    if (fL > 0) {
+        double fVol = (fW * fH_spike * fL) / 3.0;
+        double fMass = fVol * densityPerMM3;
+        double fCx = eLen / 2.0 + fL / 4.0; // Centroid of pyramid is 1/4 from base
+        double fCy = distanceFromPivot;
+
+        // I_cm for pyramid about z-axis (perpendicular to length and height).
+        // Approx: I_cm = M * (3*L^2/80 + W^2/20)
+        // Here W is width in Y direction (fH_spike? No, fW is width, fH_spike is height).
+        // Wait, fW is "base width", fH_spike is "base height".
+        // Usually width is X, height is Y, thickness is Z?
+        // Pick head extends in X.
+        // So base is in YZ plane? No, base is attached to eye side (YZ plane).
+        // So base dimensions are Y and Z.
+        // fW is width (Y?), fH_spike is height (Z?).
+        // Or fW is thickness (Z)?
+        // "frontSpikeBaseWidth" usually means dimension in the plane of the pick curve?
+        // Let's assume fW is along Y (width of pick head), fH_spike is along Z (thickness).
+        // Rotation is about Z axis.
+        // So we need I_z.
+        // I_z depends on X and Y dimensions.
+        // Length L is X. Width W is Y.
+        // I_cm = M * (3*L^2/80 + W^2/20).
+        double fIcm = fMass * (3.0*fL*fL/80.0 + fW*fW/20.0);
+
+        double fDistSq = fCx*fCx + fCy*fCy;
+        totalInertia += fIcm + fMass * fDistSq;
+    }
+
+    // 3. Rear Spike (Pyramid)
+    // Extends from x = -eLen/2 to x = -eLen/2 - L_r.
+    double rL = Math.max(0.0, rearSpikeLength);
+    double rW = Math.max(0.0, rearSpikeBaseWidth);
+    double rH_spike = Math.max(0.0, rearSpikeBaseHeight);
+
+    if (rL > 0) {
+        double rVol = (rW * rH_spike * rL) / 3.0;
+        double rMass = rVol * densityPerMM3;
+        double rCx = -eLen / 2.0 - rL / 4.0;
+        double rCy = distanceFromPivot;
+
+        double rIcm = rMass * (3.0*rL*rL/80.0 + rW*rW/20.0);
+
+        double rDistSq = rCx*rCx + rCy*rCy;
+        totalInertia += rIcm + rMass * rDistSq;
+    }
+
+    return totalInertia;
+  }
+
+  @Override
   public Blade.TipSpecifications tipSpecs() {
     return new Blade.TipSpecifications(
             10,
@@ -116,11 +228,6 @@ public class PickHead extends WeaponHead implements ThrustCapable {
     return 0.0;
   }
 
-  @Override
-  public double getLength() {
-    // primary length is eyeLength + front spike length (rear spike goes backward)
-    return Math.max(0.0, eyeLength) + Math.max(0.0, frontSpikeLength) + Math.max(0.0, rearSpikeLength);
-  }
 
   /**
    * Default constructor with typical pickaxe dimensions.

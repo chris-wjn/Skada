@@ -31,7 +31,7 @@ public abstract class PrecisionGenerationUtil {
     if (thrustHead.getMaterial().isPresent()) tierInfo = thrustHead.getMaterial().get();
     ThrustCapable head = (ThrustCapable) thrustHead.getHead();
     double tipBevelAngleNormalized = EDGE_ANGLE_DEFAULT / head.tipSpecs().tipBevelAngle();
-    double pointOfBalanceNormalized = profile.getPointOfBalance() / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
+    double pointOfBalanceNormalized = profile.getPointOfBalance(tierInfo) / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
 
     double precision = tipRadiusToPrecisionBase(head.tipSpecs().tipRadius()); //the base for precision comes from tip radius
     precision *= tipBevelAngleNormalized; //the tip angle modifies precision
