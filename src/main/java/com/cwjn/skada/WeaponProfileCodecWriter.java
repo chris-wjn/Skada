@@ -1,6 +1,6 @@
 package com.cwjn.skada;// java
 import com.cwjn.skada.data.gen.attack.AttackTypeJsonInfo;
-import com.cwjn.skada.data.gen.weapon.WeaponProfile;
+import com.cwjn.skada.data.gen.weapon.old_system.WeaponProfile;
 import com.cwjn.skada.data.gen.weapon.parts.Handle;
 import com.cwjn.skada.data.gen.weapon.parts.WeaponHead;
 import com.google.gson.*;

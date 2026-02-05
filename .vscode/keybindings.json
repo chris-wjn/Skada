@@ -1,0 +1,6 @@
+[
+  {
+    "key": "ctrl+n",
+    "command": "workbench.action.showAllSymbols"
+  }
+]

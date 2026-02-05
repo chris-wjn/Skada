@@ -1,5 +1,6 @@
 package com.cwjn.skada.data.gen.weapon;
 
+import com.cwjn.skada.data.gen.weapon.old_system.WeaponProfile;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
 
@@ -19,6 +20,24 @@ public abstract class PrecisionGenerationUtil {
     precision += bladeWeightToPrecisionBase2(bladeWeight); //the blade weight can help, even if the edge is blunt. Heavier blades have more momentum.
     precision *= edgeAngleNormalized; //the edge angle modifies precision
 
+    // next we'll do some modifications based on the shoulder angle. Shoulder angles closer to 180 degrees are better, as the bump is less pronounced
+    // and the blade can cut more cleanly. The curve factor of the primary bevel rounds this off, causing larger shoulders to be less punishing if the bevel is more convex.
+    // shoulder angles above 180 are twice as punishing as those below 180, as they create a negative angle on the edge, meaning the blade curves "upwards", perpendicular
+    // to the direction of the cut.
+    /* double shoulderAngle = slashHead.edgeBevel().shoulderAngle();
+    double distFromOptimalShoulder = Math.abs(180 - shoulderAngle);
+    if (shoulderAngle > 180) distFromOptimalShoulder*=2;
+    lethality -= distFromOptimalShoulder * Math.max(0, 2-slashHead.primaryBevel().curveFactor());
+
+    // bevel curvature also affects lethality directly. more convex bevels cut better, more concave bevels cut worse
+    lethality *= bevelCurvatureToLethalityMult(slashHead.primaryBevel().curveFactor());
+
+    if (pointOfBalanceNormalized >= bladeStartPercentage) {
+      lethality += bladeStartPercentage*10; //if the point of balance is on the blade, give a little bonus
+    }
+    lethality *= 0.5 + ((pointOfBalanceNormalized/(2*idealPointOfBalanceNormalized))); //the ideal point of balance is where lethality and attack speed are balanced, higher = more lethality, lower = more speed.
+ */
+
     double normalizedHardness = material.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
     double normalizedFlexibility = Math.abs(material.flexibility()-MATERIAL_PROPERTY_SOFT_CAP/2)/(MATERIAL_PROPERTY_SOFT_CAP/2);
     precision *= 1 + 0.05*normalizedHardness - 0.09*normalizedFlexibility;
@@ -31,7 +50,7 @@ public abstract class PrecisionGenerationUtil {
     if (thrustHead.getMaterial().isPresent()) tierInfo = thrustHead.getMaterial().get();
     ThrustCapable head = (ThrustCapable) thrustHead.getHead();
     double tipBevelAngleNormalized = EDGE_ANGLE_DEFAULT / head.tipSpecs().tipBevelAngle();
-    double pointOfBalanceNormalized = profile.getPointOfBalance(tierInfo) / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
+    double pointOfBalanceNormalized = profile.pointOfBalance(tierInfo) / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
 
     double precision = tipRadiusToPrecisionBase(head.tipSpecs().tipRadius()); //the base for precision comes from tip radius
     precision *= tipBevelAngleNormalized; //the tip angle modifies precision

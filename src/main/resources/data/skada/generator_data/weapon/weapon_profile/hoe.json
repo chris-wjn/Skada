@@ -1,26 +1,27 @@
 {
+  "_comment": "Vanilla hoe profile using JSON geometry approximation (modeled as a pick with wide flat spike)",
   "handle": {
-    "length": 600.0,
-    "radius": 15.0
+    "length": 60.0,
+    "radius": 1.5
   },
   "weapon_heads": [
     {
+      "position_on_handle": 56.0,
+      "orientation": "PERPENDICULAR",
       "head": {
         "typeKey": "pick",
-        "eyeLength": 60.0,
-        "eyeHeight": 40.0,
-        "eyeThickness": 20.0,
-        "eyeHoleSemiMajorAxis": 15.0,
-        "eyeHoleSemiMinorAxis": 15.0,
-        "frontSpikeLength": 180.0,
-        "frontSpikeBaseWidth": 40.0,
-        "frontSpikeBaseHeight": 40.0,
+        "eyeLength": 2.5,
+        "eyeHeight": 4.0,
+        "eyeThickness": 3.0,
+        "eyeHoleSemiMajorAxis": 1.5,
+        "eyeHoleSemiMinorAxis": 1.0,
+        "frontSpikeLength": 10.0,
+        "frontSpikeBaseWidth": 8.0,
+        "frontSpikeBaseHeight": 1.5,
         "rearSpikeLength": 0.0,
         "rearSpikeBaseWidth": 0.0,
         "rearSpikeBaseHeight": 0.0
-      },
-      "position_on_handle": 560.0,
-      "orientation": "PERPENDICULAR"
+      }
     }
   ],
   "attack_types": {
@@ -30,4 +31,3 @@
     }
   }
 }
-

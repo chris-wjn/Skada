@@ -1,33 +1,34 @@
 {
+  "_comment": "Vanilla axe profile using JSON geometry approximation",
   "handle": {
-    "length": 500.0,
-    "radius": 15.0
+    "length": 50.0,
+    "radius": 1.5
   },
   "weapon_heads": [
     {
-      "position_on_handle": 450.0,
+      "position_on_handle": 45.0,
       "orientation": "PERPENDICULAR",
       "head": {
         "typeKey": "axe",
-        "eyeLength": 300.0,
-        "eyeHeight": 100.0,
-        "cheekLength": 300.0,
-        "cheekHeight": 100.0,
-        "beardHeight": 50.0,
-        "beardTipDistance": 150.0,
-        "toeHeight": 50.0,
-        "toeTipDistance": 150.0,
-        "eyeThickness": 15.0,
-        "eyeHoleSemiMajorAxis": 15.0,
-        "eyeHoleSemiMinorAxis": 15.0,
+        "eyeLength": 3.0,
+        "eyeHeight": 6.0,
+        "cheekLength": 10.0,
+        "cheekHeight": 6.0,
+        "beardHeight": 2.0,
+        "beardTipDistance": 8.0,
+        "toeHeight": 2.0,
+        "toeTipDistance": 8.0,
+        "eyeThickness": 4.0,
+        "eyeHoleSemiMajorAxis": 1.5,
+        "eyeHoleSemiMinorAxis": 1.0,
+        "primaryBevel": {
+          "percentageOfBladeWidth": 0.33,
+          "curveFactor": 1.3
+        },
         "edgeBevel": {
           "angle": 22.5,
           "shoulderAngle": 180.0,
           "edgeRadius": 5.0
-        },
-        "primaryBevel": {
-          "percentageOfBladeWidth": 0.33,
-          "curveFactor": 1.3
         }
       }
     }

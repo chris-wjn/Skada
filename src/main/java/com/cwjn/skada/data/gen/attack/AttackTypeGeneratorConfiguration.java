@@ -1,7 +1,7 @@
 package com.cwjn.skada.data.gen.attack;
 
 import com.cwjn.skada.data.gen.weapon.ExtraTierInfo;
-import com.cwjn.skada.data.gen.weapon.WeaponProfile;
+import com.cwjn.skada.data.gen.weapon.old_system.WeaponProfile;
 import com.cwjn.skada.util.TierStatFunctionInterface;
 
 public record AttackTypeGeneratorConfiguration(TierStatFunctionInterface precision, TierStatFunctionInterface lethality, TierStatFunctionInterface critFail, TierStatFunctionInterface attackSpeed) {

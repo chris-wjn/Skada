@@ -1,25 +1,26 @@
 {
+  "_comment": "Vanilla pickaxe profile using JSON geometry approximation",
   "handle": {
-    "length": 650.0,
-    "radius": 15.0
+    "length": 65.0,
+    "radius": 1.5
   },
   "weapon_heads": [
     {
-      "position_on_handle": 610.0,
+      "position_on_handle": 61.0,
       "orientation": "PERPENDICULAR",
       "head": {
         "typeKey": "pick",
-        "eyeLength": 60.0,
-        "eyeHeight": 40.0,
-        "eyeThickness": 20.0,
-        "eyeHoleSemiMajorAxis": 15.0,
-        "eyeHoleSemiMinorAxis": 15.0,
-        "frontSpikeLength": 160.0,
-        "frontSpikeBaseWidth": 40.0,
-        "frontSpikeBaseHeight": 40.0,
-        "rearSpikeLength": 160.0,
-        "rearSpikeBaseWidth": 40.0,
-        "rearSpikeBaseHeight": 40.0
+        "eyeLength": 3.0,
+        "eyeHeight": 5.0,
+        "eyeThickness": 4.0,
+        "eyeHoleSemiMajorAxis": 1.5,
+        "eyeHoleSemiMinorAxis": 1.0,
+        "frontSpikeLength": 12.0,
+        "frontSpikeBaseWidth": 2.5,
+        "frontSpikeBaseHeight": 3.0,
+        "rearSpikeLength": 12.0,
+        "rearSpikeBaseWidth": 2.5,
+        "rearSpikeBaseHeight": 3.0
       }
     }
   ],

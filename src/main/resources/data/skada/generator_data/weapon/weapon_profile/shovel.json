@@ -1,21 +1,22 @@
 {
+  "_comment": "Vanilla shovel profile using JSON geometry approximation",
   "handle": {
-    "length": 620.0,
-    "radius": 15.0
+    "length": 62.0,
+    "radius": 1.5
   },
   "weapon_heads": [
     {
-      "position_on_handle": 600.0,
+      "position_on_handle": 60.0,
       "orientation": "PERPENDICULAR",
       "head": {
         "typeKey": "shovel",
-        "bladeLength": 120.0,
-        "bladeWidth": 110.0,
-        "bladeThickness": 3.0,
-        "socketLength": 60.0,
-        "socketOuterRadius": 18.0,
-        "socketInnerRadius": 14.0,
-        "tipAngle": 18.0
+        "bladeLength": 12.0,
+        "bladeWidth": 10.0,
+        "bladeThickness": 1.0,
+        "socketLength": 4.0,
+        "socketOuterRadius": 1.8,
+        "socketInnerRadius": 1.5,
+        "tipAngle": 30.0
       }
     }
   ],
@@ -26,4 +27,3 @@
     }
   }
 }
-

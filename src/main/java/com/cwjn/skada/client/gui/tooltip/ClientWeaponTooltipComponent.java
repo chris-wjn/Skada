@@ -64,7 +64,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
         lines.add(attackTypesComponent(attackTypes[index]));
         if (!info.ignoreAttributes()) lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.REACH));
         lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.LETHALITY));
-        lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.ACCURACY));
+        lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.PRECISION));
         lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.CRITICAL_FAIL));
         if (!info.ignoreAttributes()) lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.ATTACK_SPEED));
         if (itemstack.getItem() instanceof CrossbowItem) {
@@ -243,8 +243,8 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
                 retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_speed",
                         Util.round(baseSpeed, 1))));
                 break;
-            case ACCURACY:
-                retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.accuracy",
+            case PRECISION:
+                retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.precision",
                         df.format(attackTypeInfo.precision()*100))));
                 break;
             case VELOCITY_CROSSBOW:
@@ -270,7 +270,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
         VELOCITY_CROSSBOW,
         VELOCITY_BOW,
         CRITICAL_FAIL,
-        ACCURACY
+        PRECISION
     }
 
     private void drawHorizontalGradient(GuiGraphics graphics, float pX1, float pY1, float pX2, float pY2, float pZ, int pColorFrom, int pColorTo) {

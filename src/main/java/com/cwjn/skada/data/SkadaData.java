@@ -26,9 +26,9 @@ import static com.cwjn.skada.data.damage.LethalityFunction.Operation.*;
  */
 public abstract class SkadaData {
 
-  public static final double PLAYER_TORQUE = 350;
+        public static final double PLAYER_STRENGTH = 50.0;
   public static boolean DEBUG_ENABLED = false;
-  public static final double DEFAULT_ACCURACY = 0.75;
+  public static final double DEFAULT_PRECISION = 0.75;
   public static Supplier<IForgeRegistry<AttackType>> REGISTRY_ATTACK_TYPE;
   public static Supplier<IForgeRegistry<Element>> REGISTRY_ELEMENT;
   public static final HashMap<EntityType<?>, MobData> MOB_DATA = new HashMap<>();
@@ -87,5 +87,7 @@ public abstract class SkadaData {
   public static final double BEVEL_ANGLE_DEFAULT = 22.5; //degrees
   public static final double BLADE_WEIGHT_DEFAULT = 1300; //grams
   public static final double WOOD_DENSITY = 0.7; //grams per cubic centimeter (g/cm³)
+        public static final double WEDGE_DRIVE_CONSTANT = 0.3; //kg·m²/s scaling for wedge drive ratio
+        public static final double WEDGE_BONUS_COEFFICIENT = 0.15; //+30% cap at wedgeFactor 2.0 when driveRatio >= 1
 
 }

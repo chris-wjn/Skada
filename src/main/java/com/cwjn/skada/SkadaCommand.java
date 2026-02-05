@@ -6,8 +6,9 @@ import com.cwjn.skada.data.gen.armour.ArmourMaterialInfo;
 import com.cwjn.skada.data.gen.armour.ArmourPieceInfo;
 import com.cwjn.skada.data.gen.attack.ElementSpread;
 import com.cwjn.skada.data.gen.weapon.ExtraTierInfo;
-import com.cwjn.skada.data.gen.weapon.WeaponProfile;
+import com.cwjn.skada.data.gen.weapon.old_system.WeaponProfile;
 import com.cwjn.skada.data.damage.WeaponInfo;
+import com.cwjn.skada.data.gen.weapon.parts.mesh.MeshAwareWeaponHeadCodec;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.util.Util;
@@ -211,6 +212,10 @@ public class SkadaCommand {
     HashMap<String, ExtraTierInfo> tierMap = new HashMap<>();
     HashMap<String, WeaponProfile> profileMap = new HashMap<>();
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    
+    // Set the resource manager for mesh-based weapon head loading
+    MeshAwareWeaponHeadCodec.setResourceManager(source.getServer().getResourceManager());
+    
     source.getServer().getResourceManager().listResources("generator_data/weapon", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
       try (var reader = resource.openAsReader()) {
         String path = rl.getPath();
@@ -252,6 +257,9 @@ public class SkadaCommand {
           if (item instanceof TieredItem tItem) {
             String matName = tItem.getTier().toString().toLowerCase();
             System.out.println("Generating item: " + path + " with material " + matName);
+            if (CommonConfig.SQUEEZE_DAMAGE_VALUES.get()) { //this is to make sure items don't have wildly different damage values just because of material differences
+              double damageModifier = getDamageModifierForItem(item, tItem.getTier());
+            }
             //first we'll check the item's namespace for tiers, then any namespace
             for (String s : tierMap.keySet().stream().filter(s -> s.startsWith(namespace)).toList()) {
               if (s.equals(namespace + "." + matName)) {
@@ -295,6 +303,10 @@ public class SkadaCommand {
     });
     player.displayClientMessage(Component.translatable("skada.generate_weapon_info.finish", map.size()), false);
     return 1;
+  }
+
+  private double getDamageModifierForItem(Item item, Tier tier) {
+    return 0;
   }
 
   private int generateArmourInfoForNamespace(@NotNull CommandSourceStack source, String namespace) {

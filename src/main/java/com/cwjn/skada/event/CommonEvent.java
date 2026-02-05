@@ -210,7 +210,7 @@ public class CommonEvent {
                     String modId = split[split.length-1].substring(0, split[split.length-1].length()-5);
                     info.result().ifPresent((map) -> {
                         if (map.size() > 40) {
-                            LOGGER.info("Weapon info from {} has more than 40 entries, splitting into multiple maps", rl);
+                            LOGGER.info("Armour info from {} has more than 40 entries, splitting into multiple maps", rl);
                             Map<String, ArmourInfo> subMap = new HashMap<>();
                             for (Map.Entry<String, ArmourInfo> entry : map.entrySet()) {
                                 subMap.put(entry.getKey(), entry.getValue());

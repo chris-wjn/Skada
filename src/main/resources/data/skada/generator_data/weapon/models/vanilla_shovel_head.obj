@@ -1,0 +1,184 @@
+﻿# Vanilla Minecraft Shovel Head - Accurate mesh model
+# Based on shovel.json weapon profile
+# All coordinates in centimeters
+# Shovel oriented PERPENDICULAR to handle
+#
+# Dimensions from JSON:
+# Blade: 120mm (12cm) length, 110mm (11cm) width, 3mm (0.3cm) thickness
+# Socket: 60mm (6cm) length, 18mm (1.8cm) outer radius, 14mm (1.4cm) inner radius
+# Tip angle: 18 degrees
+#
+# Coordinate system for perpendicular head:
+# - X-axis: along the blade length (primary axis, extends away from handle)
+# - Y-axis: handle direction (vertical when attached)
+# - Z-axis: blade width direction
+# - Origin: at socket/handle junction
+
+# ==============================================================
+# SOCKET SECTION (cylindrical tube connecting to handle)
+# Socket: 6cm length (Y), 1.8cm outer radius
+# Modeled as octagonal prism for efficiency
+# ==============================================================
+
+# Socket bottom (Y=0, at handle junction)
+# Octagonal outer ring (outer radius 1.8cm)
+v 1.27 0.0 1.27
+v 1.8 0.0 0.0
+v 1.27 0.0 -1.27
+v 0.0 0.0 -1.8
+v -1.27 0.0 -1.27
+v -1.8 0.0 0.0
+v -1.27 0.0 1.27
+v 0.0 0.0 1.8
+
+# Socket top (Y=6cm, where blade attaches)
+v 1.27 6.0 1.27
+v 1.8 6.0 0.0
+v 1.27 6.0 -1.27
+v 0.0 6.0 -1.8
+v -1.27 6.0 -1.27
+v -1.8 6.0 0.0
+v -1.27 6.0 1.27
+v 0.0 6.0 1.8
+
+# ==============================================================
+# BLADE SECTION (flat paddle shape)
+# Blade: 12cm length (X), 11cm width (Z), 0.3cm thickness (simulated as thin)
+# Slight dish/curve and tapered tip at 18 degree angle
+# ==============================================================
+
+# Blade base (where it meets socket, Y=6cm)
+# Full width 11cm (5.5cm each side)
+v 1.8 6.0 5.5
+v 1.8 5.7 5.5
+v 1.8 6.0 -5.5
+v 1.8 5.7 -5.5
+
+# Blade at 1/3 length (4cm from socket)
+# Maintain full width
+v 5.8 6.0 5.5
+v 5.8 5.7 5.5
+v 5.8 6.0 -5.5
+v 5.8 5.7 -5.5
+
+# Blade at 2/3 length (8cm from socket)
+# Start tapering width slightly
+v 9.8 6.0 5.0
+v 9.8 5.7 5.0
+v 9.8 6.0 -5.0
+v 9.8 5.7 -5.0
+
+# Blade at 5/6 length (10cm from socket)
+# Continue taper
+v 11.8 6.0 4.0
+v 11.8 5.7 4.0
+v 11.8 6.0 -4.0
+v 11.8 5.7 -4.0
+
+# Blade tip (12cm from socket, Y=6cm)
+# Comes to rounded/angled point at 18 degrees
+# Tip is still slightly wide (about 2cm) due to rounded tip
+v 13.8 6.0 2.0
+v 13.8 5.7 2.0
+v 13.8 6.0 -2.0
+v 13.8 5.7 -2.0
+
+# Very tip (pointed/rounded end)
+v 14.5 5.85 0.0
+
+# ==============================================================
+# FACES (triangles, CCW winding for outward normals)
+# ==============================================================
+
+# ---- SOCKET OUTER SURFACE ----
+# Bottom cap of socket (octagon)
+f 1 2 3
+f 1 3 4
+f 1 4 5
+f 1 5 6
+f 1 6 7
+f 1 7 8
+f 1 8 2
+
+# Socket side walls (8 rectangles as 16 triangles)
+f 1 9 10
+f 1 10 2
+f 2 10 11
+f 2 11 3
+f 3 11 12
+f 3 12 4
+f 4 12 13
+f 4 13 5
+f 5 13 14
+f 5 14 6
+f 6 14 15
+f 6 15 7
+f 7 15 16
+f 7 16 8
+f 8 16 9
+f 8 9 1
+
+# ---- SOCKET TO BLADE TRANSITION ----
+# Top surface connections
+f 10 17 19
+f 10 19 11
+f 9 17 10
+f 16 9 17
+
+# ---- BLADE TOP SURFACE ----
+# Base to 1/3
+f 17 21 23
+f 17 23 19
+# 1/3 to 2/3
+f 21 25 27
+f 21 27 23
+# 2/3 to 5/6
+f 25 29 31
+f 25 31 27
+# 5/6 to tip base
+f 29 33 35
+f 29 35 31
+# Tip triangles
+f 33 37 35
+
+# ---- BLADE BOTTOM SURFACE ----
+# Base to 1/3
+f 18 20 24
+f 18 24 22
+# 1/3 to 2/3
+f 22 24 28
+f 22 28 26
+# 2/3 to 5/6
+f 26 28 32
+f 26 32 30
+# 5/6 to tip base
+f 30 32 36
+f 30 36 34
+# Tip triangles
+f 34 36 37
+
+# ---- BLADE EDGES (right side, +Z) ----
+f 17 22 21
+f 17 18 22
+f 21 26 25
+f 21 22 26
+f 25 30 29
+f 25 26 30
+f 29 34 33
+f 29 30 34
+f 33 34 37
+
+# ---- BLADE EDGES (left side, -Z) ----
+f 19 23 24
+f 19 24 20
+f 23 27 28
+f 23 28 24
+f 27 31 32
+f 27 32 28
+f 31 35 36
+f 31 36 32
+f 35 37 36
+
+# ---- BLADE BACK EDGE (connection to socket) ----
+f 17 19 20
+f 17 20 18

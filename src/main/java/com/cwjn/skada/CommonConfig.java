@@ -11,23 +11,30 @@ public class CommonConfig {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.DoubleValue INEFFECTIVE_REACH_DAMAGE_MODIFIER;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_ACCURACY;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_ACCURACY_FOR_MELEE;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_ACCURACY_FOR_RANGED;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_PRECISION;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_PRECISION_FOR_MELEE;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_PRECISION_FOR_RANGED;
     public static final ForgeConfigSpec.BooleanValue ENABLE_LETHALITY;
     public static final ForgeConfigSpec.BooleanValue ENABLE_CRITICAL_FAIL;
     public static final ForgeConfigSpec.DoubleValue CRITICAL_FAIL_DURABILITY_LOSS;
+    public static final ForgeConfigSpec.BooleanValue SQUEEZE_DAMAGE_VALUES;
 
     static {
+
+        BUILDER.comment("Gameplay Settings").push("gameplay");
+        SQUEEZE_DAMAGE_VALUES = BUILDER.comment("When generating, assign damage modifiers to minimize the difference in damage between weapons of the same type but different material")
+                .define("squeezeDamageValues", true);
+        BUILDER.pop();
+
         BUILDER.comment("Combat Settings").push("combat");
 
-        BUILDER.push("Accuracy Settings");
-        ENABLE_ACCURACY = BUILDER.comment("Enable precision in general. All the following settings in this section will be ignored if this is false")
-                .define("enableAccuracy", true);
-        ENABLE_ACCURACY_FOR_MELEE = BUILDER.comment("Enable precision damage modifier for melee attacks")
-                .define("enableAccuracyForMelee", true);
-        ENABLE_ACCURACY_FOR_RANGED = BUILDER.comment("Enable precision projectile deviation modifier for bow and crossbow attacks")
-                .define("enableAccuracyForRanged", true);
+        BUILDER.push("Precision Settings");
+        ENABLE_PRECISION = BUILDER.comment("Enable precision in general. All the following settings in this section will be ignored if this is false")
+                .define("enablePrecision", true);
+        ENABLE_PRECISION_FOR_MELEE = BUILDER.comment("Enable precision damage modifier for melee attacks")
+                .define("enablePrecisionForMelee", true);
+        ENABLE_PRECISION_FOR_RANGED = BUILDER.comment("Enable precision projectile deviation modifier for bow and crossbow attacks")
+                .define("enablePrecisionForRanged", true);
         BUILDER.pop();
 
         BUILDER.push("Critical Fail Settings");

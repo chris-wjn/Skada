@@ -6,6 +6,7 @@
   "plugin": "com.cwjn.skada.mixin.SkadaMixinPlugin",
   "mixins": [
     "attack_injectors.mob.DrownedTridentThrowUseSkada",
+    "attack_injectors.mob.LlamaSpitUseSkada",
     "attack_injectors.mob.ProjectileUtilGetMobArrowUseSkada",
     "attack_injectors.player.BowItemUseSkada",
     "attack_injectors.player.CrossbowItemUseSkada",

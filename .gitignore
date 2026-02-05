@@ -20,6 +20,17 @@ build
 # other
 eclipse
 run
+run-data
+runServer
+tools
+*.log
+logs
+node_modules
+archived
+package-lock.json
+package.json
+pets-1768990636369.json
+tasks
 
 # Files from Forge MDK
 forge*changelog.txt
