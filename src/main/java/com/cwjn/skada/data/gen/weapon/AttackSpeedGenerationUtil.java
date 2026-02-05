@@ -1,74 +1,114 @@
 package com.cwjn.skada.data.gen.weapon;
 
+import com.cwjn.skada.data.gen.weapon.new_system.weapon.WeaponAssembly;
 import com.cwjn.skada.data.registry.AttackType;
 import net.minecraft.util.Mth;
 
 /**
- * These generators are slightly different, we want to generate a multiplier for base attack speed.
- * So, it'll return some number around 0.5-1.5 probably, where 1.0 is "normal" speed.
+ * Generates attack speed multipliers based on point of balance and weapon weight.
+ * Returns values typically in the range 0.9x - 1.1x, where 1.0 is "normal" speed.
+ * 
+ * The attack speed is influenced by:
+ * - Point of balance relative to ideal: closer to handle = faster, further = slower
+ * - Weapon weight: heavier weapons magnify the PoB effect slightly
+ * 
+ * The final multiplier is constrained to prevent extreme values that would
+ * make weapons feel broken in gameplay.
  */
 public abstract class AttackSpeedGenerationUtil {
 
-  public static double slash(WeaponProfile profile, ExtraTierInfo material) {
-    WeaponProfile.WeaponHeadEntry head = profile.getSlashHead();
-    if (head.getMaterial().isPresent()) material = head.getMaterial().get();
-    double totalLength = profile.getTotalLength();
-    double idealPointOfBalance = profile.getIdealPointOfBalanceWithHead(head, AttackType.slash())/totalLength;
-    return getBaseAttackSpeedMultiplier(profile, material, idealPointOfBalance);
+  // Constraints for attack speed multiplier
+  private static final double MIN_SPEED_MULT = 0.85;
+  private static final double MAX_SPEED_MULT = 1.15;
+  private static final double SOFT_MIN = 0.90;
+  private static final double SOFT_MAX = 1.10;
+
+  public static double slash(WeaponAssembly weapon, ExtraTierInfo material) {
+    double idealPointOfBalance = weapon.idealPointOfBalanceForAttackType(AttackType.slash());
+    return getBaseAttackSpeedMultiplier(weapon, material, idealPointOfBalance);
   }
 
-  public static double thrust(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    WeaponProfile.WeaponHeadEntry head = profile.getThrustHead();
-    if (head.getMaterial().isPresent()) tierInfo = head.getMaterial().get();
-    double totalLength = profile.getTotalLength();
-    double idealPointOfBalance = profile.getIdealPointOfBalanceWithHead(head, AttackType.thrust())/ totalLength; //essentially, the very start of the head
-    return getBaseAttackSpeedMultiplier(profile, tierInfo, idealPointOfBalance);
+  public static double thrust(WeaponAssembly weapon, ExtraTierInfo tierInfo) {
+    double idealPointOfBalance = weapon.idealPointOfBalanceForAttackType(AttackType.thrust());
+    return getBaseAttackSpeedMultiplier(weapon, tierInfo, idealPointOfBalance);
   }
 
-  public static double strike(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    WeaponProfile.WeaponHeadEntry head = profile.getStrikeHead();
-    if (head.getMaterial().isPresent()) tierInfo = head.getMaterial().get();
-    double totalLength = profile.getTotalLength();
-    double idealPointOfBalance = profile.getIdealPointOfBalanceWithHead(head, AttackType.strike())/ totalLength;
-    return getBaseAttackSpeedMultiplier(profile, tierInfo, idealPointOfBalance);
+  public static double strike(WeaponAssembly weapon, ExtraTierInfo tierInfo) {
+    double idealPointOfBalance = weapon.idealPointOfBalanceForAttackType(AttackType.strike());
+    return getBaseAttackSpeedMultiplier(weapon, tierInfo, idealPointOfBalance);
   }
 
   /**
-   * Calculates the base attack speed multiplier for a weapon attack type.
-   * If the point of balance matches the ideal, the base multiplier is 1.0 (to then be modified by weight).
-   * If the point of balance is closer to the handle than ideal, the multiplier increases (faster attack).
-   * If the point of balance is further from the handle than ideal, the multiplier decreases (slower attack).
-   * @param profile the weapon profile
+   * Calculates the attack speed multiplier based on point of balance differential.
+   * 
+   * The formula uses a sigmoid-like mapping to ensure:
+   * - Values stay within a reasonable range (0.85 - 1.15, soft limits 0.9 - 1.1)
+   * - Small deviations from ideal PoB have proportional effects
+   * - Large deviations are compressed to prevent extreme values
+   * - Heavier weapons have slightly more pronounced effects
+   * 
+   * @param weapon the weapon assembly
    * @param tierInfo the weapon material info
-   * @param idealPointOfBalance the ideal point of balance for this attack type, 0.0-1.0
-   * @return a double which is a multiplier for attack speed. 1.0 = no change.
+   * @param idealPointOfBalance the ideal point of balance for this attack type in cm
+   * @return a multiplier for attack speed, typically in range 0.9 - 1.1
    */
-  private static double getBaseAttackSpeedMultiplier(WeaponProfile profile, ExtraTierInfo tierInfo, double idealPointOfBalance) {
-    idealPointOfBalance = Mth.clamp(idealPointOfBalance, 0.001, 0.999); //this should never be exactly 0 or 1, but just in case
-    double pointOfBalanceNormalized = profile.getPointOfBalance(tierInfo) / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
-    //we'll normalize the differential between actual and ideal point of balance. -1.0 for furthest from ideal towards tip, +1.0 for furthest from ideal towards handle.
-    double POBDifferential = idealPointOfBalance - pointOfBalanceNormalized;
-    //if the POBDifferential is 0, return 1.0 immediately. Leave room for some delta, since we're dealing with doubles.
-    if (Math.abs(POBDifferential) < 0.001) {
+  private static double getBaseAttackSpeedMultiplier(WeaponAssembly weapon, ExtraTierInfo tierInfo, double idealPointOfBalance) {
+    double normalizedIdealPointOfBalance = Mth.clamp(idealPointOfBalance/weapon.length(), 0.001, 0.999);
+    double normalizedPointOfBalance = Mth.clamp(weapon.pointOfBalance(WeaponAssembly.LARGE_SAMPLE_SIZE) / weapon.length(), 0.001, 0.999);
+    
+    // Calculate differential: positive means PoB is closer to handle than ideal (faster)
+    // negative means PoB is further from handle than ideal (slower)
+    double pobDifferential = normalizedIdealPointOfBalance - normalizedPointOfBalance;
+    
+    // For very small differences, return 1.0 immediately
+    if (Math.abs(pobDifferential) < 0.005) {
       return 1.0;
     }
-    //need to normalize the differential to -1.0 to 1.0, depending on which side of the ideal it is.
-    double poBDifferentialNormalized = normalizePoBDifferential(idealPointOfBalance, POBDifferential);
-    //the difference the PoB makes is dependent on the weight of the weapon, so let's calculate that now.
-    double normalizedBladeWeight = profile.normalizeBladeWeight(tierInfo);
-    return 1.0 + normalizedBladeWeight*poBDifferentialNormalized;
+    
+    // Normalize the differential relative to the maximum possible deviation
+    double normalizedDiff = normalizePoBDifferential(idealPointOfBalance, pobDifferential);
+    
+    // Weight factor: heavier weapons have slightly more pronounced PoB effects
+    // but we keep this subtle (5-15% amplification based on weight)
+    double normalizedMass = weapon.normalizedMass(tierInfo);
+    double massFactor = 0.85 + 0.15 * Mth.clamp(normalizedMass, 0.5, 1.5);
+    
+    // Apply a tanh-based mapping for smooth compression at extremes
+    // This ensures we stay within bounds while maintaining sensitivity near 1.0
+    // The 0.15 coefficient limits the maximum deviation to roughly ±0.15 before clamping
+    double rawMultiplier = 1.0 + 0.15 * Math.tanh(normalizedDiff * massFactor * 2.0);
+    
+    // Soft clamping: values beyond soft limits are compressed further
+    double result;
+    if (rawMultiplier > SOFT_MAX) {
+      // Compress values above soft max
+      result = SOFT_MAX + (rawMultiplier - SOFT_MAX) * 0.3;
+    } else if (rawMultiplier < SOFT_MIN) {
+      // Compress values below soft min
+      result = SOFT_MIN + (rawMultiplier - SOFT_MIN) * 0.3;
+    } else {
+      result = rawMultiplier;
+    }
+    
+    // Hard clamp to absolute limits
+    return Mth.clamp(result, MIN_SPEED_MULT, MAX_SPEED_MULT);
   }
 
-  private static double normalizePoBDifferential(double idealPointOfBalance, double POBDifferential) {
-    double maxPoBTowardsTip = 1.0 - idealPointOfBalance; //keep this as a positive number for easier calculations, even though it represents a negative direction
-    double maxPobTowardsHandle = idealPointOfBalance - 0.0;
-    double PoBDifferentialNormalized;
-    if (POBDifferential < 0) {
-      PoBDifferentialNormalized = POBDifferential / maxPoBTowardsTip; //normalize to -1.0 to 0.0
+  /**
+   * Normalizes the PoB differential to a -1 to +1 range based on the maximum
+   * possible deviation in each direction from the ideal point of balance.
+   */
+  private static double normalizePoBDifferential(double idealPointOfBalance, double pobDifferential) {
+    double maxTowardsTip = 1.0 - idealPointOfBalance;
+    double maxTowardsHandle = idealPointOfBalance;
+    
+    if (pobDifferential < 0) {
+      // PoB is further from handle than ideal (slower)
+      return maxTowardsTip > 0.001 ? pobDifferential / maxTowardsTip : 0.0;
     } else {
-      PoBDifferentialNormalized = POBDifferential / maxPobTowardsHandle; //normalize to 0.0 to 1.0
+      // PoB is closer to handle than ideal (faster)
+      return maxTowardsHandle > 0.001 ? pobDifferential / maxTowardsHandle : 0.0;
     }
-    return PoBDifferentialNormalized;
   }
 
 }

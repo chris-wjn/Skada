@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.cwjn.skada.SkadaRegistry.*;
-import static com.cwjn.skada.WeaponProfileCodecWriter.writeDefaultSwordJson;
 import static com.cwjn.skada.client.Particles.PARTICLES;
 
 // The value here should match an entry in the META-INF/mods.toml file

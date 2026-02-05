@@ -30,6 +30,18 @@ import static com.cwjn.skada.util.ConsoleColour.*;
 @Mod.EventBusSubscriber
 public class DamageHandler {
 
+  /**
+   * Minimum damage multiplier for precision system.
+   * Damage cannot be reduced below this fraction of the base damage value.
+   */
+  private static final double MIN_DAMAGE_MULTIPLIER = 0.5;
+
+  /**
+   * Float.MAX_VALUE literal for compatibility with vanilla damage resistance stat tracking.
+   * Used to check for overflow in damage resistance calculations (copied from vanilla LivingEntity).
+   */
+  private static final float VANILLA_FLOAT_MAX_VALUE = 3.4028235E37F;
+
   @SubscribeEvent(priority = EventPriority.LOWEST)
   public static void doDamageCalculation(LivingHurtEvent event) {
     SkadaDamageSource source;
@@ -65,9 +77,9 @@ public class DamageHandler {
 
     if (!info.isEnvironmental()) {
 
-      if (CommonConfig.ENABLE_ACCURACY.get() && CommonConfig.ENABLE_ACCURACY_FOR_MELEE.get() && !isProjectile) {
+      if (CommonConfig.ENABLE_PRECISION.get() && CommonConfig.ENABLE_PRECISION_FOR_MELEE.get() && !isProjectile) {
         if (DEBUG_ENABLED) Skada.LOGGER.debug("Pre-precision damage: {}", amount);
-        amount = getDamageFromAccuracyNormalDistribution(info.accuracy(), amount, event.getEntity().getRandom());
+        amount = getDamageFromPrecisionNormalDistribution(info.precision(), amount, event.getEntity().getRandom());
         if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-precision damage: {}", amount);
       }
 
@@ -110,7 +122,7 @@ public class DamageHandler {
         double f1 = amount;
         amount = Math.max(f / 25.0F, 0.0F);
         double f2 = f1 - amount;
-        if (f2 > 0.0F && f2 < 3.4028235E37F) {
+        if (f2 > 0.0F && f2 < VANILLA_FLOAT_MAX_VALUE) {
           if (target instanceof ServerPlayer) {
             ((ServerPlayer) target).awardStat(Stats.DAMAGE_RESISTED, (int) Math.round(f2 * 10.0F));
           } else if (source.getEntity() instanceof ServerPlayer) {
@@ -201,14 +213,14 @@ public class DamageHandler {
    * Calculates damage based on precision using a normal distribution. Higher precision results
    * in lower standard deviation, leading to more consistent damage.
    *
-   * @param accuracy The precision value (0.0 to 1.0).
+   * @param precision The precision value (0.0 to 1.0).
    * @param damage The initial damage value.
    * @param random The random source for generating normal distribution values.
    * @return The damage after applying precision adjustments.
    */
-  private static double getDamageFromAccuracyNormalDistribution(double accuracy, double damage, RandomSource random) {
+  private static double getDamageFromPrecisionNormalDistribution(double precision, double damage, RandomSource random) {
     // Higher precision means lower standard deviation (more consistent damage)
-    double standardDeviation = (1.0 - accuracy) * damage;
+    double standardDeviation = (1.0 - precision) * damage;
 
     // Generate a random number from a normal distribution
     double z = random.nextGaussian();
@@ -219,8 +231,8 @@ public class DamageHandler {
     double normalDistributionModifier = Math.abs(z) * standardDeviation;
 
     // Calculate final damage using the normal distribution
-    // Clamp the result between 0.5x and the original damage value
-    return Math.max(damage * 0.5, damage - normalDistributionModifier);
+    // Clamp the result between MIN_DAMAGE_MULTIPLIER and the original damage value
+    return Math.max(damage * MIN_DAMAGE_MULTIPLIER, damage - normalDistributionModifier);
   }
 
   /*

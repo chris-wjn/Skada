@@ -1,0 +1,47 @@
+{
+  "_comment": "Vanilla sword profile using JSON geometry approximation",
+  "handle": {
+    "length": 20.0,
+    "radius": 1.5
+  },
+  "weapon_heads": [
+    {
+      "position_on_handle": 20.0,
+      "orientation": "PARALLEL",
+      "head": {
+        "typeKey": "blade",
+        "singleEdged": false,
+        "length": 80.0,
+        "widthAtBase": 6.0,
+        "widthAtTip": 2.0,
+        "thicknessAtBase": 0.5,
+        "thicknessAtTip": 0.2,
+        "primaryBevel": {
+          "percentageOfBladeWidth": 0.7,
+          "curveFactor": 1.2
+        },
+        "edgeBevel": {
+          "angle": 30.0,
+          "shoulderAngle": 180.0,
+          "edgeRadius": 5.0
+        },
+        "tipSpecifications": {
+          "tipRadius": 5.0,
+          "tipBevelAngle": 22.5,
+          "tipBevelShoulderAngle": 157.5,
+          "tipShoulderRoundedness": 0.0
+        }
+      }
+    }
+  ],
+  "attack_types": {
+    "skada:slash": {
+      "minReach": 0.25,
+      "maxReach": 2.25
+    },
+    "skada:thrust": {
+      "minReach": 0.7,
+      "maxReach": 2.25
+    }
+  }
+}

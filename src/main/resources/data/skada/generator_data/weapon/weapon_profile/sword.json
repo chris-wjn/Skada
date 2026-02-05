@@ -1,19 +1,21 @@
 {
+  "_comment": "Vanilla sword profile using JSON geometry approximation",
   "handle": {
-    "length": 150.0,
-    "radius": 15.0
+    "length": 15.0,
+    "radius": 1.5
   },
   "weapon_heads": [
     {
-      "position_on_handle": 150.0,
+      "position_on_handle": 15.0,
       "orientation": "PARALLEL",
       "head": {
         "typeKey": "blade",
-        "length": 500.0,
-        "thicknessAtBase": 20.0,
-        "thicknessAtTip": 20.0,
-        "widthAtBase": 90.0,
-        "widthAtTip": 90.0,
+        "singleEdged": false,
+        "length": 50.0,
+        "widthAtBase": 9.0,
+        "widthAtTip": 9.0,
+        "thicknessAtBase": 2.0,
+        "thicknessAtTip": 2.0,
         "primaryBevel": {
           "percentageOfBladeWidth": 0.66,
           "curveFactor": 1.0

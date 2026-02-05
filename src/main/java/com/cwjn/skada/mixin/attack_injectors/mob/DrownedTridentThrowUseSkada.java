@@ -42,10 +42,10 @@ public class DrownedTridentThrowUseSkada {
                             info.getAttackTypes().keySet().toArray(AttackType[]::new)[stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
                     );
             double lethality = attackInfo.lethality();
-            double accuracy = attackInfo.precision();
+            double precision = attackInfo.precision();
             ((AccessProjectileData) tr).setDamageInfo(new DamageInfo(
                     lethality,
-                    accuracy,
+                    precision,
                     false,
                     info.getAttackTypes().keySet().toArray(AttackType[]::new)[stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)],
                     info.getSpread().instance()));
@@ -53,7 +53,7 @@ public class DrownedTridentThrowUseSkada {
         else {
             ((AccessProjectileData) tr).setDamageInfo(new DamageInfo(
                     0.0,
-                    SkadaData.DEFAULT_ACCURACY,
+                    SkadaData.DEFAULT_PRECISION,
                     false,
                     AttackType.thrust(),
                     WeaponInfo.NO_WEAPON.getSpread().instance()));

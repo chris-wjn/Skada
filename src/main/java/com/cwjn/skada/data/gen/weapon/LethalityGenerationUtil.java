@@ -1,64 +1,80 @@
 package com.cwjn.skada.data.gen.weapon;
 import com.cwjn.skada.data.SkadaData;
+import com.cwjn.skada.data.gen.weapon.old_system.WeaponProfile;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.SlashCapable;
 import com.cwjn.skada.data.gen.weapon.parts.attack_types.ThrustCapable;
-import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.util.Util;
+
+import static com.cwjn.skada.data.SkadaData.BEVEL_ANGLE_DEFAULT;
 
 import static com.cwjn.skada.data.SkadaData.MATERIAL_PROPERTY_SOFT_CAP;
 
 public abstract class LethalityGenerationUtil {
 
+  // Scales the friction-length term (f * bevelLength) into the same numeric
+  // range as angular momentum. Typical values: L ≈ 0.001–0.003 kg·m²/s,
+  // bevelLength ≈ 0.02–0.05 m, f ∈ [0,1]. Using 0.05 keeps
+  // 0.05 * f * 0.03 ≈ 0.00075 (for f≈0.5) comparable to L≈0.0015.
+  private static final double BEVEL_RESISTANCE_MOMENTUM_SCALE = 0.05;
+
   /**
    * Calculates lethality for slashing attacks.
-   * Average lethality for a sword should be around
    * @param profile The weapon profile of the weapon
    * @param material The weapon material info
    * @return a double representing lethality
    */
   public static double slash(WeaponProfile profile, ExtraTierInfo material) {
-    //First we'll normalize our values for the weapon profile. We take 1 to be the "default" value.
     WeaponProfile.WeaponHeadEntry head = profile.getSlashHead();
     if (head.getMaterial().isPresent()) material = head.getMaterial().get();
     SlashCapable slashHead = (SlashCapable) head.getHead(); //this is a bit dubious but it should be fine
 
-    double pointOfBalanceNormalized = profile.getPointOfBalance(material) / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
-    double primaryBevelAngle = slashHead.primaryBevelAngle(); //angle of the primary bevel, if the edge bevel shoulder angle is 180, this is just the edge bevel angle
-    double primaryBevelAngleNormalized = Util.normalizeBevelAngle(primaryBevelAngle); //acuter angle means more lethality cause better cutting
+    double pos = head.getHead().pointOfBalance();
+    double primaryBevelAngle = slashHead.primaryBevelAngle(pos); //angle of the primary bevel at point of balance
     double normalizedBladeWeight = profile.normalizeBladeWeight(material);
-
-    //Some calculations about the balance point of the weapon, using material density and profile dimensions
-    double bladeStartPercentage = profile.getHandle().getLength() / profile.getTotalLength(); //the distance up the weapon where the blade portion starts, as a percentage of total length
-    double idealPointOfBalanceNormalized = profile.getIdealPointOfBalanceWithHead(head, AttackType.slash())/profile.getTotalLength();
 
     /*
        Lethality is based primarily on a few things:
        - The angular momentum the weapon can generate: longer, heavier weapons generate more angular momentum when swung,
                                                        increasing cutting power. Point of Balance plays a role in moment of inertia.
-       - The angle of the primary bevel: a larger angle means a wider "wedge", which doesn't cut better, but makes the cut
-                                         wider, causing more damage overall.
+       - The wedge size: combination of bevel angle (how wide the wedge is) and bevel width/length (how wide the blade is).
+                         A larger wedge mean more lethality, because the cut is more destructive.
     */
     double momentOfInertia = profile.getMomentOfInertia(material);
-    double lethalityAngularMomentum = angularMomentumToLethalityBase(momentOfInertia, Util.angularVelocity(momentOfInertia, SkadaData.PLAYER_TORQUE));
-    double lethality = lethalityAngularMomentum * primaryBevelAngleNormalized;
+    double angularVelocity = Util.angularVelocity(momentOfInertia, SkadaData.PLAYER_STRENGTH);
+    double angularMomentum = momentOfInertia * angularVelocity;
+    double lethalityAngularMomentum = angularMomentumToLethalityBase(angularMomentum);
 
-    // next we'll do some modifications based on the shoulder angle. Shoulder angles closer to 180 degrees are better, as the bump is less pronounced
-    // and the blade can cut more cleanly. The curve factor of the primary bevel rounds this off, causing larger shoulders to be less punishing if the bevel is more convex.
-    // shoulder angles above 180 are twice as punishing as those below 180, as they create a negative angle on the edge, meaning the blade curves "upwards", perpendicular
-    // to the direction of the cut.
-    double shoulderAngle = slashHead.edgeBevel().shoulderAngle();
-    double distFromOptimalShoulder = Math.abs(180 - shoulderAngle);
-    if (shoulderAngle > 180) distFromOptimalShoulder*=2;
-    lethality -= distFromOptimalShoulder * Math.max(0, 2-slashHead.primaryBevel().curveFactor());
+    System.out.println("Moment of Inertia: " + momentOfInertia + " kg·m², Angular Velocity: " + angularVelocity + " rad/s, Angular Momentum: " + angularMomentum + " kg·m²/s");
 
-    // bevel curvature also affects lethality directly. more convex bevels cut better, more concave bevels cut worse
-    lethality *= bevelCurvatureToLethalityMult(slashHead.primaryBevel().curveFactor());
-
-    if (pointOfBalanceNormalized >= bladeStartPercentage) {
-      lethality += bladeStartPercentage*10; //if the point of balance is on the blade, give a little bonus
-    }
-    lethality *= 0.5 + ((pointOfBalanceNormalized/(2*idealPointOfBalanceNormalized))); //the ideal point of balance is where lethality and attack speed are balanced, higher = more lethality, lower = more speed.
-
+     /*
+     * Calculate wedge size by combining bevel angle and bevel length. Wedge size
+     * will be tied to angular momemntum based the following facts:
+     * - A wider bevel is more lethal, since it creates a more destructive cut
+     * - However, a wider bevel also requires more force to cut with, since wider
+     * wedges are worse at cutting
+     * - ergo, a wider wedge provides higher lethality to the extent that there is
+     * enough angular momentum to drive it through the target,
+     * so if the wedge is too wide compared to the angular momentum, the lethality
+     * bonus from the wedge size should be diminished.
+     */
+    
+    //the height of the bevel is roughly half the thickness of the head, which we can calculate using the bevel length (hypotenuse) and bevel angle,
+    //so the side we're looking for is the opposite of the angle.
+    System.out.println("Bevel Width: " + slashHead.getBevelWidthAt(profile.getCentreOfPercussion(material)) + " cm, Primary Bevel Angle: " + primaryBevelAngle + " degrees");
+    double bevelHeight = slashHead.getBevelThicknessAt(profile.getCentreOfPercussion(material));
+     //the amount the wedge contributes to cutting resistance is some factor of friction between the wedge and the target
+     //we'll call this factor 'f'. We derive f from bevel angle, since we can't use the exact coefficient of friction between the blade and target.
+     //then, some function of f and bevel length tells us how much angular momentum is needed to get benefits from the bevel height.
+    double f = 1.0 - (primaryBevelAngle / 90.0); //at 0 degrees, f=1 (maximum friction), at 90 degrees, f=0 (no friction)
+    double bevelLen = slashHead.absoluteBevelLength(profile.getCentreOfPercussion(material));
+    System.out.println("Bevel Length: " + bevelLen + " cm, Friction Factor: " + f + " , Resistance: " + (f * bevelLen));
+    double momentumSurplus = angularMomentum - (BEVEL_RESISTANCE_MOMENTUM_SCALE * f * bevelLen);
+    //now we can use a 2 variable function to determine how much lethality we'll add. The function will return a value roughly
+    //between 0 and 30, where the returned value is dependant on bevel height, but only if there's enough momentum surplus to make use of the bevel height.
+    System.out.println("Bevel Height: " + bevelHeight + " cm, Momentum Surplus: " + momentumSurplus + " kg·m²/s");
+    double bevelLethalityBonus = getWedgeBonus(bevelHeight, momentumSurplus);
+    double lethality = lethalityAngularMomentum + bevelLethalityBonus;
+    
     double normalizedHardness = material.hardness()/MATERIAL_PROPERTY_SOFT_CAP;
     double normalizedFlexibility = Math.abs(material.flexibility()-MATERIAL_PROPERTY_SOFT_CAP/2)/(MATERIAL_PROPERTY_SOFT_CAP/2);
     lethality *= 1 + 0.08*normalizedHardness + 0.14*normalizedBladeWeight - 0.1*normalizedFlexibility; //factor material properties
@@ -73,46 +89,64 @@ public abstract class LethalityGenerationUtil {
   }
 
   /**
-   * Calculates a base lethality value for a slashing weapon based on the
-   * angular momentum it can generate from its length and weight. Longer,
-   * heavier weapons generate more angular momentum when swung, increasing
-   * their cutting power.
-   *
-   * @return the base lethality value, somewhere between 0 and ~80.
+   * Calculates a wedge bonus for lethality based on bevel height and available momentum surplus.
+   * The function returns higher values for higher bevel heights, but only if there's enough
+   * momentum surplus to make use of the bevel height.
+   * 
+   * The function is defined as:
+   *   bonus = A * (1 - exp(-B * bevelHeight)) * (1 - exp(-C * momentumSurplus))
+   * where A, B, C are constants that shape the curve.
+   * 
+   * Typical values:
+   * - bevelHeight: 0.001 m to 0.05 m
+   * - momentumSurplus: 0.0 to 0.005 kg·m²/s
+   * 
+   * @param bevelHeight the height of the bevel in meters
+   * @param momentumSurplus the surplus angular momentum in kg·m²/s
+   * @return the wedge bonus for lethality
    */
-  private static double angularMomentumToLethalityBase(double momentOfInertia, double angularVelocity) {
-    System.out.println("Moment of Inertia: " + momentOfInertia);
-    System.out.println("Angular Velocity: " + angularVelocity);
-    double angularMomentum = momentOfInertia * angularVelocity;
-    System.out.println("Angular Momentum: " + angularMomentum);
-    return angularMomentum;
+  private static double getWedgeBonus(double bevelHeight, double momentumSurplus) {
+    // Constants to shape the curve
+    final double A = 30.0; // Maximum bonus
+    final double B = 50.0; // Bevel height sensitivity
+    final double C = 800.0; // Momentum surplus sensitivity
+
+    double bevelFactor = 1.0 - Math.exp(-B * bevelHeight);
+    double momentumFactor = 1.0 - Math.exp(-C * Math.max(0.0, momentumSurplus));
+
+    System.out.println(A * bevelFactor * momentumFactor);
+    return A * bevelFactor * momentumFactor;
   }
 
   /**
-   * Calculates a base lethality value for slash from the bevel length.
-   * Bevel length is derived from blade width and bevel percentage.
-   * The formula provides diminishing returns for bevel lengths over 80mm,
-   * because the average bevel length should be roughly 40mm.
-   * @param bevelLength the length of the bevel in millimetres, always > 0.
-   * @return the base lethality value, somewhere between 0 and ~80.
+   * Converts angular momentum to a base lethality value using a logarithmic scaling function.
+   * This provides diminishing returns as angular momentum increases, mapping typical weapon
+   * values (0.01 - 3.0 kg·m²/s) to a lethality range of approximately 0 - 50.
+   * 
+   * The function uses: lethality = k * ln(1 + c * L) where:
+   * - L is angular momentum in kg·m²/s
+   * - k and c are scaling constants tuned so that:
+   *   - A dagger (L ≈ 0.05) gives ~5 lethality
+   *   - A longsword (L ≈ 0.3) gives ~20 lethality  
+   *   - A greatsword (L ≈ 0.8) gives ~30 lethality
+   *   - Exceptional weapons (L ≈ 2.0) approach ~40 lethality
+   *   - Very high angular momentum (L ≈ 3.0) approaches ~50 lethality
+   * 
+   * @param momentOfInertia the moment of inertia in kg·m²
+   * @param angularVelocity the angular velocity in rad/s
+   * @return the base lethality value, typically in range 0-50
    */
-  private static double bevelLengthToLethalityBase(double bevelLength) {
-    if (bevelLength <= 80) return 0.7*bevelLength;
-    else {
-      return 56.0 + 7*Math.log(1 + 0.1*(bevelLength-80));
-    }
-  }
-
-  /**
-   * Derives a lethality multiplier from the bevel curvature factor.
-   * Convex bevels (higher curve factor) are more lethal, concave bevels (lower curve factor) are less lethal.
-   * The curve factor is expected to be between 0.33 and 2.0, but could be higher or lower.
-   * @param curveFactor the curve factor of the bevel.
-   * @return a lethality multiplier, where 1.0 is neutral.
-   */
-  private static double bevelCurvatureToLethalityMult(double curveFactor) {
-    if (curveFactor <= 0) return 1;
-    return 1/(2*curveFactor) + 0.5;
+  private static double angularMomentumToLethalityBase(double angularMomentum) {
+    // Logarithmic scaling: lethality = k * ln(1 + c * L)
+    // Constants k, c, tuned to make function return lethality values roughly between 0 and 50
+    // final lethality values will be further modified by other factors later.
+    // At L=0.05: ~5, L=0.3: ~20, L=0.8: ~30, L=2.0: ~40, L=3.0 = ~50
+    final double k = 16.0;
+    final double c = 8.0;
+    
+    double lethality = k * Math.log(1.0 + c * angularMomentum);
+    
+    return Math.max(0.0, lethality);
   }
 
   public static double thrust(WeaponProfile profile, ExtraTierInfo tierInfo) {
@@ -120,7 +154,7 @@ public abstract class LethalityGenerationUtil {
     if (thrustHead.getMaterial().isPresent()) tierInfo = thrustHead.getMaterial().get();
     ThrustCapable head = (ThrustCapable) thrustHead.getHead();
     //weapon profile values and normalizations
-    double primaryAngle = Util.findBevelAngle(head.tipSpecs().tipBevelAngle(), head.tipSpecs().tipBevelShoulderAngle());
+    double primaryAngle = head.tipSpecs().tipBevelAngle();
     double primaryAngleNormalized = Util.normalizeBevelAngle(primaryAngle); //acuter angle means more lethality cause better piercing
     double lethality = primaryAngleNormalized * bladeDimensionsToLethalityBase(head);
 
@@ -158,7 +192,7 @@ public abstract class LethalityGenerationUtil {
 
   public static double strike(WeaponProfile profile, ExtraTierInfo tierInfo) {
     //Some calculations about the balance point of the weapon, using material density and profile dimensions
-    double pointOfBalanceNormalized = profile.getPointOfBalance(tierInfo) / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
+    double pointOfBalanceNormalized = profile.pointOfBalance(tierInfo) / profile.getTotalLength(); //percentage from 0-1, where 1 is furthest from pommel
 
     double weight = profile.getVolume() * tierInfo.density(); //in grams
     double lethality = weightToLethalityBase(weight);
@@ -186,6 +220,6 @@ public abstract class LethalityGenerationUtil {
     }
   }
 
-
-
 }
+
+

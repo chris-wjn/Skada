@@ -1,0 +1,172 @@
+﻿# Vanilla Minecraft Axe Head - Accurate mesh model
+# Based on axe.json weapon profile
+# All coordinates in centimeters
+# Axe head oriented PERPENDICULAR to handle
+# Eye: 300mm length (30cm), 100mm height (10cm), 15mm thickness (1.5cm)
+# Cheek: 300mm (30cm) extending from eye
+# Beard/Toe: 50mm (5cm) extra height, 150mm (15cm) tip distance
+# 
+# Coordinate system for perpendicular head:
+# - X-axis: along the cutting edge direction (primary axis)
+# - Y-axis: handle direction (when attached, extends up from handle)
+# - Z-axis: thickness direction
+# - Origin: center of eye hole where handle passes through
+
+# The axe head is modeled as viewed from above (looking down -Y axis)
+# with the cutting edge on the +X side and the poll (back) on -X side
+
+# ==============================================================
+# EYE SECTION (where handle passes through)
+# ==============================================================
+
+# Eye outer boundary - rectangular with eye hole
+# Eye dimensions: 30cm long (Y), 10cm tall (height along X), 1.5cm thick (Z)
+
+# Eye back edge (poll side, -X)
+v -5.0 -15.0 0.75
+v -5.0 -15.0 -0.75
+v -5.0 15.0 0.75
+v -5.0 15.0 -0.75
+
+# Eye front edge (blade side, +X, before cheek starts)
+v 5.0 -15.0 0.75
+v 5.0 -15.0 -0.75
+v 5.0 15.0 0.75
+v 5.0 15.0 -0.75
+
+# ==============================================================
+# CHEEK SECTION (tapers toward cutting edge)
+# Cheek extends 30cm from eye toward cutting edge
+# ==============================================================
+
+# Cheek at 1/3 distance (10cm from eye edge)
+# Width narrows from 30cm to about 25cm, thickness thins slightly
+v 15.0 -12.5 0.6
+v 15.0 -12.5 -0.6
+v 15.0 12.5 0.6
+v 15.0 12.5 -0.6
+
+# Cheek at 2/3 distance (20cm from eye edge)  
+# Continuing to narrow
+v 25.0 -10.0 0.4
+v 25.0 -10.0 -0.4
+v 25.0 10.0 0.4
+v 25.0 10.0 -0.4
+
+# ==============================================================
+# CUTTING EDGE with Beard and Toe
+# Edge at 30cm from eye, with beard (-Y extension) and toe (+Y extension)
+# Beard: 5cm extra height, 15cm tip distance from main edge
+# Toe: 5cm extra height, 15cm tip distance from main edge
+# ==============================================================
+
+# Main cutting edge at cheek end (before beard/toe)
+v 35.0 -10.0 0.0
+v 35.0 10.0 0.0
+
+# Beard tip (extends down and slightly forward)
+# Beard goes 15cm past main edge in X, and 5cm extra down in Y
+v 50.0 -15.0 0.0
+
+# Toe tip (extends up and slightly forward)
+# Toe goes 15cm past main edge in X, and 5cm extra up in Y
+v 50.0 15.0 0.0
+
+# ==============================================================
+# POLL (back of axe head for striking)
+# Extends slightly past the eye on the -X side
+# ==============================================================
+
+# Poll face (flat back for striking)
+v -8.0 -12.0 0.6
+v -8.0 -12.0 -0.6
+v -8.0 12.0 0.6
+v -8.0 12.0 -0.6
+
+# ==============================================================
+# FACES (triangles, CCW winding for outward normals)
+# ==============================================================
+
+# ---- POLL (back striking surface) ----
+f 21 23 24
+f 21 24 22
+
+# ---- POLL to EYE BACK transition ----
+# Top face
+f 23 3 4
+f 23 4 24
+# Bottom face
+f 21 22 2
+f 21 2 1
+# Front side (+Z)
+f 21 1 3
+f 21 3 23
+# Back side (-Z)
+f 22 24 4
+f 22 4 2
+
+# ---- EYE SECTION outer surfaces ----
+# Top face of eye
+f 3 7 8
+f 3 8 4
+# Bottom face of eye
+f 1 2 6
+f 1 6 5
+# Front side of eye (+Z)
+f 1 5 7
+f 1 7 3
+# Back side of eye (-Z)
+f 2 4 8
+f 2 8 6
+
+# ---- EYE to CHEEK 1/3 ----
+# Top transition
+f 7 11 12
+f 7 12 8
+# Bottom transition
+f 5 6 10
+f 5 10 9
+# Front side (+Z)
+f 5 9 11
+f 5 11 7
+# Back side (-Z)
+f 6 8 12
+f 6 12 10
+
+# ---- CHEEK 1/3 to 2/3 ----
+# Top
+f 11 15 16
+f 11 16 12
+# Bottom
+f 9 10 14
+f 9 14 13
+# Front (+Z)
+f 9 13 15
+f 9 15 11
+# Back (-Z)
+f 10 12 16
+f 10 16 14
+
+# ---- CHEEK 2/3 to CUTTING EDGE ----
+# Top (toward toe)
+f 15 18 16
+# Bottom (toward beard)
+f 13 14 17
+# Front (+Z) - converges to edge
+f 13 17 18
+f 13 18 15
+# Back (-Z) - converges to edge
+f 14 16 18
+f 14 18 17
+
+# ---- BEARD (lower extension of cutting edge) ----
+# Beard face (triangular from edge bottom to beard tip)
+f 17 19 13
+f 14 19 17
+f 13 19 14
+
+# ---- TOE (upper extension of cutting edge) ----
+# Toe face (triangular from edge top to toe tip)
+f 18 15 20
+f 18 20 16
+f 15 16 20

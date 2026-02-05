@@ -1,10 +1,11 @@
 package com.cwjn.skada.data.damage;
 
+import com.cwjn.skada.CommonConfig;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.gen.attack.AttackTypeJsonInfo;
 import com.cwjn.skada.data.gen.attack.ElementSpread;
 import com.cwjn.skada.data.gen.weapon.ExtraTierInfo;
-import com.cwjn.skada.data.gen.weapon.WeaponProfile;
+import com.cwjn.skada.data.gen.weapon.old_system.WeaponProfile;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;
@@ -81,7 +82,7 @@ public class WeaponInfo {
                 entry.getValue().minReach(),
                 entry.getValue().maxReach(),
                 Util.round(attackSpeed*entry.getValue().attackSpeedModifier(), 3),
-                0.0,
+                0,
                 Util.round(critFailChance*entry.getValue().critFailModifier(), 3),
                 entry.getValue().reticleShapes()));
       }
