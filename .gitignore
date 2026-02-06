@@ -28,6 +28,7 @@ runServer
 tools
 *.log
 logs
+scripts
 node_modules
 archived
 package-lock.json
