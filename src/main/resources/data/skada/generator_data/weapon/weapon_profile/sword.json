@@ -1,37 +1,73 @@
 {
-  "_comment": "Vanilla sword profile using JSON geometry approximation",
-  "handle": {
-    "length": 15.0,
-    "radius": 1.5
-  },
-  "weapon_heads": [
+  "_comment": "Vanilla Minecraft sword weapon assembly",
+  "parts": [
     {
-      "position_on_handle": 15.0,
-      "orientation": "PARALLEL",
-      "head": {
-        "typeKey": "blade",
-        "singleEdged": false,
-        "length": 50.0,
-        "widthAtBase": 9.0,
-        "widthAtTip": 9.0,
-        "thicknessAtBase": 2.0,
-        "thicknessAtTip": 2.0,
-        "primaryBevel": {
-          "percentageOfBladeWidth": 0.66,
-          "curveFactor": 1.0
-        },
-        "edgeBevel": {
-          "angle": 30.0,
-          "shoulderAngle": 180.0,
-          "edgeRadius": 5.0
-        },
-        "tipSpecifications": {
-          "tipRadius": 5.0,
-          "tipBevelAngle": 22.5,
-          "tipBevelShoulderAngle": 157.5,
-          "tipShoulderRoundedness": 0.0
+      "part": {
+        "type": "handle",
+        "length": 20.0,
+        "radius": 1.3
+      },
+      "position": { "x": 0.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "part": {
+        "type": "guard",
+        "sizeX": 1.0,
+        "sizeY": 8.0,
+        "sizeZ": 2.0
+      },
+      "position": { "x": 20.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "part": {
+        "type": "blade",
+        "blade": {
+          "version": 1,
+          "spine": [
+            {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            {
+              "x": 70.0,
+              "y": 0.0,
+              "z": 0.0
+            }
+          ],
+          "pointTaper": 0.55,
+          "stations": [
+            {
+              "s": 0.0,
+              "width": 6.0,
+              "thickness": 0.9,
+              "section": {
+                "r": 1.1,
+                "edgeOffset": 0.0,
+                "spineFlat": 0.42
+              }
+            },
+            {
+              "s": 0.9,
+              "width": 6.0,
+              "thickness": 0.72,
+              "section": {
+                "r": 1.1,
+                "edgeOffset": 0.0,
+                "spineFlat": 0.36
+              }
+            }
+          ]
         }
-      }
+      },
+      "position": { "x": 20.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "part": {
+        "type": "pommel",
+        "radius": 1.3
+      },
+      "position": { "x": -1.2, "y": 0.0, "z": 0.0 }
     }
   ],
   "attack_types": {

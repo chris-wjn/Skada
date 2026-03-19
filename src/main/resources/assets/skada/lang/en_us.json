@@ -2,6 +2,8 @@
   "skada.command_get_weaponinfo.error.no_info": "No weapon info available for this item.",
   "skada.command_get_weaponinfo.error.no_item": "Not holding a weapon.",
   "skada.command_debug.toggle": "Debug %s",
+  "skada.command_get_physics": "Volume: %s m³, Mass: %s kg, PoB: %s m, CoM: %s m, Inertia: %s kg·m²",
+  "skada.command_get_physics.error.not_tiered": "Item is not tiered.",
   "skada.generate_weapon_info.error.no_generator_data": "Couldn't find generator data!",
   "skada.generate_weapon_info.start": "§eGenerating weapon info for§r §b%s...",
   "skada.generate_weapon_info.error.no_items": "§cNo valid items in namespace:§r §b%s",

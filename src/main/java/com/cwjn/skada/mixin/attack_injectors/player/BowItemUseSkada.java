@@ -35,8 +35,8 @@ public class BowItemUseSkada {
                     info.getAttackTypes().get(
                             info.getAttackTypes().keySet().toArray(AttackType[]::new)[pStack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
                     );
-            inaccuracy = (float) (15 * (1 - attackInfo.precision()));
-            float velocity = (float) (chargePower * (3 + attackInfo.damageBonus()));
+            inaccuracy = (float) Util.precisionScoreToProjectileInaccuracy(attackInfo.precision());
+            float velocity = (float) (chargePower * Util.projectileVelocityWithDamageBonus(3.0, attackInfo.damageBonus()));
             Util.rollCriticalFail(pStack, attackInfo.failChance(), ((ServerPlayer)entity).getRandom(), ((ServerPlayer)entity));
             ((AccessProjectileData) instance).setDamageInfo(new DamageInfo(
                     attackInfo.lethality(),

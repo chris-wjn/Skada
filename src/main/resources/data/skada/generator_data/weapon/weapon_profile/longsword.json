@@ -1,37 +1,57 @@
 {
-  "_comment": "Vanilla sword profile using JSON geometry approximation",
-  "handle": {
-    "length": 20.0,
-    "radius": 1.5
-  },
-  "weapon_heads": [
+  "_comment": "Vanilla longsword weapon assembly",
+  "parts": [
     {
-      "position_on_handle": 20.0,
-      "orientation": "PARALLEL",
-      "head": {
-        "typeKey": "blade",
-        "singleEdged": false,
-        "length": 80.0,
-        "widthAtBase": 6.0,
-        "widthAtTip": 2.0,
-        "thicknessAtBase": 0.5,
-        "thicknessAtTip": 0.2,
-        "primaryBevel": {
-          "percentageOfBladeWidth": 0.7,
-          "curveFactor": 1.2
-        },
-        "edgeBevel": {
-          "angle": 30.0,
-          "shoulderAngle": 180.0,
-          "edgeRadius": 5.0
-        },
-        "tipSpecifications": {
-          "tipRadius": 5.0,
-          "tipBevelAngle": 22.5,
-          "tipBevelShoulderAngle": 157.5,
-          "tipShoulderRoundedness": 0.0
+      "part": {
+        "type": "handle",
+        "length": 20.0,
+        "radius": 1.5
+      },
+      "position": { "x": 0.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "part": {
+        "type": "guard",
+        "sizeX": 1.0,
+        "sizeY": 12.0,
+        "sizeZ": 2.5
+      },
+      "position": { "x": 20.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "part": {
+        "type": "blade",
+        "blade": {
+          "version": 1,
+          "spine": [
+            { "x": 0.0, "y": 0.0, "z": 0.0 },
+            { "x": 80.0, "y": 0.0, "z": 0.0 }
+          ],
+          "pointTaper": 0.5,
+          "stations": [
+            {
+              "s": 0.0,
+              "width": 6.4,
+              "thickness": 0.75,
+              "section": { "r": 1.2, "edgeOffset": 0.0 }
+            },
+            {
+              "s": 0.8,
+              "width": 2.4,
+              "thickness": 0.35,
+              "section": { "r": 1.2, "edgeOffset": 0.0 }
+            }
+          ]
         }
-      }
+      },
+      "position": { "x": 20.5, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "part": {
+        "type": "pommel",
+        "radius": 1.5
+      },
+      "position": { "x": -1.5, "y": 0.0, "z": 0.0 }
     }
   ],
   "attack_types": {

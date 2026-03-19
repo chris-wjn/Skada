@@ -1,0 +1,33 @@
+{
+  "_comment": "the two spikes on the sides of the trident",
+  "type": "spear",
+  "spear": {
+    "version": 1,
+    "mount": {
+      "type": "socket",
+      "length": 1.0,
+      "outerWidth": 1,
+      "outerThickness": 1,
+      "innerWidth": 0.7,
+      "innerThickness": 0.7,
+      "shape": "oval",
+      "transitionLength": 1
+    },
+    "centerline": [
+      { "x": 0.0, "y": 0.0, "z": 0.0 },
+      { "x": 12.0, "y": 0.0, "z": 0.0 },
+      { "x": 26.0, "y": 0.0, "z": 0.0 }
+    ],
+    "pointTaper": 0.92,
+    "tipRadiusNm": 6.0,
+    "edgeRadiusNm": 7.0,
+    "edgeBevel": 20.0,
+    "sharpenedRange": [0.12, 1.0],
+    "stations": [
+      { "s": 0.0, "width": 3.6, "thickness": 1.0, "section": { "r": 2.0, "midribFlat": 0.22 } },
+      { "s": 0.25, "width": 2.9, "thickness": 0.78, "section": { "r": 2.1, "midribFlat": 0.18 } },
+      { "s": 0.55, "width": 1.9, "thickness": 0.48, "section": { "r": 2.25, "midribFlat": 0.10 } },
+      { "s": 0.82, "width": 0.9, "thickness": 0.18, "section": { "r": 2.4, "midribFlat": 0.0 } }
+    ]
+  }
+}

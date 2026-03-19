@@ -1,0 +1,31 @@
+{
+  "_comment": "Trident weapon profile",
+  "parts": [
+    {
+      "part": {
+        "type": "handle",
+        "length": 150.0,
+        "radius": 1.55
+      }
+    },
+    {
+      "part": "trident_side_spike",
+      "position": { "x": 150.0, "y": 10.0, "z": 0.0 }
+    },
+    {
+      "part": "trident_side_spike",
+      "position": { "x": 150.0, "y": -10.0, "z": 0.0 }
+    },
+    {
+      "part": "trident_main_spike",
+      "position": { "x": 150.0, "y": 0.0, "z": 0.0 }
+    }
+  ],
+  "attack_types": {
+    "skada:thrust": {
+      "minReach": 1.0,
+      "maxReach": 3.0,
+      "damageBonus": 0.2
+    }
+  }
+}

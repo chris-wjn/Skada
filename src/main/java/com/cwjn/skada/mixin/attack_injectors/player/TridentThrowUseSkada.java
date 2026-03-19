@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -24,6 +25,23 @@ import static com.cwjn.skada.data.SkadaData.WEAPON_INFO_TAG_KEY;
 
 @Mixin(TridentItem.class)
 public class TridentThrowUseSkada {
+
+        @Redirect(
+                        method = "releaseUsing",
+                        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/ThrownTrident;shootFromRotation(Lnet/minecraft/world/entity/Entity;FFFFF)V")
+        )
+        private void onTridentShootFromRotation(ThrownTrident thrownTrident, net.minecraft.world.entity.Entity shooter, float xRot, float yRot, float zRot, float velocity, float inaccuracy, ItemStack pStack) {
+                if (pStack.getTagElement(WEAPON_INFO_TAG_KEY) != null) {
+                        WeaponInfo info = WeaponInfo.fromCompoundTag(pStack.getTagElement(WEAPON_INFO_TAG_KEY));
+                        AttackType attackType = info.getAttackTypes().keySet().toArray(AttackType[]::new)[pStack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)];
+                        AttackTypeInfo attackInfo = info.getAttackTypes().get(attackType);
+                        float adjustedVelocity = (float) Util.tridentProjectileVelocity(velocity, attackInfo.damageBonus());
+                        float adjustedInaccuracy = (float) Util.precisionScoreToProjectileInaccuracy(attackInfo.precision());
+                        thrownTrident.shootFromRotation(shooter, xRot, yRot, zRot, adjustedVelocity, adjustedInaccuracy);
+                        return;
+                }
+                thrownTrident.shootFromRotation(shooter, xRot, yRot, zRot, velocity, inaccuracy);
+        }
 
     /*
      * When releasing a thrown trident, inject the trident projectile with a DamageInfo object to be used later.

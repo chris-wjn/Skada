@@ -1,0 +1,42 @@
+{
+  "_comment": "the main spike of the trident",
+  "type": "spear",
+  "spear": {
+    "version": 1,
+    "mount": {
+      "type": "socket",
+      "length": 11.0,
+      "outerWidth": 2.8,
+      "outerThickness": 2.2,
+      "innerWidth": 2.1,
+      "innerThickness": 1.6,
+      "shape": "oval",
+      "transitionLength": 2.0
+    },
+    "wings": {
+      "enabled": true,
+      "positionS": 0.12,
+      "projection": 7,
+      "span": 1.8,
+      "thickness": 0.6,
+      "tipRadiusMm": 1.2,
+      "style": "triangular"
+    },
+    "centerline": [
+      { "x": 0.0, "y": 0.0, "z": 0.0 },
+      { "x": 12.0, "y": 0.0, "z": 0.0 },
+      { "x": 33.0, "y": 0.0, "z": 0.0 }
+    ],
+    "pointTaper": 0.92,
+    "tipRadiusNm": 6.0,
+    "edgeRadiusNm": 7.0,
+    "edgeBevel": 20.0,
+    "sharpenedRange": [0.12, 1.0],
+    "stations": [
+      { "s": 0.0, "width": 4.4, "thickness": 1.2, "section": { "r": 2.0, "midribFlat": 0.20 } },
+      { "s": 0.25, "width": 3.5, "thickness": 0.95, "section": { "r": 2.1, "midribFlat": 0.16 } },
+      { "s": 0.55, "width": 2.3, "thickness": 0.62, "section": { "r": 2.25, "midribFlat": 0.10 } },
+      { "s": 0.82, "width": 1.1, "thickness": 0.22, "section": { "r": 2.4, "midribFlat": 0.0 } }
+    ]
+  }
+}

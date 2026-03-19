@@ -16,8 +16,8 @@ public class LethalityFunction {
         return op;
     }
 
-    public double apply(double lethality, double armourToughness, double targetHP) {
-        return func.apply(lethality, armourToughness, targetHP);
+    public double apply(double lethality, double armour, double armourToughness, double healthContext) {
+        return func.apply(lethality, armour, armourToughness, healthContext);
     }
 
     public enum Operation {

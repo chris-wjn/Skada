@@ -1,0 +1,6 @@
+{
+  "_comment": "Represents the handle for vanilla tools, not including swords.",
+  "type": "handle",
+  "length": 70,
+  "radius": 2
+}

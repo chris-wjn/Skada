@@ -1,25 +1,24 @@
 package com.cwjn.skada.data.gen.attack;
 
-import com.cwjn.skada.data.gen.weapon.ExtraTierInfo;
-import com.cwjn.skada.data.gen.weapon.old_system.WeaponProfile;
+import com.cwjn.skada.data.gen.weapon.WeaponAssembly;
 import com.cwjn.skada.util.TierStatFunctionInterface;
 
 public record AttackTypeGeneratorConfiguration(TierStatFunctionInterface precision, TierStatFunctionInterface lethality, TierStatFunctionInterface critFail, TierStatFunctionInterface attackSpeed) {
 
-  public double precision(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    return precision.apply(profile, tierInfo);
+  public double precision(WeaponAssembly profile) {
+    return precision.apply(profile);
   }
 
-  public double lethality(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    return lethality.apply(profile, tierInfo);
+  public double lethality(WeaponAssembly profile) {
+    return lethality.apply(profile);
   }
 
-  public double criticalFail(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    return critFail.apply(profile, tierInfo);
+  public double criticalFail(WeaponAssembly profile) {
+    return critFail.apply(profile);
   }
 
-  public double attackSpeed(WeaponProfile profile, ExtraTierInfo tierInfo) {
-    return attackSpeed.apply(profile, tierInfo);
+  public double attackSpeed(WeaponAssembly profile) {
+    return attackSpeed.apply(profile);
   }
 
 }

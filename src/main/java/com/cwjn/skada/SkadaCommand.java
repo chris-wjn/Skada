@@ -5,10 +5,12 @@ import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.gen.armour.ArmourMaterialInfo;
 import com.cwjn.skada.data.gen.armour.ArmourPieceInfo;
 import com.cwjn.skada.data.gen.attack.ElementSpread;
-import com.cwjn.skada.data.gen.weapon.ExtraTierInfo;
-import com.cwjn.skada.data.gen.weapon.old_system.WeaponProfile;
+import com.cwjn.skada.data.gen.weapon.MaterialInfo;
+import com.cwjn.skada.data.gen.weapon.WeaponAssembly;
+import com.cwjn.skada.data.gen.weapon.util.GeometryUtil.Vec3;
+import com.cwjn.skada.data.gen.weapon.util.PhysicsUtil;
+import com.cwjn.skada.data.gen.weapon.util.WeaponAxis;
 import com.cwjn.skada.data.damage.WeaponInfo;
-import com.cwjn.skada.data.gen.weapon.parts.mesh.MeshAwareWeaponHeadCodec;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.util.Util;
@@ -20,14 +22,18 @@ import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -50,7 +56,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.cwjn.skada.Skada.LOGGER;
-import static com.cwjn.skada.WeaponProfileCodecWriter.writeDefaultSwordJson;
 import static com.cwjn.skada.data.SkadaData.DEBUG_ENABLED;
 import static net.minecraft.commands.Commands.literal;
 
@@ -70,9 +75,15 @@ public class SkadaCommand {
                     .then(literal("materialName")
                             .executes(stack -> getTieredItemOrArmourItemMaterialName(stack.getSource()))
                     )
-            )
+                    .then(literal("physics")
+                          .executes(stack -> printWeaponPhysics(stack.getSource()))
+            ))
             .then(literal("generate")
                     .then(literal("weapons")
+                            .then(Commands.literal("item"))
+                                  .then(Commands.argument("item", ResourceLocationArgument.id())
+                                    .executes(stack -> generateWeaponInfoForItem(stack.getSource(), ResourceLocationArgument.getId(stack, "item")))
+                            )
                             .then(Commands.argument("namespace", ModIdArgument.modIdArgument())
                                     .executes(stack -> generateWeaponInfoForNamespace(stack.getSource(), stack.getArgument("namespace", String.class)))
                             )
@@ -81,6 +92,9 @@ public class SkadaCommand {
                             )
                     )
                     .then(literal("armour")
+                           .then(Commands.argument("item", ResourceLocationArgument.id())
+                             .executes(stack -> generateArmourInfoForItem(stack.getSource(), ResourceLocationArgument.getId(stack, "item")))
+                            )
                             .then(Commands.argument("namespace", ModIdArgument.modIdArgument())
                                     .executes(stack -> generateArmourInfoForNamespace(stack.getSource(), stack.getArgument("namespace", String.class)))
                             )
@@ -89,6 +103,9 @@ public class SkadaCommand {
                             )
                     )
                     .then(literal("mobs")
+                            .then(Commands.argument("entity", ResourceLocationArgument.id())
+                             .executes(stack -> generateMobInfoForEntity(stack.getSource(), ResourceLocationArgument.getId(stack, "entity")))
+                            )
                             .then(Commands.argument("namespace", ModIdArgument.modIdArgument())
                                     .executes(stack -> generateMobInfoForNamespace(stack.getSource(), stack.getArgument("namespace", String.class)))
                             )
@@ -98,24 +115,56 @@ public class SkadaCommand {
                     )
             )
             .then(literal("debug").executes(stack -> toggleDebug(stack.getSource())))
-            .then(literal("test").executes(stack -> testInertia(stack.getSource())))
+            //.then(literal("test").executes(stack -> testCommand(stack.getSource())))
     );
   }
 
-  private int testCommand(CommandSourceStack source) {
-    try {
-      writeDefaultSwordJson();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return 1;
-  }
+  // private int testCommand(CommandSourceStack source) {
+  //   try {
+  //     System.out.println("Test command");
+  //   } catch (IOException e) {
+  //     e.printStackTrace();
+  //   }
+  //   return 1;
+  // }
 
-  private int testInertia(CommandSourceStack source) {
-    WeaponProfile profile = WeaponProfile.defaultSword();
-    System.out.println(profile.getHandle().getMomentOfInertia());
-    System.out.println(profile.getSlashHead().getHead().getMomentOfInertia(115, 7.0, WeaponProfile.HeadOrientation.PARALLEL));
-    System.out.println(profile.getMomentOfInertia(new ExtraTierInfo(7.0, 3, 4, 5, new ElementSpread())));
+  /**
+   * Print the volume, mass, point of balance, CoM, and inertia of the held weapon. Or, print an error message if the held
+   * item is not a weapon.
+   * @param source the command source
+   * @return 1 if the command executed successfully, 0 if the player is null or not holding a weapon
+   */
+  private int printWeaponPhysics(CommandSourceStack source) {
+    ServerPlayer player = source.getPlayer();
+    if (player == null) {
+      return 0;
+    }
+    Map<String, WeaponAssembly> profileMap = new HashMap<>(Util.loadWeaponAssemblies(source.getServer().getResourceManager(), player));
+    Map<String, MaterialInfo> tierMap = new HashMap<>(Util.loadMaterialInfo(source.getServer().getResourceManager(), player));
+    
+    Item held = player.getMainHandItem().getItem();
+    System.out.println("Held item: " + held);
+    WeaponAssembly profile = profileMap.get(Util.findClosestMatch(profileMap.keySet().stream().toList(), Util.getItemPath(held)));
+    System.out.println("Using profile: " + profile);
+    if (held instanceof TieredItem) {
+      MaterialInfo tier = tierMap.get(Util.findClosestMatch(tierMap.keySet().stream().toList(), Util.getItemNamespace(held) + "." + ((TieredItem) held).getTier().toString().toLowerCase()));
+      profile = profile.withMaterialWoodenHandle(tier);
+      System.out.println("Using tier: " + tier);
+      double volume = profile.volume(WeaponAssembly.LARGE_SAMPLE_SIZE);
+      System.out.println("volume: " + volume);
+      double mass = profile.mass(WeaponAssembly.LARGE_SAMPLE_SIZE);
+      System.out.println("mass: " + mass);
+      double PoB = profile.pointOfBalance(WeaponAssembly.LARGE_SAMPLE_SIZE);
+      System.out.println("PoB: " + PoB);
+      Vec3 CoM = profile.centerOfMass(WeaponAssembly.LARGE_SAMPLE_SIZE);
+      System.out.println("CoM: " + CoM);
+      double inertia = PhysicsUtil.toKgM2(profile.momentOfInertiaAboutBase(WeaponAxis.Z, WeaponAssembly.LARGE_SAMPLE_SIZE));
+      System.out.println("inertia: " + inertia);
+      player.displayClientMessage(Component.translatable("skada.command_get_physics", volume, mass, PoB, CoM, inertia), false);
+    }
+    else {
+      player.displayClientMessage(Component.translatable("skada.command_get_physics.error.not_tiered"), false);
+    }
     return 1;
   }
 
@@ -209,40 +258,9 @@ public class SkadaCommand {
     }
     player.displayClientMessage(Component.translatable("skada.generate_weapon_info.start", namespace), false);
     TreeMap<String, WeaponInfo> map = new TreeMap<>();
-    HashMap<String, ExtraTierInfo> tierMap = new HashMap<>();
-    HashMap<String, WeaponProfile> profileMap = new HashMap<>();
+    HashMap<String, MaterialInfo> tierMap = new HashMap<>(Util.loadMaterialInfo(source.getServer().getResourceManager(), player));
+    HashMap<String, WeaponAssembly> profileMap = new HashMap<>(Util.loadWeaponAssemblies(source.getServer().getResourceManager(), player));
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    
-    // Set the resource manager for mesh-based weapon head loading
-    MeshAwareWeaponHeadCodec.setResourceManager(source.getServer().getResourceManager());
-    
-    source.getServer().getResourceManager().listResources("generator_data/weapon", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
-      try (var reader = resource.openAsReader()) {
-        String path = rl.getPath();
-        if (path.startsWith("generator_data/weapon/weapon_profile/")) {
-          String profileName = path.substring("generator_data/weapon/weapon_profile/".length()).replace(".json", "");
-          DataResult<WeaponProfile> info = WeaponProfile.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
-          info.error().ifPresent(error -> System.out.println(error.message()));
-          info.result().ifPresent(pInfo -> {
-            if (profileMap.containsKey(profileName)) {
-              LOGGER.error("Duplicate weapon profile name found: {}", profileName);
-            }
-            profileMap.put(profileName, pInfo);
-          });
-        } else if (path.startsWith("generator_data/weapon/tier/")) {
-          String tierName = path.substring("generator_data/weapon/tier/".length()).replace(".json", "");
-          DataResult<ExtraTierInfo> info = ExtraTierInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
-          info.result().ifPresent(tInfo -> {
-            if (tierMap.containsKey(tierName)) {
-              LOGGER.error("Duplicate tier name found: {}", tierName);
-            }
-            tierMap.put(tierName, tInfo);
-          });
-        }
-      } catch (IOException e) {
-        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
-      }
-    });
     for (Item item : ForgeRegistries.ITEMS.getValues()) {
       if (!item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND).isEmpty() ||
               !item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty() ||
@@ -250,13 +268,10 @@ public class SkadaCommand {
         if (Util.getItemNamespace(item).equals(namespace)) {
           boolean ignoreAttributes = item instanceof ProjectileWeaponItem;
           String path = Util.getItemPath(item);
-          System.out.println(path);
           WeaponInfo info = null;
-          System.out.println(Util.findClosestMatch(profileMap.keySet().stream().toList(), path));
-          WeaponProfile profile = profileMap.get(Util.findClosestMatch(profileMap.keySet().stream().toList(), path));
+          WeaponAssembly profile = profileMap.get(Util.findClosestMatch(profileMap.keySet().stream().toList(), path));
           if (item instanceof TieredItem tItem) {
             String matName = tItem.getTier().toString().toLowerCase();
-            System.out.println("Generating item: " + path + " with material " + matName);
             if (CommonConfig.SQUEEZE_DAMAGE_VALUES.get()) { //this is to make sure items don't have wildly different damage values just because of material differences
               double damageModifier = getDamageModifierForItem(item, tItem.getTier());
             }
@@ -302,6 +317,92 @@ public class SkadaCommand {
       }
     });
     player.displayClientMessage(Component.translatable("skada.generate_weapon_info.finish", map.size()), false);
+    return 1;
+  }
+
+  private int generateWeaponInfoForItem(CommandSourceStack source, ResourceLocation itemId) {
+    ServerPlayer player = source.getPlayer();
+    if (player == null) {
+      return 0;
+    }
+    Item item = ForgeRegistries.ITEMS.getValue(itemId);
+    if (item == null || item == Items.AIR) {
+      player.displayClientMessage(Component.literal("No item found for id: " + itemId), false);
+      return 0;
+    }
+    if (item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND).isEmpty() &&
+            item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty() &&
+            !(item instanceof ProjectileWeaponItem)) {
+      player.displayClientMessage(Component.literal("Item is not a weapon: " + itemId), false);
+      return 0;
+    }
+
+    String namespace = itemId.getNamespace();
+    player.displayClientMessage(Component.translatable("skada.generate_weapon_info.start", itemId), false);
+
+    HashMap<String, MaterialInfo> tierMap = new HashMap<>(Util.loadMaterialInfo(source.getServer().getResourceManager(), player));
+    HashMap<String, WeaponAssembly> profileMap = new HashMap<>(Util.loadWeaponAssemblies(source.getServer().getResourceManager(), player));
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+    String path = Util.getItemPath(item);
+    TreeMap<String, WeaponInfo> map = new TreeMap<>();
+    Path outputPath = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generated", namespace + ".json");
+    if (outputPath.toFile().exists()) {
+      try (Reader reader = new FileReader(outputPath.toFile())) {
+        JsonObject existingObj = gson.fromJson(reader, JsonObject.class);
+        if (existingObj != null) {
+          DataResult<Map<String, WeaponInfo>> existingInfo = WeaponInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, existingObj);
+          existingInfo.result().ifPresent(map::putAll);
+        }
+      } catch (IOException e) {
+        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.io_error"), false);
+      }
+    }
+
+    boolean ignoreAttributes = item instanceof ProjectileWeaponItem;
+    WeaponAssembly profile = profileMap.get(Util.findClosestMatch(profileMap.keySet().stream().toList(), path));
+    if (profile == null) {
+      player.displayClientMessage(Component.literal("No weapon profile found for: " + itemId), false);
+      return 0;
+    }
+
+    WeaponInfo info;
+    if (item instanceof TieredItem tItem) {
+      String matName = tItem.getTier().toString().toLowerCase();
+      info = null;
+      for (String s : tierMap.keySet().stream().filter(s -> s.startsWith(namespace)).toList()) {
+        if (s.equals(namespace + "." + matName)) {
+          info = WeaponInfo.generate(tierMap.get(s), profile, ignoreAttributes);
+          break;
+        }
+      }
+      if (info == null) {
+        for (String s : tierMap.keySet()) {
+          if (s.contains(matName)) {
+            info = WeaponInfo.generate(tierMap.get(s), profile, ignoreAttributes);
+            break;
+          }
+        }
+        if (info == null) {
+          LOGGER.error("No tier info found for {}. Generating on name only.", path);
+          info = WeaponInfo.generate(profile, ignoreAttributes);
+        }
+      }
+    } else {
+      LOGGER.error("No tier info found for {}. Generating on name only.", path);
+      info = WeaponInfo.generate(profile, ignoreAttributes);
+    }
+
+    map.put(path, info);
+    WeaponInfo.STRING_MAP_CODEC.encodeStart(JsonOps.INSTANCE, map).result().ifPresent(jsonElement -> {
+      String json = gson.toJson(jsonElement);
+      try {
+        FileUtils.write(outputPath.toFile(), json);
+      } catch (IOException e) {
+        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.io_error"), false);
+      }
+    });
+    player.displayClientMessage(Component.translatable("skada.generate_weapon_info.finish", 1), false);
     return 1;
   }
 
@@ -399,6 +500,110 @@ public class SkadaCommand {
     return 1;
   }
 
+  private int generateArmourInfoForItem(CommandSourceStack source, ResourceLocation itemId) {
+    ServerPlayer player = source.getPlayer();
+    if (player == null) {
+      return 0;
+    }
+
+    Item item = ForgeRegistries.ITEMS.getValue(itemId);
+    if (item == null || item == Items.AIR) {
+      player.displayClientMessage(Component.literal("No item found for id: " + itemId), false);
+      return 0;
+    }
+    if (item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.HEAD).isEmpty() &&
+            item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.CHEST).isEmpty() &&
+            item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.LEGS).isEmpty() &&
+            item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.FEET).isEmpty()) {
+      player.displayClientMessage(Component.literal("Item is not armour: " + itemId), false);
+      return 0;
+    }
+
+    String namespace = itemId.getNamespace();
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    player.displayClientMessage(Component.translatable("skada.generate_armour_info.start", itemId), false);
+
+    Map<String, ArmourPieceInfo> armourPieceNameMap = new HashMap<>();
+    Map<String, ArmourMaterialInfo> armourMaterialInfoMap = new HashMap<>();
+    source.getServer().getResourceManager().listResources("generator_data/armour", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
+      try (var reader = resource.openAsReader()) {
+        String path = rl.getPath();
+        if (path.equals("generator_data/armour/by_item_name.json")) {
+          DataResult<Map<String, ArmourPieceInfo>> namedInfo = ArmourPieceInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+          namedInfo.result().ifPresent(armourPieceNameMap::putAll);
+        } else if (path.startsWith("generator_data/armour/material/")) {
+          String materialName = path.substring("generator_data/armour/material/".length()).replace(".json", "");
+          DataResult<ArmourMaterialInfo> info = ArmourMaterialInfo.CODEC.parse(JsonOps.INSTANCE, gson.fromJson(reader, JsonObject.class));
+          info.result().ifPresent(mInfo -> {
+            if (armourMaterialInfoMap.containsKey(materialName)) {
+              LOGGER.error("Duplicate material name found: {}", materialName);
+            }
+            armourMaterialInfoMap.put(materialName, mInfo);
+          });
+        }
+      } catch (IOException e) {
+        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_generator_data"), false);
+      }
+    });
+
+    String path = Util.getItemPath(item);
+    ArmourPieceInfo nInfo = ArmourPieceInfo.DEFAULT;
+    for (String s : armourPieceNameMap.keySet()) {
+      if (Pattern.compile("\\b" + s + "\\b", Pattern.CASE_INSENSITIVE).matcher(path.replace('_', ' ')).find()) {
+        nInfo = armourPieceNameMap.get(s);
+        break;
+      }
+    }
+
+    ArmourMaterialInfo mInfo = ArmourMaterialInfo.DEFAULT;
+    if (item instanceof ArmorItem aItem) {
+      String matName = aItem.getMaterial().toString().toLowerCase();
+      for (String s : armourMaterialInfoMap.keySet().stream().filter(s -> s.startsWith(namespace)).toList()) {
+        if (s.equals(namespace + "." + matName)) {
+          mInfo = armourMaterialInfoMap.get(s);
+          break;
+        }
+      }
+      if (mInfo == ArmourMaterialInfo.DEFAULT) {
+        for (String s : armourMaterialInfoMap.keySet()) {
+          if (s.contains(matName)) {
+            mInfo = armourMaterialInfoMap.get(s);
+            break;
+          }
+        }
+      }
+    }
+    if (mInfo == ArmourMaterialInfo.DEFAULT) {
+      LOGGER.error("No armour material info for {}", path);
+    }
+
+    TreeMap<String, ArmourInfo> map = new TreeMap<>();
+    Path outputPath = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generated", namespace + ".json");
+    if (outputPath.toFile().exists()) {
+      try (Reader reader = new FileReader(outputPath.toFile())) {
+        JsonObject existingObj = gson.fromJson(reader, JsonObject.class);
+        if (existingObj != null) {
+          DataResult<Map<String, ArmourInfo>> existingInfo = ArmourInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, existingObj);
+          existingInfo.result().ifPresent(map::putAll);
+        }
+      } catch (IOException e) {
+        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.io_error"), false);
+      }
+    }
+
+    map.put(path, ArmourInfo.generate(nInfo, mInfo));
+    ArmourInfo.STRING_MAP_CODEC.encodeStart(JsonOps.INSTANCE, map).result().ifPresent(jsonElement -> {
+      String json = gson.toJson(jsonElement);
+      try {
+        FileUtils.write(outputPath.toFile(), json);
+      } catch (IOException e) {
+        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.io_error"), false);
+      }
+    });
+    player.displayClientMessage(Component.translatable("skada.generate_weapon_info.finish", 1), false);
+    return 1;
+  }
+
   private int generateMobInfoForNamespace(CommandSourceStack source, String namespace) {
     ServerPlayer player = source.getPlayer();
     if (player == null) {
@@ -430,6 +635,54 @@ public class SkadaCommand {
       }
     });
     player.displayClientMessage(Component.translatable("skada.generate_weapon_info.finish", map.size()), false);
+    return 1;
+  }
+
+  private int generateMobInfoForEntity(CommandSourceStack source, ResourceLocation entityId) {
+    ServerPlayer player = source.getPlayer();
+    if (player == null) {
+      return 0;
+    }
+
+    EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(entityId);
+    if (type == null) {
+      player.displayClientMessage(Component.literal("No entity found for id: " + entityId), false);
+      return 0;
+    }
+    if (!(type.create(player.level()) instanceof LivingEntity) || type.create(player.level()) instanceof Projectile) {
+      player.displayClientMessage(Component.literal("Entity is not a valid mob: " + entityId), false);
+      return 0;
+    }
+
+    String namespace = entityId.getNamespace();
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    TreeMap<String, MobData> map = new TreeMap<>();
+    Path outputPath = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs", "generated", namespace + ".json");
+    if (outputPath.toFile().exists()) {
+      try (Reader reader = new FileReader(outputPath.toFile())) {
+        JsonObject existingObj = gson.fromJson(reader, JsonObject.class);
+        if (existingObj != null) {
+          DataResult<Map<String, MobData>> existingInfo = MobData.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, existingObj);
+          existingInfo.result().ifPresent(map::putAll);
+        }
+      } catch (IOException e) {
+        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.io_error"), false);
+      }
+    }
+
+    player.displayClientMessage(Component.translatable("skada.generate_mob_info.start", entityId), false);
+    Multimap<Attribute, AttributeModifier> multimap = ArrayListMultimap.create();
+    map.put(Util.getEntityPath(type), new MobData(null, AttackType.strike(), multimap));
+
+    MobData.STRING_MAP_CODEC.encodeStart(JsonOps.INSTANCE, map).result().ifPresent(jsonElement -> {
+      String json = gson.toJson(jsonElement);
+      try {
+        FileUtils.write(outputPath.toFile(), json);
+      } catch (IOException e) {
+        player.displayClientMessage(Component.translatable("skada.generate_weapon_info.io_error"), false);
+      }
+    });
+    player.displayClientMessage(Component.translatable("skada.generate_weapon_info.finish", 1), false);
     return 1;
   }
 

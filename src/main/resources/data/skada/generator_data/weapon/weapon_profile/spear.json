@@ -1,0 +1,58 @@
+{
+  "_comment": "Basic broad-leaf spear weapon assembly with a long ash shaft and socketed head",
+  "parts": [
+    {
+      "part": {
+        "type": "handle",
+        "length": 150.0,
+        "radius": 1.55
+      },
+      "position": { "x": 0.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "part": {
+        "type": "spear",
+        "spear": {
+          "version": 1,
+          "mount": {
+            "type": "socket",
+            "length": 11.0,
+            "outerWidth": 2.8,
+            "outerThickness": 2.2,
+            "innerWidth": 2.1,
+            "innerThickness": 1.6,
+            "shape": "oval",
+            "transitionLength": 2.0
+          },
+          "centerline": [
+            { "x": 0.0, "y": 0.0, "z": 0.0 },
+            { "x": 12.0, "y": 0.0, "z": 0.0 },
+            { "x": 26.0, "y": 0.0, "z": 0.0 }
+          ],
+          "pointTaper": 0.92,
+          "tipRadiusNm": 6.0,
+          "edgeRadiusNm": 7.0,
+          "edgeBevel": 20.0,
+          "sharpenedRange": [0.12, 1.0],
+          "stations": [
+            { "s": 0.0, "width": 5.6, "thickness": 1.0, "section": { "r": 1.5, "midribFlat": 0.18 } },
+            { "s": 0.25, "width": 5.0, "thickness": 0.88, "section": { "r": 1.55, "midribFlat": 0.16 } },
+            { "s": 0.55, "width": 3.1, "thickness": 0.56, "section": { "r": 1.65, "midribFlat": 0.10 } },
+            { "s": 0.82, "width": 1.4, "thickness": 0.22, "section": { "r": 1.8, "midribFlat": 0.0 } }
+          ]
+        }
+      },
+      "position": { "x": 150.0, "y": 0.0, "z": 0.0 }
+    }
+  ],
+  "attack_types": {
+    "skada:thrust": {
+      "minReach": 1.3,
+      "maxReach": 4.25
+    },
+    "skada:slash": {
+      "minReach": 0.95,
+      "maxReach": 3.2
+    }
+  }
+}

@@ -1,29 +1,116 @@
 {
-  "_comment": "Vanilla shovel profile using JSON geometry approximation",
-  "handle": {
-    "length": 62.0,
-    "radius": 1.5
-  },
-  "weapon_heads": [
+  "_comment": "Real-world interpretation of the Minecraft shovel as a compact socketed entrenching head mounted on a short wooden haft",
+  "parts": [
     {
-      "position_on_handle": 60.0,
-      "orientation": "PERPENDICULAR",
-      "head": {
-        "typeKey": "shovel",
-        "bladeLength": 12.0,
-        "bladeWidth": 10.0,
-        "bladeThickness": 1.0,
-        "socketLength": 4.0,
-        "socketOuterRadius": 1.8,
-        "socketInnerRadius": 1.5,
-        "tipAngle": 30.0
+      "part": "vanilla_tool_handle",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    },
+    {
+      "part": {
+        "type": "shovel",
+        "shovel": {
+          "version": 1,
+          "mount": {
+            "type": "socket",
+            "length": 6.0,
+            "rearOuterWidth": 2.8,
+            "rearOuterThickness": 2.1,
+            "frontOuterWidth": 3.4,
+            "frontOuterThickness": 1.85,
+            "innerWidth": 1.9,
+            "innerThickness": 1.45,
+            "wallThickness": 0.22,
+            "transitionLength": 1.5
+          },
+          "shoulder": {
+            "length": 3.2,
+            "entryHalfWidth": 1.7,
+            "exitHalfWidth": 4.8,
+            "entryThickness": 0.52,
+            "exitThickness": 0.3,
+            "crownHeight": 0.42
+          },
+          "blade": {
+            "length": 14.5,
+            "stations": [
+              {
+                "s": 0.0,
+                "halfWidth": 4.8,
+                "thickness": 0.3,
+                "dishDepth": 0.42,
+                "crownOffset": 0.0
+              },
+              {
+                "s": 0.35,
+                "halfWidth": 5.9,
+                "thickness": 0.26,
+                "dishDepth": 0.62,
+                "crownOffset": 0.12
+              },
+              {
+                "s": 0.7,
+                "halfWidth": 5.5,
+                "thickness": 0.21,
+                "dishDepth": 0.45,
+                "crownOffset": 0.05
+              },
+              {
+                "s": 1.0,
+                "halfWidth": 4.4,
+                "thickness": 0.16,
+                "dishDepth": 0.08,
+                "crownOffset": -0.04
+              }
+            ],
+            "edge": {
+              "profile": "rounded",
+              "lipRadiusMm": 1.25,
+              "bevelLength": 1.4
+            }
+          },
+          "reinforcement": {
+            "centerRib": {
+              "startS": 0.08,
+              "endS": 0.76,
+              "height": 0.24,
+              "baseWidth": 1.2
+            },
+            "heelThickening": {
+              "length": 2.2,
+              "extraThickness": 0.12
+            }
+          }
+        }
+      },
+      "position": {
+        "x": 75.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "transform": {
+        "x": {
+          "axis": "x",
+          "sign": 1
+        },
+        "y": {
+          "axis": "z",
+          "sign": 1
+        },
+        "z": {
+          "axis": "y",
+          "sign": 1
+        }
       }
     }
   ],
   "attack_types": {
     "skada:strike": {
-      "minReach": 0.4,
-      "maxReach": 1.6
+      "minReach": 0.45,
+      "maxReach": 2.05
     }
   }
 }

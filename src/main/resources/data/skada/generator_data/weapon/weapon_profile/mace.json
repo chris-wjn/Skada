@@ -1,0 +1,97 @@
+{
+  "_comment": "Flanged steel mace assembly with a socketed head and concentrated strike geometry",
+  "parts": [
+    {
+      "part": {
+        "type": "handle",
+        "length": 44.0,
+        "radius": 1.55
+      },
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    },
+    {
+      "part": {
+        "type": "mace_head",
+        "transform": {
+          "x": {
+            "axis": "x",
+            "sign": 1
+          },
+          "y": {
+            "axis": "y",
+            "sign": 1
+          },
+          "z": {
+            "axis": "z",
+            "sign": 1
+          }
+        },
+        "mace": {
+          "version": 1,
+          "mount": {
+            "type": "socket",
+            "length": 5.2,
+            "outerRadius": 1.2,
+            "innerRadius": 0.8,
+            "transitionLength": 1.2
+          },
+          "core": {
+            "length": 10.5,
+            "stations": [
+              {
+                "s": 0.0,
+                "radius": 1.8
+              },
+              {
+                "s": 0.18,
+                "radius": 2.45
+              },
+              {
+                "s": 0.55,
+                "radius": 2.75
+              },
+              {
+                "s": 0.88,
+                "radius": 2.35
+              },
+              {
+                "s": 1.0,
+                "radius": 1.85
+              }
+            ]
+          },
+          "flanges": {
+            "count": 6,
+            "startS": 0.08,
+            "endS": 0.94,
+            "protrusion": 0.95,
+            "rootWidth": 0.9,
+            "tipWidth": 0.24,
+            "curve": 1.6,
+            "twistDegrees": 0.0
+          },
+          "impactOverride": {
+            "effectiveContactAreaCm2": 1.2,
+            "focusFactor": 1.8,
+            "rigidity": 1.15
+          }
+        }
+      },
+      "position": {
+        "x": 44.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    }
+  ],
+  "attack_types": {
+    "skada:strike": {
+      "minReach": 0.35,
+      "maxReach": 1.9
+    }
+  }
+}

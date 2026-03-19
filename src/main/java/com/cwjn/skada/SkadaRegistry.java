@@ -3,6 +3,12 @@ package com.cwjn.skada;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.LethalityFunction;
 import com.cwjn.skada.data.gen.attack.AttackTypeGeneratorConfiguration;
+import com.cwjn.skada.data.gen.weapon.attack_capability.AttackCapable;
+import com.cwjn.skada.data.gen.weapon.attack_capability.MagicCapable;
+import com.cwjn.skada.data.gen.weapon.attack_capability.NoneCapable;
+import com.cwjn.skada.data.gen.weapon.attack_capability.SlashCapable;
+import com.cwjn.skada.data.gen.weapon.attack_capability.StrikeCapable;
+import com.cwjn.skada.data.gen.weapon.attack_capability.ThrustCapable;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.ColourLibrary;
@@ -33,27 +39,28 @@ public class SkadaRegistry {
     public static final RegistryObject<Element> AETHER = element("aether", ColourLibrary.AETHER);
     public static final RegistryObject<Element> PHYSICAL = element("basic", ColourLibrary.BASIC);
 
-    public static final RegistryObject<AttackType> SLASH = attackType("slash", SkadaData.PERCENT_DAMAGE_BONUS, SkadaData.SLASH_GENERATOR_CONFIG);
-    public static final RegistryObject<AttackType> THRUST = attackType("thrust", SkadaData.PERCENT_HEALTH_DAMAGE, SkadaData.THRUST_GENERATOR_CONFIG);
-    public static final RegistryObject<AttackType> STRIKE = attackType("strike", SkadaData.PERCENT_REDUC, SkadaData.STRIKE_GENERATOR_CONFIG);
-    public static final RegistryObject<AttackType> MAGIC = attackType("magic", SkadaData.NONE, SkadaData.NULL_GENERATOR_CONFIG);
-    public static final RegistryObject<AttackType> NONE = attackType("none", SkadaData.NONE, SkadaData.NULL_GENERATOR_CONFIG);
+    public static final RegistryObject<AttackType> SLASH = attackType("slash", SkadaData.PERCENT_DAMAGE_BONUS, SkadaData.SLASH_GENERATOR_CONFIG, SlashCapable.class);
+    public static final RegistryObject<AttackType> THRUST = attackType("thrust", SkadaData.PERCENT_HEALTH_DAMAGE, SkadaData.THRUST_GENERATOR_CONFIG, ThrustCapable.class);
+    public static final RegistryObject<AttackType> STRIKE = attackType("strike", SkadaData.PERCENT_REDUC, SkadaData.STRIKE_GENERATOR_CONFIG, StrikeCapable.class);
+    public static final RegistryObject<AttackType> MAGIC = attackType("magic", SkadaData.NONE, SkadaData.NULL_GENERATOR_CONFIG, MagicCapable.class);
+    public static final RegistryObject<AttackType> NONE = attackType("none", SkadaData.NONE, SkadaData.NULL_GENERATOR_CONFIG, NoneCapable.class);
 
-    private static RegistryObject<AttackType> attackType(String name, LethalityFunction type, AttackTypeGeneratorConfiguration tierStatFunction) {
-        Attribute r = new RangedAttribute("attribute.skada." + name + "_resist", 0.0D, -1024.0D, 10.0D).setSyncable(true);
+    private static RegistryObject<AttackType> attackType(String name, LethalityFunction type, AttackTypeGeneratorConfiguration tierStatFunction, Class<? extends AttackCapable> capableInterface) {
+        Attribute r = new RangedAttribute("attribute.skada." + name + "_resist", 0.0D, -1024.0D, 1024.0D).setSyncable(true);
         ForgeRegistries.ATTRIBUTES.register("damage_class." + name + "_resist", r);
         return ATTACK_TYPES.register(name,
                 () -> new AttackType(
                         name,
                         type,
                         tierStatFunction,
-                        r
+                        r,
+                        capableInterface
                 ));
     }
 
     private static RegistryObject<Element> element(String name, int colour) {
         Attribute a = new RangedAttribute("attribute.skada." + name + "_affinity", 0.0D, -10.0D, 1024.0D).setSyncable(true);
-        Attribute r = new RangedAttribute("attribute.skada." + name + "_resist", 0.0D, -1024.0D, 10.0D).setSyncable(true);
+        Attribute r = new RangedAttribute("attribute.skada." + name + "_resist", 0.0D, -1024.0D, 1024.0D).setSyncable(true);
         Attribute b = new RangedAttribute("attribute.skada." + name + "_base_damage", 0.0D, 0.0D, 8192.0D).setSyncable(true);
         ForgeRegistries.ATTRIBUTES.register("element." + name + "_affinity", a);
         ForgeRegistries.ATTRIBUTES.register("element." + name + "_resist", r);
