@@ -1,36 +1,170 @@
 {
-  "_comment": "Vanilla pickaxe profile using JSON geometry approximation",
-  "handle": {
-    "length": 65.0,
-    "radius": 1.5
-  },
-  "weapon_heads": [
+  "_comment": "Real-world interpretation of the Minecraft pickaxe as a forged double-sided pick with a long working beak and a shorter counter-spike",
+  "parts": [
     {
-      "position_on_handle": 61.0,
-      "orientation": "PERPENDICULAR",
-      "head": {
-        "typeKey": "pick",
-        "eyeLength": 3.0,
-        "eyeHeight": 5.0,
-        "eyeThickness": 4.0,
-        "eyeHoleSemiMajorAxis": 1.5,
-        "eyeHoleSemiMinorAxis": 1.0,
-        "frontSpikeLength": 12.0,
-        "frontSpikeBaseWidth": 2.5,
-        "frontSpikeBaseHeight": 3.0,
-        "rearSpikeLength": 12.0,
-        "rearSpikeBaseWidth": 2.5,
-        "rearSpikeBaseHeight": 3.0
+      "part": "vanilla_tool_handle",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    },
+    {
+      "part": {
+        "type": "pick_head",
+        "transform": {
+          "x": {
+            "axis": "y",
+            "sign": 1
+          },
+          "y": {
+            "axis": "x",
+            "sign": 1
+          },
+          "z": {
+            "axis": "z",
+            "sign": 1
+          }
+        },
+        "pick": {
+          "version": 1,
+          "eye": {
+            "xOffset": 0,
+            "length": 5,
+            "height": 3,
+            "thickness": 4.5,
+            "bore": {
+              "width": 3,
+              "thickness": 3,
+              "shape": "ellipse"
+            }
+          },
+          "front": {
+            "centerline": [
+              {
+                  "x": 2,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                {
+                  "x": 12,
+                  "y": -1,
+                  "z": 0.0
+                },
+                {
+                  "x": 16,
+                  "y": -1.5,
+                  "z": 0.0
+                },
+                {
+                  "x": 25,
+                  "y": -5,
+                  "z": 0.0
+                }
+            ],
+            "pointTaper": 0.0,
+            "tipRadiusNm": 24.0,
+            "stations": [
+              {
+                "s": 0.0,
+                "width": 4,
+                "thickness": 5.0,
+                "section": {
+                  "kind": "lenticular",
+                  "r": 2.7
+                }
+              },
+              {
+                "s": 0.5,
+                "width": 2,
+                "thickness": 2.5,
+                "section": {
+                  "kind": "lenticular",
+                  "r": 2.2
+                }
+              },
+              {
+                "s": 1,
+                "width": 1,
+                "thickness": 0.5,
+                "section": {
+                  "kind": "lenticular",
+                  "r": 2
+                }
+              }
+            ]
+          },
+          "rear": {
+            "type": "spike",
+            "spike": {
+              "centerline": [
+                {
+                  "x": -2,
+                  "y": 0.0,
+                  "z": 0.0
+                },
+                {
+                  "x": -12,
+                  "y": -1,
+                  "z": 0.0
+                },
+                {
+                  "x": -16,
+                  "y": -1.5,
+                  "z": 0.0
+                },
+                {
+                  "x": -25,
+                  "y": -5,
+                  "z": 0.0
+                }
+              ],
+              "pointTaper": 0.93,
+              "tipRadiusNm": 34.0,
+              "stations": [
+                {
+                  "s": 0.0,
+                  "width": 4,
+                  "thickness": 5.0,
+                  "section": {
+                    "kind": "lenticular",
+                    "r": 2.7
+                  }
+                },
+                {
+                  "s": 0.5,
+                  "width": 2,
+                  "thickness": 2.5,
+                  "section": {
+                    "kind": "lenticular",
+                    "r": 2.2
+                  }
+                },
+                {
+                  "s": 1,
+                  "width": 1,
+                  "thickness": 0.5,
+                  "section": {
+                    "kind": "lenticular",
+                    "r": 2
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "position": {
+        "x": 65,
+        "y": 0.0,
+        "z": 0.0
       }
     }
   ],
   "attack_types": {
     "skada:thrust": {
-      "minReach": 0.5,
-      "maxReach": 1.75,
-      "reticleShapes": [
-        "pickaxe_swipe"
-      ]
+      "minReach": 0.55,
+      "maxReach": 1.9
     }
   }
 }

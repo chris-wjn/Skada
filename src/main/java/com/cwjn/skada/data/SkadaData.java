@@ -3,16 +3,14 @@ package com.cwjn.skada.data;
 import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.damage.LethalityFunction;
 import com.cwjn.skada.data.gen.attack.AttackTypeGeneratorConfiguration;
-import com.cwjn.skada.data.gen.weapon.AttackSpeedGenerationUtil;
-import com.cwjn.skada.data.gen.weapon.CriticalFailGenerationUtil;
-import com.cwjn.skada.data.gen.weapon.LethalityGenerationUtil;
-import com.cwjn.skada.data.gen.weapon.PrecisionGenerationUtil;
-import com.cwjn.skada.data.gen.weapon.parts.*;
+import com.cwjn.skada.data.gen.weapon.generation_algo.AttackSpeedGenerationUtil;
+import com.cwjn.skada.data.gen.weapon.generation_algo.CriticalFailGenerationUtil;
+import com.cwjn.skada.data.gen.weapon.generation_algo.LethalityGenerationUtil;
+import com.cwjn.skada.data.gen.weapon.generation_algo.PrecisionGenerationUtil;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;
-import com.mojang.serialization.Codec;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.IForgeRegistry;
 
@@ -33,16 +31,7 @@ public abstract class SkadaData {
   public static Supplier<IForgeRegistry<Element>> REGISTRY_ELEMENT;
   public static final HashMap<EntityType<?>, MobData> MOB_DATA = new HashMap<>();
   public static Map<String, ReticleShape> RETICLES = new HashMap<>();
-  public static Map<String, Codec<? extends WeaponHead>> WEAPON_HEAD_CODECS = new HashMap<>();
-  static {
-    WEAPON_HEAD_CODECS.put("blade", Blade.CODEC);
-    WEAPON_HEAD_CODECS.put("axe", AxeHead.CODEC);
-    WEAPON_HEAD_CODECS.put("sickle", SickleHead.CODEC);
-    WEAPON_HEAD_CODECS.put("pick", PickHead.CODEC);
-    WEAPON_HEAD_CODECS.put("shovel", ShovelHead.CODEC);
-    WEAPON_HEAD_CODECS.put("mace", MaceHead.CODEC);
-  }
-  public static final LethalityFunction NONE = new LethalityFunction((lethality, armourToughness, targetHP) -> 0, SUM_WITH_DAMAGE);
+        public static final LethalityFunction NONE = new LethalityFunction((lethality, armour, armourToughness, healthContext) -> 0, SUM_WITH_DAMAGE);
   public static final LethalityFunction PERCENT_DAMAGE_BONUS = new LethalityFunction(Util::percentBonusDamage, MULTIPLY_WITH_DAMAGE);
   public static final LethalityFunction PERCENT_HEALTH_DAMAGE = new LethalityFunction(Util::percentHealthDamage, SUM_WITH_DAMAGE);
   public static final LethalityFunction PERCENT_REDUC = new LethalityFunction(Util::percentReduc, MULTIPLY_WITH_ARMOUR);
@@ -52,10 +41,7 @@ public abstract class SkadaData {
           PrecisionGenerationUtil::strike, LethalityGenerationUtil::strike, CriticalFailGenerationUtil::strike, AttackSpeedGenerationUtil::strike);
   public static final AttackTypeGeneratorConfiguration THRUST_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(
           PrecisionGenerationUtil::thrust, LethalityGenerationUtil::thrust, CriticalFailGenerationUtil::thrust, AttackSpeedGenerationUtil::thrust);
-//  public static final AttackTypeGeneratorConfiguration STRIKE_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a, b) -> 0, (a, b) -> 0, (a, b) -> 0, (a, b) -> 0);
-//  public static final AttackTypeGeneratorConfiguration SLASH_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a, b) -> 0, (a, b) -> 0, (a, b) -> 0, (a, b) -> 0);
-//  public static final AttackTypeGeneratorConfiguration THRUST_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a, b) -> 0, (a, b) -> 0, (a, b) -> 0, (a, b) -> 0);
-  public static final AttackTypeGeneratorConfiguration NULL_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a, b) -> 0, (a, b) -> 0, (a, b) -> 0, (a, b) -> 0);
+  public static final AttackTypeGeneratorConfiguration NULL_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a) -> 0, (a) -> 0, (a) -> 0, (a) -> 0);
   public static final String WEAPON_INFO_TAG_KEY = "skada.weapon_info.tagkey";
   public static final String ARMOUR_INFO_TAG_KEY = "skada.armour_info.tagkey";
   public static final String CURRENT_ATTACK_TYPE_TAG_KEY = "skada.current_attack_type.tagKey";
@@ -87,7 +73,7 @@ public abstract class SkadaData {
   public static final double BEVEL_ANGLE_DEFAULT = 22.5; //degrees
   public static final double BLADE_WEIGHT_DEFAULT = 1300; //grams
   public static final double WOOD_DENSITY = 0.7; //grams per cubic centimeter (g/cm³)
-        public static final double WEDGE_DRIVE_CONSTANT = 0.3; //kg·m²/s scaling for wedge drive ratio
-        public static final double WEDGE_BONUS_COEFFICIENT = 0.15; //+30% cap at wedgeFactor 2.0 when driveRatio >= 1
+  public static final double WEDGE_DRIVE_CONSTANT = 0.3; //kg·m²/s scaling for wedge drive ratio
+  public static final double WEDGE_BONUS_COEFFICIENT = 0.15; //+30% cap at wedgeFactor 2.0 when driveRatio >= 1
 
 }

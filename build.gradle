@@ -133,6 +133,15 @@ tasks.test {
     useJUnitPlatform() // run JUnit 5 tests
 }
 
+tasks.register('syncGameTestStructures', Copy) {
+    from(layout.projectDirectory.dir('gameteststructures'))
+    into(layout.projectDirectory.dir('run/gameteststructures'))
+}
+
+tasks.matching { it.name == 'runGameTestServer' }.configureEach {
+    dependsOn tasks.named('syncGameTestStructures')
+}
+
 mixin {
     add sourceSets.main, "skada.mixin-refmap.json"
     config 'skada.mixin.json'

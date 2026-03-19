@@ -4,8 +4,8 @@ import com.cwjn.skada.CommonConfig;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.gen.attack.AttackTypeJsonInfo;
 import com.cwjn.skada.data.gen.attack.ElementSpread;
-import com.cwjn.skada.data.gen.weapon.ExtraTierInfo;
-import com.cwjn.skada.data.gen.weapon.old_system.WeaponProfile;
+import com.cwjn.skada.data.gen.weapon.MaterialInfo;
+import com.cwjn.skada.data.gen.weapon.WeaponAssembly;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;
@@ -21,14 +21,12 @@ import java.util.function.Supplier;
 
 public class WeaponInfo {
 
+    private static final WeaponInfo NO_WEAPON_VALUE = new WeaponInfo(Collections.emptyMap(), new ElementSpread(), false);
+
     private final Map<AttackType, AttackTypeInfo> attackTypes;
     private final ElementSpread spread;
     private final boolean ignoreAttributes;
-    public static final WeaponInfo NO_WEAPON = new WeaponInfo(
-            new HashMap<>(Map.of(AttackType.strike(), AttackTypeInfo.DEFAULT)),
-            new ElementSpread(),
-            false
-    );
+    public static final WeaponInfo NO_WEAPON = NO_WEAPON_VALUE;
 
     public static Codec<WeaponInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(Codec.STRING, AttackTypeInfo.CODEC).fieldOf("attack_types").forGetter(WeaponInfo::attackTypeStringMap),
@@ -66,23 +64,26 @@ public class WeaponInfo {
     }
 
     /*
-        * Construct a new WeaponInfo with a given item by guessing weapon info based on attributes and name.
+        * Construct a new WeaponInfo with a given item by guessing weapon info based on material and name.
+        * This is for weapons that are generated from json. The WeaponAssembly will be automatically
+        * 
      */
-    public static WeaponInfo generate(ExtraTierInfo tierInfo, WeaponProfile profile, boolean ignoreAttributes) {
-      ElementSpread spread = tierInfo.spread();
+    public static WeaponInfo generate(MaterialInfo material, WeaponAssembly assembly, boolean ignoreAttributes) {
+      assembly = assembly.withMaterialWoodenHandle(material);
+      ElementSpread spread = material.spread();
       Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
-      for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : profile.getAttackTypes().entrySet()) {
-        double lethality = entry.getKey().tierStatFunction().lethality(profile, tierInfo);
-        double precision = entry.getKey().tierStatFunction().precision(profile, tierInfo);
-        double critFailChance = entry.getKey().tierStatFunction().criticalFail(profile, tierInfo);
-        double attackSpeed = entry.getKey().tierStatFunction().attackSpeed(profile, tierInfo);
+      for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : assembly.getAttackTypes().entrySet()) {
+        double lethality = entry.getKey().tierStatFunction().lethality(assembly);
+        double precision = entry.getKey().tierStatFunction().precision(assembly);
+        double critFailChance = entry.getKey().tierStatFunction().criticalFail(assembly);
+        double attackSpeed = entry.getKey().tierStatFunction().attackSpeed(assembly);
         retMap.put(entry.getKey(), new AttackTypeInfo(
                 Util.round(lethality*entry.getValue().lethalityModifier(), 2),
                 Util.round(precision*entry.getValue().precisionModifier(), 2),
                 entry.getValue().minReach(),
                 entry.getValue().maxReach(),
                 Util.round(attackSpeed*entry.getValue().attackSpeedModifier(), 3),
-                0,
+            Util.round(entry.getValue().damageBonus(), 3),
                 Util.round(critFailChance*entry.getValue().critFailModifier(), 3),
                 entry.getValue().reticleShapes()));
       }
@@ -92,8 +93,8 @@ public class WeaponInfo {
     /*
         * Construct a new WeaponInfo with a given item by guessing weapon info based on only name, these items should be looked at manually
      */
-    public static WeaponInfo generate(WeaponProfile info, boolean ignoreAttributes) {
-        return generate(ExtraTierInfo.getDefault(), info, ignoreAttributes);
+    public static WeaponInfo generate(WeaponAssembly info, boolean ignoreAttributes) {
+        return generate(MaterialInfo.getDefault(), info, ignoreAttributes);
     }
 
     public Map<AttackType, AttackTypeInfo> getAttackTypes() {

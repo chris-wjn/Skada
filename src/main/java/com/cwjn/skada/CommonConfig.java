@@ -40,8 +40,8 @@ public class CommonConfig {
         BUILDER.push("Critical Fail Settings");
         ENABLE_CRITICAL_FAIL = BUILDER.comment("Enable critical fail mechanic")
                 .define("enableCriticalFail", true);
-        CRITICAL_FAIL_DURABILITY_LOSS = BUILDER.comment("The durability loss from a critical fail if it is enabled. The item loses this percentage of it's durability on critical fail.")
-                .defineInRange("criticalFailDurabilityLoss", 0.5, 0.0, 1.0);
+        CRITICAL_FAIL_DURABILITY_LOSS = BUILDER.comment("The durability loss for the deformation tier of a critical fail. Edge damage uses a small fixed loss and catastrophic failure breaks the item.")
+                .defineInRange("criticalFailDurabilityLoss", 0.15, 0.0, 1.0);
         BUILDER.pop();
 
         ENABLE_LETHALITY = BUILDER.comment("Enable lethality damage modifier")

@@ -245,7 +245,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
                 break;
             case PRECISION:
                 retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.precision",
-                        df.format(attackTypeInfo.precision()*100))));
+                    df.format(Util.precisionScoreToDisplayPercent(attackTypeInfo.precision())))));
                 break;
             case VELOCITY_CROSSBOW:
                 retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",

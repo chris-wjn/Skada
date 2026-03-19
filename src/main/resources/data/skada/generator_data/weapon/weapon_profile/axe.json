@@ -1,41 +1,68 @@
 {
-  "_comment": "Vanilla axe profile using JSON geometry approximation",
-  "handle": {
-    "length": 50.0,
-    "radius": 1.5
-  },
-  "weapon_heads": [
+  "_comment": "Vanilla Minecraft axe weapon assembly",
+  "parts": [
     {
-      "position_on_handle": 45.0,
-      "orientation": "PERPENDICULAR",
-      "head": {
-        "typeKey": "axe",
-        "eyeLength": 3.0,
-        "eyeHeight": 6.0,
-        "cheekLength": 10.0,
-        "cheekHeight": 6.0,
-        "beardHeight": 2.0,
-        "beardTipDistance": 8.0,
-        "toeHeight": 2.0,
-        "toeTipDistance": 8.0,
-        "eyeThickness": 4.0,
-        "eyeHoleSemiMajorAxis": 1.5,
-        "eyeHoleSemiMinorAxis": 1.0,
-        "primaryBevel": {
-          "percentageOfBladeWidth": 0.33,
-          "curveFactor": 1.3
+      "part": "vanilla_tool_handle",
+      "position": { "x": 0.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "part": {
+        "type": "axe",
+        "transform": {
+          "x": { "axis": "y", "sign": 1 },
+          "y": { "axis": "x", "sign": -1 },
+          "z": { "axis": "z", "sign": 1 }
         },
-        "edgeBevel": {
-          "angle": 22.5,
-          "shoulderAngle": 180.0,
-          "edgeRadius": 5.0
+        "axe": {
+          "version": 1,
+          "eye": {
+            "xOffset": -1.4,
+            "length": 6.0,
+            "height": 6.0,
+            "thickness": 4,
+            "bore": {
+              "width": 3.0,
+              "thickness": 3.0,
+              "shape": "circle"
+            }
+          },
+          "edge": {
+            "length": 9,
+            "core": {
+              "height": 6.0,
+              "crossSection": {
+                "length": 9,
+                "thickness": 4,
+                "curve": 1.35
+              }
+            },
+            "top": {
+              "height": 5.0,
+              "tipX": 6,
+              "crossSection": {
+                "length": 9,
+                "thickness": 4,
+                "curve": 1.2
+              }
+            },
+            "bottom": {
+              "height": 5.0,
+              "tipX": 6,
+              "crossSection": {
+                "length": 9,
+                "thickness": 4,
+                "curve": 1.2
+              }
+            }
+          }
         }
-      }
+      },
+      "position": { "x": 65, "y": 0.0, "z": 0.0 }
     }
   ],
   "attack_types": {
     "skada:slash": {
-      "minReach": 0.25,
+      "minReach": 0.35,
       "maxReach": 2.0
     }
   }

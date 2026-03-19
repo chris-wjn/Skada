@@ -83,9 +83,9 @@ public abstract class CrossbowItemUseSkada {
                     info.getAttackTypes().get(
                             info.getAttackTypes().keySet().toArray(AttackType[]::new)[thisCrossbow.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
                     );
-            float inaccuracy = (float) (15 * (1 - attackInfo.precision()));
+                float inaccuracy = (float) Util.precisionScoreToProjectileInaccuracy(attackInfo.precision());
             float defaultVelocity = getShootingPower(thisCrossbow);
-            float velocity = (float) (1 * (defaultVelocity + attackInfo.damageBonus()));
+            float velocity = (float) Util.projectileVelocityWithDamageBonus(defaultVelocity, attackInfo.damageBonus());
             instance.shoot(pX, pY, pZ, velocity, inaccuracy);
         }
         else {
