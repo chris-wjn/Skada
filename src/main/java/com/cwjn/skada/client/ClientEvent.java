@@ -33,6 +33,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.Slot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.*;
@@ -59,6 +60,7 @@ public class ClientEvent {
             e.register(ArmourTooltipComponent.class, t -> new ClientArmourTooltipComponent(t.item));
         }
 
+        @SuppressWarnings("null")
         @SubscribeEvent
         public static void registerParticleFactories(final RegisterParticleProvidersEvent e) {
             e.registerSpriteSet(Particles.NUMBER_PARTICLE.get(), NumberParticle.Provider::new);
@@ -69,6 +71,7 @@ public class ClientEvent {
     @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeBusEvent {
 
+        @SuppressWarnings("null")
         @SubscribeEvent
         public static void onTooltipRender(RenderTooltipEvent.GatherComponents e) {
             //Only add to items that we consider weapons or armour
@@ -80,6 +83,7 @@ public class ClientEvent {
             }
         }
 
+        @SuppressWarnings("null")
         @SubscribeEvent
         public static void onTooltipEvent(ItemTooltipEvent e) {
             //if the item has modifiers but isn't a weapon or armour, use the Vanilla tooltip method in Util to add default modifier tooltip lines
@@ -88,6 +92,7 @@ public class ClientEvent {
             }
         }
 
+        @SuppressWarnings("null")
         private static int getHideFlags(ItemStack i) {
             return i.hasTag() && i.getTag().contains("HideFlags", 99) ? i.getTag().getInt("HideFlags") : i.getItem().getDefaultTooltipHideFlags(i);
         }
@@ -96,41 +101,48 @@ public class ClientEvent {
             return (pHideFlags & pPart.getMask()) == 0;
         }
 
+        @SuppressWarnings("null")
+        private static boolean canCycleAttackType(ItemStack stack) {
+            return stack.hasTag() && stack.getTag().contains(CURRENT_ATTACK_TYPE_TAG_KEY) && stack.getTag().contains(NUM_ATTACK_TYPES_TAG_KEY);
+        }
+
+        private static int getNextAttackTypeIndex(ItemStack stack) {
+            @SuppressWarnings("null")
+            int currentAttackType = stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
+            @SuppressWarnings("null")
+            int maxAttackTypes = stack.getTag().getInt(NUM_ATTACK_TYPES_TAG_KEY);
+            return currentAttackType + 1 == maxAttackTypes ? 0 : currentAttackType + 1;
+        }
+
+        @SuppressWarnings("null")
         @SubscribeEvent
         public static void listenForAttackTypeCycle(InputEvent.Key e) {
             if (Minecraft.getInstance().player == null) return;
             if (Minecraft.getInstance().player.getAttackStrengthScale(0.5f) <= 0.9) return;
             if (e.getKey() == Keybinds.cycleAttackType.getKey().getValue() && e.getAction() == GLFW.GLFW_PRESS) {
                 if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen && screen.getSlotUnderMouse() != null) {
-                    if (screen instanceof CreativeModeInventoryScreen) return;
-                    ItemStack i = screen.getSlotUnderMouse().getItem();
-                    if (i.hasTag() && i.getTag().contains(CURRENT_ATTACK_TYPE_TAG_KEY)) {
-                        int currentAttackType = i.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
-                        int maxAttackTypes = i.getTag().getInt(NUM_ATTACK_TYPES_TAG_KEY);
-                        //need to +1 because currentAttackType is an index and maxAttackTypes is a area
-                        if (currentAttackType + 1 == maxAttackTypes) {
-                            i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, 0);
-                            SkadaNetwork.playerToServer(new C2SUpdateAttackIndexFromMenu(0, screen.getMenu().containerId, screen.getSlotUnderMouse().index));
-                        } else {
-                            i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, currentAttackType + 1);
-                            SkadaNetwork.playerToServer(new C2SUpdateAttackIndexFromMenu(currentAttackType + 1, screen.getMenu().containerId, screen.getSlotUnderMouse().index));
-                        }
+                    Slot hoveredSlot = screen.getSlotUnderMouse();
+                    ItemStack i = hoveredSlot.getItem();
+                    if (!canCycleAttackType(i)) return;
+
+                    int nextAttackType = getNextAttackTypeIndex(i);
+                    if (screen instanceof CreativeModeInventoryScreen) {
+                        i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, nextAttackType);
+                        Minecraft.getInstance().gameMode.handleCreativeModeItemAdd(i.copy(), hoveredSlot.index);
+                    }
+                    else {
+                        i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, nextAttackType);
+                        SkadaNetwork.playerToServer(new C2SUpdateAttackIndexFromMenu(nextAttackType, screen.getMenu().containerId, hoveredSlot.index));
                     }
                 }
                 else {
+                    @SuppressWarnings("null")
                     ItemStack i = Minecraft.getInstance().player.getMainHandItem();
-                    if (i.hasTag() && i.getTag().contains(CURRENT_ATTACK_TYPE_TAG_KEY)) {
-                        int currentAttackType = i.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
-                        int maxAttackTypes = i.getTag().getInt(NUM_ATTACK_TYPES_TAG_KEY);
-                        //need to +1 because currentAttackType is an index and maxAttackTypes is a area
-                        if (currentAttackType + 1 == maxAttackTypes) {
-                            i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, 0);
-                            SkadaNetwork.playerToServer(new C2SUpdateAttackIndex(0));
-                        } else {
-                            i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, currentAttackType + 1);
-                            SkadaNetwork.playerToServer(new C2SUpdateAttackIndex(currentAttackType + 1));
-                        }
-                    }
+                    if (!canCycleAttackType(i)) return;
+
+                    int nextAttackType = getNextAttackTypeIndex(i);
+                    i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, nextAttackType);
+                    SkadaNetwork.playerToServer(new C2SUpdateAttackIndex(nextAttackType));
                 }
             }
         }
@@ -156,9 +168,11 @@ public class ClientEvent {
         /*
             The visual side of custom reticles. Only draws shape to screen, does not handle ray tracing.
          */
+        @SuppressWarnings("null")
         @SubscribeEvent
         public static void renderCustomReticles(RenderGuiOverlayEvent event) {
             if (!ClientConfig.ENABLE_CUSTOM_RETICLES.get()) return;
+            @SuppressWarnings("null")
             ItemStack i = Minecraft.getInstance().player.getMainHandItem();
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder buffer = tesselator.getBuilder();
@@ -231,6 +245,7 @@ public class ClientEvent {
                 if (ClientConfig.HEALTHBAR_ONLY_ON_DAMAGE.get()) {
                     if (displayHealthbarTicksForMob.containsKey(entity)) {
                         int unpackedLight = Math.max(LightTexture.sky(event.getPackedLight()) - ClientHandler.skyDarken, LightTexture.block(event.getPackedLight()));
+                        @SuppressWarnings("null")
                         float distance = entity.distanceTo(Minecraft.getInstance().player) - unpackedLight + 15;
                         float minAlpha = distance < 30 * 0.5 ? 1 : (1 - (distance / 30));
                         float alpha = (float) Math.min(minAlpha, ((float) displayHealthbarTicksForMob.get(entity) / (ClientConfig.HEALTHBAR_ON_DAMAGE_DISPLAY_TIME.get() * 0.5)));
@@ -239,6 +254,7 @@ public class ClientEvent {
                 }
                 else {
                     int unpackedLight = Math.max(LightTexture.sky(event.getPackedLight()) - ClientHandler.skyDarken, LightTexture.block(event.getPackedLight()));
+                    @SuppressWarnings("null")
                     float distance = entity.distanceTo(Minecraft.getInstance().player) - unpackedLight + 15;
                     float alpha = distance < 30*0.5 ? 1 : (1 - (distance/30));
                     MobHealthBar.prepare(entity, alpha);

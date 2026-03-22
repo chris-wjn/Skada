@@ -111,10 +111,16 @@ public class CommonEvent {
                         );
                 if (attackInfo.maxReach() - 3.0 != 0) e.addModifier(ForgeMod.ENTITY_REACH.get(),
                         new AttributeModifier(SKADA_ATTACK_TYPE_REACH_UUID, "attack_type_reach_mod", attackInfo.maxReach() - 3.0, AttributeModifier.Operation.ADDITION));
-                if (attackInfo.attackSpeedMod() - 1 != 0) e.addModifier(Attributes.ATTACK_SPEED,
-                        new AttributeModifier(SKADA_ATTACK_TYPE_SPEED_UUID, "attack_type_speed_mod", attackInfo.attackSpeedMod() - 1, AttributeModifier.Operation.MULTIPLY_TOTAL));
-                if (attackInfo.damageBonus() != 0) e.addModifier(Attributes.ATTACK_DAMAGE,
-                        new AttributeModifier(SKADA_ATTACK_TYPE_DAMAGE_UUID, "attack_type_damage_mod", attackInfo.damageBonus(), AttributeModifier.Operation.ADDITION));
+                if (attackInfo.attackSpeed() > 0) {
+                    e.removeAttribute(Attributes.ATTACK_SPEED);
+                    e.addModifier(Attributes.ATTACK_SPEED,
+                        new AttributeModifier(BASE_ATTACK_SPEED_UUID, "attack_type_speed", attackInfo.attackSpeed() - Attributes.ATTACK_SPEED.getDefaultValue(), AttributeModifier.Operation.ADDITION));
+                }
+                if (attackInfo.damage() != 0) {
+                    e.removeAttribute(Attributes.ATTACK_DAMAGE);
+                    e.addModifier(Attributes.ATTACK_DAMAGE,
+                        new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "attack_type_damage_mod", attackInfo.damage(), AttributeModifier.Operation.ADDITION));
+                }
             }
             if (stack.getTagElement(ARMOUR_INFO_TAG_KEY) != null) {
                 ArmourInfo info = ArmourInfo.fromCompoundTag(stack.getTagElement(ARMOUR_INFO_TAG_KEY));

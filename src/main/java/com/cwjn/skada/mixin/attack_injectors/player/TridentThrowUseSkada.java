@@ -35,7 +35,7 @@ public class TridentThrowUseSkada {
                         WeaponInfo info = WeaponInfo.fromCompoundTag(pStack.getTagElement(WEAPON_INFO_TAG_KEY));
                         AttackType attackType = info.getAttackTypes().keySet().toArray(AttackType[]::new)[pStack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)];
                         AttackTypeInfo attackInfo = info.getAttackTypes().get(attackType);
-                        float adjustedVelocity = (float) Util.tridentProjectileVelocity(velocity, attackInfo.damageBonus());
+                        float adjustedVelocity = (float) Util.tridentProjectileVelocity(velocity, attackInfo.damage());
                         float adjustedInaccuracy = (float) Util.precisionScoreToProjectileInaccuracy(attackInfo.precision());
                         thrownTrident.shootFromRotation(shooter, xRot, yRot, zRot, adjustedVelocity, adjustedInaccuracy);
                         return;

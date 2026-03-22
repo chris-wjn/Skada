@@ -175,6 +175,17 @@ class GenerationBalanceTuningTest {
   }
 
   @Test
+  void rearUnderweightingImprovesAttackSpeedRelativeToForwardOvercommitment() {
+    double idealBalance = AttackSpeedGenerationUtil.baseAttackSpeedDelta(0.32, 0.0, 0.35);
+    double rearUnderweighted = AttackSpeedGenerationUtil.baseAttackSpeedDelta(0.24, 0.0, 0.35);
+    double forwardOvercommitted = AttackSpeedGenerationUtil.baseAttackSpeedDelta(0.40, 0.08, 0.35);
+
+    assertTrue(idealBalance > rearUnderweighted);
+    assertTrue(rearUnderweighted > forwardOvercommitted);
+    assertTrue(forwardOvercommitted < idealBalance);
+  }
+
+  @Test
   void thrustAlignmentEfficiencyPenalizesRotationalToolPoints() {
     ThrustCapable pickLike = new ThrustCapable() {
       @Override
