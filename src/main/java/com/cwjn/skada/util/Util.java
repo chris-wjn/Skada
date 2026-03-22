@@ -753,10 +753,6 @@ public abstract class Util {
     return PROJECTILE_INACCURACY_MAX * (1.0 - precisionScoreToConsistency(rawPrecision));
   }
 
-  public static double precisionScoreToDisplayPercent(double rawPrecision) {
-    return precisionScoreToConsistency(rawPrecision) * 100.0;
-  }
-
   public static double projectileVelocityWithDamageBonus(double baseVelocity, double damageBonus) {
     return Math.max(0.0, baseVelocity + damageBonus);
   }
@@ -1170,7 +1166,7 @@ public abstract class Util {
    * @param rawPartJson raw json read from a part resource file
    * @return a deep-copied json object containing the direct part definition
    */
-  static JsonObject normalizeWeaponPartDefinitionJson(JsonObject rawPartJson) {
+  public static JsonObject normalizeWeaponPartDefinitionJson(JsonObject rawPartJson) {
     JsonElement wrappedPart = rawPartJson.get("part");
     if (wrappedPart != null && wrappedPart.isJsonObject()) {
       return wrappedPart.getAsJsonObject().deepCopy();
@@ -1192,7 +1188,7 @@ public abstract class Util {
    * @return a deep-copied assembly json object with references resolved inline
    * @throws IllegalArgumentException if a part reference is invalid or missing
    */
-  static JsonObject resolveWeaponAssemblyPartReferences(JsonObject rawAssemblyJson, String assemblyNamespace,
+  public static JsonObject resolveWeaponAssemblyPartReferences(JsonObject rawAssemblyJson, String assemblyNamespace,
       Map<String, JsonObject> partJsonMap) {
     JsonObject resolvedAssemblyJson = rawAssemblyJson.deepCopy();
     JsonArray parts = resolvedAssemblyJson.getAsJsonArray("parts");

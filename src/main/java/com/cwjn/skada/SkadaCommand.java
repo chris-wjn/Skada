@@ -37,6 +37,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -270,33 +271,32 @@ public class SkadaCommand {
           String path = Util.getItemPath(item);
           WeaponInfo info = null;
           WeaponAssembly profile = profileMap.get(Util.findClosestMatch(profileMap.keySet().stream().toList(), path));
+          double attackSpeed = getAttackSpeedForItem(item);
+          double damageModifier = getDamageModifierForItem(item);
           if (item instanceof TieredItem tItem) {
             String matName = tItem.getTier().toString().toLowerCase();
-            if (CommonConfig.SQUEEZE_DAMAGE_VALUES.get()) { //this is to make sure items don't have wildly different damage values just because of material differences
-              double damageModifier = getDamageModifierForItem(item, tItem.getTier());
-            }
             //first we'll check the item's namespace for tiers, then any namespace
             for (String s : tierMap.keySet().stream().filter(s -> s.startsWith(namespace)).toList()) {
               if (s.equals(namespace + "." + matName)) {
-                info = WeaponInfo.generate(tierMap.get(s), profile, ignoreAttributes);
+                info = WeaponInfo.generate(tierMap.get(s), profile, ignoreAttributes, attackSpeed, damageModifier);
                 break;
               }
             }
             if (info == null) { //this checks if we didn't find a match in the previous loop
               for (String s : tierMap.keySet()) {
                 if (s.contains(matName)) {
-                  info = WeaponInfo.generate(tierMap.get(s), profile, ignoreAttributes);
+                  info = WeaponInfo.generate(tierMap.get(s), profile, ignoreAttributes, attackSpeed, damageModifier);
                   break;
                 }
               }
               if (info == null) {
                 LOGGER.error("No tier info found for {}. Generating on name only.", path);
-                info = WeaponInfo.generate(profile, ignoreAttributes);
+                info = WeaponInfo.generate(profile, ignoreAttributes, attackSpeed, damageModifier);
               }
             }
           } else {
             LOGGER.error("No tier info found for {}. Generating on name only.", path);
-            info = WeaponInfo.generate(profile, ignoreAttributes);
+            info = WeaponInfo.generate(profile, ignoreAttributes, attackSpeed, damageModifier);
           }
           map.put(path, info);
         }
@@ -361,6 +361,8 @@ public class SkadaCommand {
 
     boolean ignoreAttributes = item instanceof ProjectileWeaponItem;
     WeaponAssembly profile = profileMap.get(Util.findClosestMatch(profileMap.keySet().stream().toList(), path));
+    double attackSpeed = getAttackSpeedForItem(item);
+    double damageModifier = getDamageModifierForItem(item);
     if (profile == null) {
       player.displayClientMessage(Component.literal("No weapon profile found for: " + itemId), false);
       return 0;
@@ -372,25 +374,25 @@ public class SkadaCommand {
       info = null;
       for (String s : tierMap.keySet().stream().filter(s -> s.startsWith(namespace)).toList()) {
         if (s.equals(namespace + "." + matName)) {
-          info = WeaponInfo.generate(tierMap.get(s), profile, ignoreAttributes);
+          info = WeaponInfo.generate(tierMap.get(s), profile, ignoreAttributes, attackSpeed, damageModifier);
           break;
         }
       }
       if (info == null) {
         for (String s : tierMap.keySet()) {
           if (s.contains(matName)) {
-            info = WeaponInfo.generate(tierMap.get(s), profile, ignoreAttributes);
+            info = WeaponInfo.generate(tierMap.get(s), profile, ignoreAttributes, attackSpeed, damageModifier);
             break;
           }
         }
         if (info == null) {
           LOGGER.error("No tier info found for {}. Generating on name only.", path);
-          info = WeaponInfo.generate(profile, ignoreAttributes);
+          info = WeaponInfo.generate(profile, ignoreAttributes, attackSpeed, damageModifier);
         }
       }
     } else {
       LOGGER.error("No tier info found for {}. Generating on name only.", path);
-      info = WeaponInfo.generate(profile, ignoreAttributes);
+      info = WeaponInfo.generate(profile, ignoreAttributes, attackSpeed, damageModifier);
     }
 
     map.put(path, info);
@@ -406,8 +408,20 @@ public class SkadaCommand {
     return 1;
   }
 
-  private double getDamageModifierForItem(Item item, Tier tier) {
-    return 0;
+  private double getDamageModifierForItem(Item item) {
+    return item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).stream()
+            .filter(modifier -> modifier.getId().equals(SkadaData.BASE_ATTACK_DAMAGE_UUID))
+            .mapToDouble(AttributeModifier::getAmount)
+            .findFirst()
+            .orElse(0.0);
+  }
+
+  private double getAttackSpeedForItem(Item item) {
+    return Attributes.ATTACK_SPEED.getDefaultValue() + item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_SPEED).stream()
+            .filter(modifier -> modifier.getId().equals(SkadaData.BASE_ATTACK_SPEED_UUID))
+            .mapToDouble(AttributeModifier::getAmount)
+            .findFirst()
+            .orElse(0.0);
   }
 
   private int generateArmourInfoForNamespace(@NotNull CommandSourceStack source, String namespace) {

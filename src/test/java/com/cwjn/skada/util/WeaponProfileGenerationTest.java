@@ -160,8 +160,9 @@ class WeaponProfileGenerationTest {
   }
 
   @Test
-  void generatedWeaponInfoCarriesOptionalDamageBonusFromAttackJson() throws IOException {
+  void generatedWeaponInfoCarriesDamageFromAttackJson() throws IOException {
     WeaponAssembly sword = loadAssembly("sword");
+    double swordBaseAttackSpeed = 1.6;
     Map<AttackType, AttackTypeJsonInfo> updatedAttackTypes = new LinkedHashMap<>(sword.getAttackTypes());
     AttackTypeJsonInfo slashInfo = updatedAttackTypes.entrySet().stream()
       .filter(entry -> "slash".equals(entry.getKey().name()))
@@ -175,29 +176,44 @@ class WeaponProfileGenerationTest {
     updatedAttackTypes.put(slashType, new AttackTypeJsonInfo(
       slashInfo.minReach(),
       slashInfo.maxReach(),
-      slashInfo.attackSpeedModifier(),
+      slashInfo.attackSpeed(),
       slashInfo.lethalityModifier(),
       slashInfo.precisionModifier(),
       0.35,
       slashInfo.critFailModifier(),
       slashInfo.reticleShapes()));
 
-    WeaponInfo info = WeaponInfo.generate(MaterialInfo.getDefault(), new WeaponAssembly(sword.parts(), updatedAttackTypes), false);
+    WeaponInfo info = WeaponInfo.generate(MaterialInfo.getDefault(), new WeaponAssembly(sword.parts(), updatedAttackTypes), false, swordBaseAttackSpeed, 6.0);
     AttackTypeInfo generatedSlash = info.getAttackTypes().get(slashType);
 
-    assertEquals(0.35, generatedSlash.damageBonus(), 1.0e-9);
+    assertEquals(6.35, generatedSlash.damage(), 1.0e-9);
   }
 
   @Test
-  void stockTridentProfileCanOptIntoDamageBonus() throws IOException {
-    WeaponInfo info = WeaponInfo.generate(loadAssembly("trident"), false);
+  void generatedWeaponInfoStoresGeneratedAttackSpeedAsExactAps() throws IOException {
+    WeaponAssembly sword = loadAssembly("sword");
+    double swordBaseAttackSpeed = 1.6;
+    AttackType slashType = sword.getAttackTypes().keySet().stream()
+      .filter(type -> "slash".equals(type.name()))
+      .findFirst()
+      .orElseThrow();
+
+    WeaponInfo info = WeaponInfo.generate(MaterialInfo.getDefault(), sword, false, swordBaseAttackSpeed, 0.0);
+    AttackTypeInfo generatedSlash = info.getAttackTypes().get(slashType);
+
+    assertEquals(swordBaseAttackSpeed + AttackSpeedGenerationUtil.slash(sword), generatedSlash.attackSpeed(), 1.0e-9);
+  }
+
+  @Test
+  void stockTridentProfileCanOptIntoDamage() throws IOException {
+    WeaponInfo info = WeaponInfo.generate(loadAssembly("trident"), false, 1.1, 8.0);
     AttackTypeInfo generatedThrust = info.getAttackTypes().entrySet().stream()
       .filter(entry -> "thrust".equals(entry.getKey().name()))
       .map(Map.Entry::getValue)
       .findFirst()
       .orElseThrow();
 
-    assertEquals(0.2, generatedThrust.damageBonus(), 1.0e-9);
+    assertEquals(8.2, generatedThrust.damage(), 1.0e-9);
   }
 
   private static WeaponAssembly loadAssembly(String name) throws IOException {

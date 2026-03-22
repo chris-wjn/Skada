@@ -15,6 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -68,33 +69,53 @@ public class WeaponInfo {
         * This is for weapons that are generated from json. The WeaponAssembly will be automatically
         * 
      */
-    public static WeaponInfo generate(MaterialInfo material, WeaponAssembly assembly, boolean ignoreAttributes) {
+        public static WeaponInfo generate(MaterialInfo material, WeaponAssembly assembly, boolean ignoreAttributes) {
+            return generate(material, assembly, ignoreAttributes, Attributes.ATTACK_SPEED.getDefaultValue(), 0.0);
+        }
+
+        public static WeaponInfo generate(MaterialInfo material, WeaponAssembly assembly, boolean ignoreAttributes, double damageModifier) {
+            return generate(material, assembly, ignoreAttributes, Attributes.ATTACK_SPEED.getDefaultValue(), damageModifier);
+        }
+
+        public static WeaponInfo generate(MaterialInfo material, WeaponAssembly assembly, boolean ignoreAttributes, double baseAttackSpeed, double damageModifier) {
       assembly = assembly.withMaterialWoodenHandle(material);
       ElementSpread spread = material.spread();
       Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
       for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : assembly.getAttackTypes().entrySet()) {
-        double lethality = entry.getKey().tierStatFunction().lethality(assembly);
-        double precision = entry.getKey().tierStatFunction().precision(assembly);
-        double critFailChance = entry.getKey().tierStatFunction().criticalFail(assembly);
-        double attackSpeed = entry.getKey().tierStatFunction().attackSpeed(assembly);
-        retMap.put(entry.getKey(), new AttackTypeInfo(
-                Util.round(lethality*entry.getValue().lethalityModifier(), 2),
-                Util.round(precision*entry.getValue().precisionModifier(), 2),
+        var generatedStats = entry.getKey().tierStatFunction().generateAll(assembly, entry.getKey());
+        retMap.put(entry.getKey(), AttackTypeInfo.of(
+            Util.round(generatedStats.lethality()*entry.getValue().lethalityModifier(), 2),
+            Util.round(generatedStats.precision()*entry.getValue().precisionModifier(), 2),
                 entry.getValue().minReach(),
                 entry.getValue().maxReach(),
-                Util.round(attackSpeed*entry.getValue().attackSpeedModifier(), 3),
-            Util.round(entry.getValue().damageBonus(), 3),
-                Util.round(critFailChance*entry.getValue().critFailModifier(), 3),
-                entry.getValue().reticleShapes()));
+                        resolveAttackSpeed(baseAttackSpeed, generatedStats.attackSpeed(), entry.getValue().attackSpeed()),
+                        Util.round(damageModifier + entry.getValue().damage(), 3),
+                        Util.round(generatedStats.criticalFail()*entry.getValue().critFailModifier(), 3),
+                        entry.getValue().reticleShapes()));
       }
       return new WeaponInfo(retMap, spread, ignoreAttributes);
+    }
+
+    private static double resolveAttackSpeed(double baseAttackSpeed, double generatedAttackSpeedAdjustment, double configuredAttackSpeed) {
+        if (configuredAttackSpeed > 0.0) {
+            return Util.round(configuredAttackSpeed, 3);
+        }
+        return Util.round(baseAttackSpeed + generatedAttackSpeedAdjustment, 3);
     }
 
     /*
         * Construct a new WeaponInfo with a given item by guessing weapon info based on only name, these items should be looked at manually
      */
     public static WeaponInfo generate(WeaponAssembly info, boolean ignoreAttributes) {
-        return generate(MaterialInfo.getDefault(), info, ignoreAttributes);
+        return generate(MaterialInfo.getDefault(), info, ignoreAttributes, Attributes.ATTACK_SPEED.getDefaultValue(), 0.0);
+    }
+
+    public static WeaponInfo generate(WeaponAssembly info, boolean ignoreAttributes, double damageModifier) {
+        return generate(MaterialInfo.getDefault(), info, ignoreAttributes, Attributes.ATTACK_SPEED.getDefaultValue(), damageModifier);
+    }
+
+    public static WeaponInfo generate(WeaponAssembly info, boolean ignoreAttributes, double baseAttackSpeed, double damageModifier) {
+        return generate(MaterialInfo.getDefault(), info, ignoreAttributes, baseAttackSpeed, damageModifier);
     }
 
     public Map<AttackType, AttackTypeInfo> getAttackTypes() {

@@ -49,7 +49,7 @@
   "skada.tooltip.info.aim": "§iAim:§r §e%s",
   "skada.tooltip.info.reach": "§iReach:§r §e%sm§r - §e%sm",
   "skada.tooltip.info.lethality": "§iLethality:§r §e%s",
-  "skada.tooltip.info.precision": "§iPrecision:§r §e%s%%",
+  "skada.tooltip.info.precision": "§iPrecision:§r §e%s",
   "skada.tooltip.info.velocity": "§iVelocity:§r §e%sm/s",
   "skada.tooltip.info.critical_fail": "§iCrit. Fail:§r §e%s%%",
   "skada.tooltip.info.attack_speed": "§iAtk. Speed:§r §e%s",

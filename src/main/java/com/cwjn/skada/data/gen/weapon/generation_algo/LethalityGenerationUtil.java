@@ -2,24 +2,22 @@ package com.cwjn.skada.data.gen.weapon.generation_algo;
 
 import com.cwjn.skada.Skada;
 import com.cwjn.skada.data.SkadaData;
-import com.cwjn.skada.data.gen.weapon.MaterialInfo;
 import com.cwjn.skada.data.gen.weapon.WeaponAssembly;
-import com.cwjn.skada.data.gen.weapon.attack_capability.SlashCapable;
-import com.cwjn.skada.data.gen.weapon.attack_capability.StrikeCapable;
-import com.cwjn.skada.data.gen.weapon.attack_capability.ThrustCapable;
-import com.cwjn.skada.data.gen.weapon.parts.WeaponPartEntry;
-import com.cwjn.skada.data.gen.weapon.util.PhysicsUtil;
-import com.cwjn.skada.data.gen.weapon.util.WeaponAxis;
-import com.cwjn.skada.data.registry.AttackType;
+import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackDeliverySnapshot;
+import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackGenerationContextFactory;
+import com.cwjn.skada.data.gen.weapon.generation_algo.context.AssemblyPhysicsSnapshot;
+import com.cwjn.skada.data.gen.weapon.generation_algo.context.MaterialResponseSnapshot;
+import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackGenerationContextSlash;
+import com.cwjn.skada.data.gen.weapon.generation_algo.context.ContactSnapshotSlash;
+import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackGenerationContextStrike;
+import com.cwjn.skada.data.gen.weapon.generation_algo.context.ContactSnapshotStrike;
+import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackGenerationContextThrust;
+import com.cwjn.skada.data.gen.weapon.generation_algo.context.ContactSnapshotThrust;
 
 import net.minecraft.util.Mth;
 import com.cwjn.skada.util.Util;
 
 public abstract class LethalityGenerationUtil {
-
-  private static final AttackType SLASH_CONTEXT = new AttackType("slash", null, null, null, SlashCapable.class);
-  private static final AttackType THRUST_CONTEXT = new AttackType("thrust", null, null, null, ThrustCapable.class);
-  private static final AttackType STRIKE_CONTEXT = new AttackType("strike", null, null, null, StrikeCapable.class);
 
   // Shared constants
   private static final double MIN_LETHALITY = 1.0;
@@ -111,41 +109,34 @@ public abstract class LethalityGenerationUtil {
    * - secondary: wedge thickness bonus gated by available angular momentum
    */
   public static double slash(WeaponAssembly weapon) {
-    WeaponPartEntry partEntry = weapon.primaryPartForAttackType(SLASH_CONTEXT).orElseThrow(() -> new IllegalStateException("Tried to generate slash lethality for weapon without slash capability"));
-    MaterialInfo material = partEntry.material();
-    SlashCapable slashCapable = (SlashCapable) partEntry.part();
+    return slash(AttackGenerationContextFactory.buildSlashContext(weapon));
+  }
 
-    double momentOfInertia = PhysicsUtil.toKgM2(weapon.momentOfInertiaAboutBase(WeaponAxis.Z, WeaponAssembly.LARGE_SAMPLE_SIZE));
+  public static double slash(AttackGenerationContextSlash context) {
+    AssemblyPhysicsSnapshot assembly = context.assembly();
+    ContactSnapshotSlash contact = context.contact();
+    AttackDeliverySnapshot delivery = context.delivery();
+    MaterialResponseSnapshot material = context.material();
+
+    double momentOfInertia = assembly.momentOfInertiaBaseZKgM2();
     double angularVelocity = Util.angularVelocity(momentOfInertia, SkadaData.PLAYER_STRENGTH);
     double angularMomentum = momentOfInertia * angularVelocity;
     double rotationalKineticEnergy = 0.5 * momentOfInertia * angularVelocity * angularVelocity;
     double baseLethality = slashBaseLethalityFromEnergy(rotationalKineticEnergy);
 
-    double cop = weapon.centreOfPercussion(WeaponAssembly.LARGE_SAMPLE_SIZE);
-    double wedgeThicknessCm = slashCapable.wedgeThicknessCmAt(cop);
-    double bevelAngle = slashCapable.edgeAngleDegreesAt(cop);
-
+    double wedgeThicknessCm = contact.wedgeThicknessCmAtCop();
+    double bevelAngle = contact.bevelAngleDegAtCop();
     double wedgePotential = SLASH_WEDGE_POTENTIAL_PER_CM * wedgeThicknessCm;
     double requiredMomentum = SLASH_REQUIRED_MOMENTUM_SCALE * wedgeThicknessCm * (1.0 + Math.tan(Math.toRadians(bevelAngle)));
     double driveRatio = angularMomentum / Math.max(NUMERIC_EPSILON, requiredMomentum);
     double wedgeDrive = Mth.clamp(driveRatio, 0.0, 1.0);
     double wedgeBonus = wedgePotential * wedgeDrive;
 
-    double normalizedHardness = MaterialInfo.normalizeMaterial(material.hardness());
-    double normalizedCenteredFlexibility = Math.abs(MaterialInfo.normalizeMaterial(material.flexibility()) - 0.5) * 2.0;
-    double materialFactor = 1.0 + SLASH_MATERIAL_HARDNESS_SCALE * normalizedHardness - SLASH_MATERIAL_FLEXIBILITY_SCALE * normalizedCenteredFlexibility;
-
-    double edgeRadiusNm = Math.max(NUMERIC_EPSILON, slashCapable.edgeRadiusNm());
-    double bevelAcuity = Mth.clamp(18.0 / Math.max(NUMERIC_EPSILON, bevelAngle), 0.35, 1.15);
-    double wedgeThinness = Mth.clamp(0.35 / Math.max(NUMERIC_EPSILON, wedgeThicknessCm), 0.45, 1.20);
-    double edgeAcuity = Mth.clamp(10.0 / edgeRadiusNm, 0.45, 1.25);
-    double specializationFactor = Mth.clamp(0.55 * bevelAcuity + 0.25 * wedgeThinness + 0.20 * edgeAcuity, 0.40, 1.25);
-
-    double strikePointNorm = weapon.normalizedStrikePointForAttackType(SLASH_CONTEXT, WeaponAssembly.LARGE_SAMPLE_SIZE);
-    double impactEfficiency = impactEfficiency(weapon, strikePointNorm);
-
-    double deliveryFactor = slashDeliveryFactor(weapon);
-    double realizedSpecialization = realizedLocalFactor(specializationFactor, deliveryFactor);
+    double materialFactor = material.slashMaterialFactor();
+    double strikePointNorm = delivery.strikePointNorm();
+    double impactEfficiency = delivery.impactEfficiency();
+    double deliveryFactor = slashDeliveryFactor(context);
+    double realizedSpecialization = realizedLocalFactor(contact.specializationPotential(), deliveryFactor);
     double lethality = (baseLethality + wedgeBonus * deliveryFactor) * impactEfficiency * materialFactor * realizedSpecialization * deliveryFactor;
     double finalLethality = Util.round(Mth.clamp(lethality, MIN_LETHALITY, MAX_LETHALITY), LETHALITY_ROUND_DECIMALS);
     
@@ -158,11 +149,16 @@ public abstract class LethalityGenerationUtil {
    * - secondary: wedge-thickness contribution gated by available linear momentum
    */
   public static double thrust(WeaponAssembly weapon) {
-    WeaponPartEntry thrustHead = weapon.primaryPartForAttackType(THRUST_CONTEXT).orElseThrow(() -> new IllegalStateException("Tried to generate thrust lethality for weapon without thrust capability"));
-    MaterialInfo material = thrustHead.material();
-    ThrustCapable thrustCapable = (ThrustCapable) thrustHead.part();
+    return thrust(AttackGenerationContextFactory.buildThrustContext(weapon));
+  }
 
-    double massKg = PhysicsUtil.toKg(weapon.mass(WeaponAssembly.LARGE_SAMPLE_SIZE));
+  public static double thrust(AttackGenerationContextThrust context) {
+    AssemblyPhysicsSnapshot assembly = context.assembly();
+    ContactSnapshotThrust contact = context.contact();
+    AttackDeliverySnapshot delivery = context.delivery();
+    MaterialResponseSnapshot material = context.material();
+
+    double massKg = com.cwjn.skada.data.gen.weapon.util.PhysicsUtil.toKg(assembly.massG());
 
     double strengthFactor = Math.sqrt(SkadaData.PLAYER_STRENGTH / THRUST_STRENGTH_REFERENCE);
     double massPenalty = Math.pow(Math.max(NUMERIC_EPSILON, massKg) / THRUST_REFERENCE_MASS_KG, THRUST_MASS_PENALTY_EXPONENT);
@@ -172,9 +168,9 @@ public abstract class LethalityGenerationUtil {
     double linearKineticEnergy = 0.5 * massKg * linearVelocity * linearVelocity;
     double baseLethality = thrustBaseLethalityFromEnergy(linearKineticEnergy);
 
-    double wedgeThicknessCm = thrustCapable.widthAtPointBase();
-    double tipLengthCm = thrustCapable.tipLengthCm();
-    double bevelAngle = Math.toDegrees(Math.atan((wedgeThicknessCm * 0.5) / tipLengthCm));
+    double wedgeThicknessCm = contact.wedgeThicknessCm();
+    double tipLengthCm = contact.tipLengthCm();
+    double bevelAngle = contact.bevelAngleDeg();
 
     double wedgePotential = THRUST_WEDGE_POTENTIAL_PER_CM * wedgeThicknessCm;
     double requiredMomentum = THRUST_REQUIRED_MOMENTUM_SCALE * wedgeThicknessCm * (1.0 + Math.tan(Math.toRadians(bevelAngle)));
@@ -182,38 +178,20 @@ public abstract class LethalityGenerationUtil {
     double wedgeDrive = Mth.clamp(driveRatio, 0.0, 1.0);
     double wedgeBonus = wedgePotential * wedgeDrive;
 
-    double taperFactor = THRUST_TAPER_BASE + THRUST_TAPER_SCALE * thrustCapable.pointTaper();
-    double thicknessAtPointBase = Math.max(NUMERIC_EPSILON, thrustCapable.thicknessAtPointBase());
-    double tipSectionMean = 0.5 * (wedgeThicknessCm + thicknessAtPointBase);
-    double needleFactor = Mth.clamp(0.90 / Math.max(NUMERIC_EPSILON, tipSectionMean), 0.35, 1.40);
-    double tipSlenderness = tipLengthCm / Math.max(wedgeThicknessCm, thicknessAtPointBase);
-    double slendernessFactor = Mth.clamp((tipSlenderness - 1.5) / 6.5, 0.30, 1.20);
-    double specializationFactor = Mth.clamp(0.55 * taperFactor + 0.25 * needleFactor + 0.20 * slendernessFactor, 0.35, 1.20);
-
-    double normalizedHardness = MaterialInfo.normalizeMaterial(material.hardness());
-    double normalizedToughness = MaterialInfo.normalizeMaterial(material.toughness());
-    double normalizedCenteredFlexibility = Math.abs(MaterialInfo.normalizeMaterial(material.flexibility()) - 0.5) * 2.0;
-    double materialFactor = 1.0 + THRUST_MATERIAL_HARDNESS_SCALE * normalizedHardness
-      + THRUST_MATERIAL_TOUGHNESS_SCALE * normalizedToughness
-      - THRUST_MATERIAL_FLEXIBILITY_SCALE * normalizedCenteredFlexibility;
-
-    boolean rotationalThrust = weapon.isThrustRotational(WeaponAssembly.LARGE_SAMPLE_SIZE);
-    double impactEfficiency = 1.0;
-    if (rotationalThrust) {
-      double strikePointNorm = weapon.normalizedStrikePointForAttackType(THRUST_CONTEXT, WeaponAssembly.LARGE_SAMPLE_SIZE);
-      impactEfficiency = impactEfficiency(weapon, strikePointNorm);
-    }
-    double deliveryFactor = thrustDeliveryFactor(weapon, rotationalThrust);
-    double realizedSpecialization = realizedLocalFactor(specializationFactor, deliveryFactor);
-    double penetrationFactor = thrustPenetrationFactor(thrustCapable.thrustPenetrationEfficiency());
+    double materialFactor = material.thrustMaterialFactor();
+    boolean rotationalThrust = delivery.rotationalThrust();
+    double impactEfficiency = rotationalThrust ? delivery.impactEfficiency() : 1.0;
+    double deliveryFactor = thrustDeliveryFactor(context);
+    double realizedSpecialization = realizedLocalFactor(contact.specializationPotential(), deliveryFactor);
+    double penetrationFactor = contact.penetrationEfficiency();
 
     double lethality = (baseLethality + wedgeBonus * deliveryFactor) * impactEfficiency * realizedSpecialization * penetrationFactor * materialFactor * deliveryFactor;
     double finalLethality = Util.round(Mth.clamp(lethality, MIN_LETHALITY, MAX_LETHALITY), LETHALITY_ROUND_DECIMALS);
     if (SkadaData.DEBUG_ENABLED) {
       Skada.LOGGER.debug("[GEN][Lethality][thrust] massKg={}, linVel={}, linMomentum={}, linKE={}, wedgeThicknessCm={}, thicknessAtPointBaseCm={}, tipLengthCm={}, bevelDeg={}, wedgePotential={}, requiredMomentum={}, driveRatio={}, wedgeDrive={}, wedgeBonus={}, taperFactor={}, needleFactor={}, tipSlenderness={}, slendernessFactor={}, rotationalThrust={}, impactEfficiency={}, deliveryFactor={}, realizedSpecialization={}, materialFactor={}, final={}",
-        massKg, linearVelocity, linearMomentum, linearKineticEnergy, wedgeThicknessCm, thicknessAtPointBase, tipLengthCm, bevelAngle,
-        wedgePotential, requiredMomentum, driveRatio, wedgeDrive, wedgeBonus, taperFactor, needleFactor,
-        tipSlenderness, slendernessFactor, rotationalThrust, impactEfficiency, deliveryFactor, realizedSpecialization,
+        massKg, linearVelocity, linearMomentum, linearKineticEnergy, wedgeThicknessCm, contact.thicknessAtPointBaseCm(), tipLengthCm, bevelAngle,
+        wedgePotential, requiredMomentum, driveRatio, wedgeDrive, wedgeBonus, contact.taperFactor(), contact.needleFactor(),
+        contact.tipSlenderness(), contact.slendernessFactor(), rotationalThrust, impactEfficiency, deliveryFactor, realizedSpecialization,
         materialFactor, finalLethality);
     }
     return finalLethality;
@@ -223,27 +201,25 @@ public abstract class LethalityGenerationUtil {
    * Strike lethality is based entirely on angular momentum.
    */
   public static double strike(WeaponAssembly weapon) {
-    WeaponPartEntry strikeHead = weapon.primaryPartForAttackType(STRIKE_CONTEXT).orElseThrow(() -> new IllegalStateException("Tried to generate strike lethality for weapon without strike capability"));
-    StrikeCapable strikeCapable = (StrikeCapable) strikeHead.part();
+    return strike(AttackGenerationContextFactory.buildStrikeContext(weapon));
+  }
 
-    double momentOfInertia = PhysicsUtil.toKgM2(weapon.momentOfInertiaAboutBase(WeaponAxis.Z, WeaponAssembly.LARGE_SAMPLE_SIZE));
+  public static double strike(AttackGenerationContextStrike context) {
+    AssemblyPhysicsSnapshot assembly = context.assembly();
+    ContactSnapshotStrike contact = context.contact();
+    AttackDeliverySnapshot delivery = context.delivery();
+
+    double momentOfInertia = assembly.momentOfInertiaBaseZKgM2();
     double angularVelocity = Util.angularVelocity(momentOfInertia, SkadaData.PLAYER_STRENGTH);
     double angularMomentum = Math.max(0.0, momentOfInertia * angularVelocity);
 
-    double strikePointNorm = weapon.normalizedStrikePointForAttackType(STRIKE_CONTEXT, WeaponAssembly.LARGE_SAMPLE_SIZE);
-    double impactEfficiency = impactEfficiency(weapon, strikePointNorm);
-    double deliveryFactor = strikeDeliveryFactor(weapon);
-    double localizationFactor = strikeLocalizationFactor(
-      strikeCapable.effectiveContactAreaCm2(),
-      strikeCapable.strikeFaceGeometryFocus());
-    double complianceFactor = strikeComplianceFactor(strikeCapable.strikeStructuralEfficiency());
-    double incidenceFactor = strikeIncidenceFactor(strikeCapable.strikeIncidenceEfficiency());
-    double strikeGeometryFactor = Mth.clamp(
-      STRIKE_GEOMETRY_FOCUS_WEIGHT * strikeCapable.strikeFaceGeometryFocus()
-        + STRIKE_GEOMETRY_RIGIDITY_WEIGHT * strikeCapable.strikeHeadRigidity()
-        + STRIKE_GEOMETRY_STABILITY_WEIGHT * strikeCapable.strikeAssemblyStability(),
-      LOCAL_FACTOR_MIN,
-      LOCAL_FACTOR_MAX);
+    double strikePointNorm = delivery.strikePointNorm();
+    double impactEfficiency = delivery.impactEfficiency();
+    double deliveryFactor = strikeDeliveryFactor(context);
+    double localizationFactor = contact.localizationFactor();
+    double complianceFactor = strikeComplianceFactor(contact.strikeStructuralEfficiency());
+    double incidenceFactor = strikeIncidenceFactor(contact.strikeIncidenceEfficiency());
+    double strikeGeometryFactor = contact.strikeGeometryFactor();
     double realizedStrikeGeometry = realizedLocalFactor(strikeGeometryFactor, deliveryFactor);
     double lethality = strikeLethalityFromMomentum(angularMomentum, impactEfficiency) * deliveryFactor * localizationFactor * complianceFactor * incidenceFactor * realizedStrikeGeometry;
     double finalLethality = Util.round(Mth.clamp(lethality, MIN_LETHALITY, MAX_LETHALITY), LETHALITY_ROUND_DECIMALS);
@@ -297,35 +273,28 @@ public abstract class LethalityGenerationUtil {
     return Mth.clamp(strikeIncidenceEfficiency, STRIKE_INCIDENCE_FACTOR_MIN, STRIKE_INCIDENCE_FACTOR_MAX);
   }
 
-  private static double impactEfficiency(WeaponAssembly weapon, double strikePointNorm) {
-    double cop = weapon.centreOfPercussion(WeaponAssembly.LARGE_SAMPLE_SIZE);
-    double delta = strikePointNorm - cop;
-    return Mth.clamp(1.0 - IMPACT_EFFICIENCY_SENSITIVITY * (delta * delta), IMPACT_EFFICIENCY_MIN, IMPACT_EFFICIENCY_MAX);
-  }
-
-  private static double slashDeliveryFactor(WeaponAssembly weapon) {
+  private static double slashDeliveryFactor(AttackGenerationContextSlash context) {
     double baseFactor = deliveryFactor(
-      weapon,
-      SLASH_CONTEXT,
-      (balanceMismatch, delta) -> Math.max(0.0, delta),
+      context.delivery(),
+      context.assembly(),
+      delivery -> delivery.forwardOvercommitment(),
       SLASH_DELIVERY_BALANCE_MISMATCH_WEIGHT,
       SLASH_DELIVERY_FORWARD_BIAS_WEIGHT,
       SLASH_DELIVERY_INERTIA_WEIGHT,
       SLASH_DELIVERY_EFFECTIVE_MASS_WEIGHT,
       SLASH_DELIVERY_FACTOR_MIN,
       SLASH_DELIVERY_FACTOR_MAX);
-    double strikePointNorm = weapon.normalizedStrikePointForAttackType(SLASH_CONTEXT, WeaponAssembly.LARGE_SAMPLE_SIZE);
-    double pointOfBalanceNorm = weapon.normalizedPointOfBalance(WeaponAssembly.LARGE_SAMPLE_SIZE);
-    double leveragePenalty = Math.max(0.0, strikePointNorm - pointOfBalanceNorm - SLASH_DELIVERY_LEVERAGE_THRESHOLD);
+    double leveragePenalty = Math.max(0.0, context.delivery().leverageGap() - SLASH_DELIVERY_LEVERAGE_THRESHOLD);
     return Mth.clamp(baseFactor - SLASH_DELIVERY_LEVERAGE_WEIGHT * leveragePenalty, SLASH_DELIVERY_FACTOR_MIN, SLASH_DELIVERY_FACTOR_MAX);
   }
 
-  private static double thrustDeliveryFactor(WeaponAssembly weapon, boolean rotationalThrust) {
+  private static double thrustDeliveryFactor(AttackGenerationContextThrust context) {
+    boolean rotationalThrust = context.delivery().rotationalThrust();
     if (!rotationalThrust) {
       return deliveryFactor(
-        weapon,
-        THRUST_CONTEXT,
-        (balanceMismatch, delta) -> 0.65 * Math.max(0.0, delta) + 0.35 * Math.max(0.0, -delta),
+        context.delivery(),
+        context.assembly(),
+        delivery -> 0.65 * delivery.forwardOvercommitment() + 0.35 * delivery.rearUnderweight(),
         THRUST_LINEAR_DELIVERY_BALANCE_MISMATCH_WEIGHT,
         THRUST_LINEAR_DELIVERY_DIRECTIONAL_WEIGHT,
         THRUST_LINEAR_DELIVERY_INERTIA_WEIGHT,
@@ -334,9 +303,9 @@ public abstract class LethalityGenerationUtil {
         THRUST_LINEAR_DELIVERY_FACTOR_MAX);
     }
     return deliveryFactor(
-      weapon,
-      THRUST_CONTEXT,
-      (balanceMismatch, delta) -> Math.max(0.0, delta),
+      context.delivery(),
+      context.assembly(),
+      delivery -> delivery.forwardOvercommitment(),
       THRUST_ROTATIONAL_DELIVERY_BALANCE_MISMATCH_WEIGHT,
       THRUST_ROTATIONAL_DELIVERY_DIRECTIONAL_WEIGHT,
       THRUST_ROTATIONAL_DELIVERY_INERTIA_WEIGHT,
@@ -345,11 +314,11 @@ public abstract class LethalityGenerationUtil {
       THRUST_ROTATIONAL_DELIVERY_FACTOR_MAX);
   }
 
-  private static double strikeDeliveryFactor(WeaponAssembly weapon) {
+  private static double strikeDeliveryFactor(AttackGenerationContextStrike context) {
     return deliveryFactor(
-      weapon,
-      STRIKE_CONTEXT,
-      (actualDelta, directionalDelta) -> Math.max(0.0, -directionalDelta),
+      context.delivery(),
+      context.assembly(),
+      delivery -> delivery.rearUnderweight(),
       STRIKE_DELIVERY_BALANCE_MISMATCH_WEIGHT,
       STRIKE_DELIVERY_UNDERWEIGHTED_HEAD_WEIGHT,
       STRIKE_DELIVERY_INERTIA_WEIGHT,
@@ -359,8 +328,8 @@ public abstract class LethalityGenerationUtil {
   }
 
   private static double deliveryFactor(
-      WeaponAssembly weapon,
-      AttackType attackType,
+      AttackDeliverySnapshot delivery,
+      AssemblyPhysicsSnapshot assembly,
       DirectionalPenalty directionalPenalty,
       double balanceMismatchWeight,
       double directionalWeight,
@@ -368,28 +337,17 @@ public abstract class LethalityGenerationUtil {
       double effectiveMassWeight,
       double minFactor,
       double maxFactor) {
-    double actualPoBNorm = weapon.normalizedPointOfBalance(WeaponAssembly.LARGE_SAMPLE_SIZE);
-    double idealPoBNorm = weapon.normalizedIdealPointOfBalanceForAttackType(attackType);
-    double delta = actualPoBNorm - idealPoBNorm;
-    double balanceMismatch = Math.abs(delta);
-    double directional = directionalPenalty.value(balanceMismatch, delta);
-    double effectiveMassRatio = weapon.effectiveMassRatioForAttackType(attackType, WeaponAssembly.LARGE_SAMPLE_SIZE);
-    double inertiaRatio = normalizedInertiaRatio(weapon);
+    double balanceMismatch = delivery.balanceMismatch();
+    double directional = directionalPenalty.value(delivery);
+    double effectiveMassRatio = delivery.effectiveMassRatio();
+    double inertiaCoefficient = assembly.normalizedInertiaCoefficient();
 
     double factor = 1.0
       - balanceMismatchWeight * balanceMismatch
       - directionalWeight * directional
-      - inertiaWeight * inertiaRatio
+      - inertiaWeight * inertiaCoefficient
       + effectiveMassWeight * (effectiveMassRatio - 0.5);
     return Mth.clamp(factor, minFactor, maxFactor);
-  }
-
-  private static double normalizedInertiaRatio(WeaponAssembly weapon) {
-    double mass = Math.max(1.0, weapon.mass(WeaponAssembly.LARGE_SAMPLE_SIZE));
-    double length = Math.max(1.0, weapon.length());
-    double denominator = Math.max(1.0e-6, mass * length * length);
-    double inertia = Math.max(0.0, weapon.momentOfInertiaAboutBase(WeaponAxis.Z, WeaponAssembly.LARGE_SAMPLE_SIZE));
-    return Mth.clamp(inertia / denominator, 0.0, 1.0);
   }
 
   private static double realizedLocalFactor(double localPotential, double deliveryFactor) {
@@ -399,7 +357,7 @@ public abstract class LethalityGenerationUtil {
 
   @FunctionalInterface
   private interface DirectionalPenalty {
-    double value(double balanceMismatch, double delta);
+    double value(AttackDeliverySnapshot delivery);
   }
 
 }

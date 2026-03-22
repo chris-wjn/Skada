@@ -14,24 +14,35 @@ public record AttackTypeInfo(double lethality,
                              double precision,
                              double minReach,
                              double maxReach,
-                             double attackSpeedMod,
-                             double damageBonus,
+                             double attackSpeed,
+                             double damage,
                              double failChance,
                              List<String> reticleShapes) {
 
+    public static AttackTypeInfo of(double lethality,
+                                    double precision,
+                                    double minReach,
+                                    double maxReach,
+                                    double attackSpeed,
+                                    double damage,
+                                    double failChance,
+                                    List<String> reticleShapes) {
+        return new AttackTypeInfo(lethality, precision, minReach, maxReach, attackSpeed, damage, failChance, reticleShapes);
+    }
+
     public static Codec<AttackTypeInfo> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-            Codec.DOUBLE.fieldOf("lethality").forGetter(AttackTypeInfo::lethality),
-            Codec.DOUBLE.fieldOf("precision").forGetter(AttackTypeInfo::precision),
-            Codec.DOUBLE.fieldOf("minReach").forGetter(AttackTypeInfo::minReach),
-            Codec.DOUBLE.fieldOf("maxReach").forGetter(AttackTypeInfo::maxReach),
-            Codec.DOUBLE.fieldOf("attackSpeedModifier").forGetter(AttackTypeInfo::attackSpeedMod),
-            Codec.DOUBLE.fieldOf("damageBonus").forGetter(AttackTypeInfo::damageBonus),
-            Codec.DOUBLE.fieldOf("failChance").forGetter(AttackTypeInfo::failChance),
-            Codec.list(Codec.STRING).optionalFieldOf("reticleShapes", new ArrayList<>()).forGetter(AttackTypeInfo::reticleShapes)
-    ).apply(instance, AttackTypeInfo::new));
+                Codec.DOUBLE.fieldOf("lethality").forGetter(AttackTypeInfo::lethality),
+                Codec.DOUBLE.fieldOf("precision").forGetter(AttackTypeInfo::precision),
+                Codec.DOUBLE.fieldOf("minReach").forGetter(AttackTypeInfo::minReach),
+                Codec.DOUBLE.fieldOf("maxReach").forGetter(AttackTypeInfo::maxReach),
+                Codec.DOUBLE.fieldOf("attackSpeed").forGetter(AttackTypeInfo::attackSpeed),
+                Codec.DOUBLE.fieldOf("damage").forGetter(AttackTypeInfo::damage),
+                Codec.DOUBLE.fieldOf("failChance").forGetter(AttackTypeInfo::failChance),
+                Codec.list(Codec.STRING).optionalFieldOf("reticleShapes", new ArrayList<>()).forGetter(AttackTypeInfo::reticleShapes)
+            ).apply(instance, AttackTypeInfo::of));
 
-    public static final AttackTypeInfo DEFAULT = new AttackTypeInfo(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, List.of());
+        public static final AttackTypeInfo DEFAULT = AttackTypeInfo.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, List.of());
 
     public CompoundTag toCompoundTag() {
         CompoundTag tag = new CompoundTag();
@@ -39,8 +50,8 @@ public record AttackTypeInfo(double lethality,
         tag.putDouble("precision", precision);
         tag.putDouble("minReach", minReach);
         tag.putDouble("maxReach", maxReach);
-        tag.putDouble("attackSpeedModifier", attackSpeedMod);
-        tag.putDouble("damageBonus", damageBonus);
+        tag.putDouble("attackSpeed", attackSpeed);
+        tag.putDouble("damage", damage);
         tag.putDouble("failChance", failChance);
         if (hasReticleShapes()) {
             tag.putInt("numReticleShapes", reticleShapes.size());
@@ -60,13 +71,13 @@ public record AttackTypeInfo(double lethality,
                 reticleShapes.add(tag.getString("reticleShape" + i));
             }
         }
-        return new AttackTypeInfo(
+        return AttackTypeInfo.of(
                 tag.getDouble("lethality"),
                 tag.getDouble("precision"),
                 tag.getDouble("minReach"),
                 tag.getDouble("maxReach"),
-                tag.getDouble("attackSpeedModifier"),
-                tag.getDouble("damageBonus"),
+                tag.contains("attackSpeed") ? tag.getDouble("attackSpeed") : tag.contains("attackSpeedOffset") ? tag.getDouble("attackSpeedOffset") : 0.0,
+                tag.contains("damage") ? tag.getDouble("damage") : tag.getDouble("damageBonus"),
                 tag.getDouble("failChance"),
                 reticleShapes
         );

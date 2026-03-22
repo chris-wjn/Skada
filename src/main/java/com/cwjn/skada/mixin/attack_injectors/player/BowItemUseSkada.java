@@ -19,7 +19,7 @@ import static com.cwjn.skada.data.SkadaData.WEAPON_INFO_TAG_KEY;
 public class BowItemUseSkada {
 
     /*
-     * Use the bow's precision and damage bonus to affect the projectile's deviation from crosshair and velocity, and inject the projectile's damage info.
+        * Use the bow's precision and damage value to affect the projectile's deviation from crosshair and velocity, and inject the projectile's damage info.
      * @param entity is never null because it is checked to be a Player in the original method
      */
     @Redirect(
@@ -36,7 +36,7 @@ public class BowItemUseSkada {
                             info.getAttackTypes().keySet().toArray(AttackType[]::new)[pStack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
                     );
             inaccuracy = (float) Util.precisionScoreToProjectileInaccuracy(attackInfo.precision());
-            float velocity = (float) (chargePower * Util.projectileVelocityWithDamageBonus(3.0, attackInfo.damageBonus()));
+            float velocity = (float) (chargePower * Util.projectileVelocityWithDamageBonus(3.0, attackInfo.damage()));
             Util.rollCriticalFail(pStack, attackInfo.failChance(), ((ServerPlayer)entity).getRandom(), ((ServerPlayer)entity));
             ((AccessProjectileData) instance).setDamageInfo(new DamageInfo(
                     attackInfo.lethality(),
