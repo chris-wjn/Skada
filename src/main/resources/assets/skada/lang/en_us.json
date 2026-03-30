@@ -57,6 +57,7 @@
   "skada.tooltip.info.attack_damage_no_sum": "§iElement Split:",
   "skada.tooltip.info.armour": "§iArmour:§r §e%s",
   "skada.tooltip.info.toughness": "§iToughness:§r §e%s",
+  "skada.tooltip.info.burden": "§iBurden:§r §e%s",
 
   "skada.icon.armour": "\u000D",
   "skada.icon.toughness": "\u006D",

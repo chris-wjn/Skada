@@ -1,0 +1,11 @@
+{
+  "thickness_mm": 6.0,
+  "layer_count": 1,
+  "padding_mm": 3.0,
+  "rigidity": 0.95,
+  "seam_quality": 0.92,
+  "gap_exposure": 0.1,
+  "curvature": 0.82,
+  "articulation_penalty": 0.45,
+  "burden_multiplier": 1.25
+}

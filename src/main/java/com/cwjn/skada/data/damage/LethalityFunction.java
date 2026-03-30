@@ -1,7 +1,5 @@
 package com.cwjn.skada.data.damage;
 
-import com.cwjn.skada.util.LethalityFunctionInterface;
-
 public class LethalityFunction {
 
     private final LethalityFunctionInterface func;
@@ -16,8 +14,8 @@ public class LethalityFunction {
         return op;
     }
 
-    public double apply(double lethality, double armour, double armourToughness, double healthContext) {
-        return func.apply(lethality, armour, armourToughness, healthContext);
+    public double apply(double lethality, double armour, double healthContext) {
+        return func.apply(lethality, armour, healthContext);
     }
 
     public enum Operation {

@@ -3,6 +3,7 @@ package com.cwjn.skada.event;
 import com.cwjn.skada.SkadaCommand;
 import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
+import com.cwjn.skada.data.damage.ManualWeaponInfos;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
@@ -11,6 +12,7 @@ import com.cwjn.skada.event.custom.PostMitigationEvent;
 import com.cwjn.skada.network.SkadaNetwork;
 import com.cwjn.skada.network.server_to_client.*;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilData;
 import com.google.common.collect.HashMultimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -91,7 +93,7 @@ public class CommonEvent {
          */
         @SubscribeEvent(priority = EventPriority.HIGHEST)
         public static void addWeaponInfo(ItemAttributeModifierEvent e) {
-            Util.addWeaponArmourInfoTagIfNotExists(e.getItemStack());
+            UtilData.addWeaponArmourInfoTagIfNotExists(e.getItemStack());
         }
 
         /*
@@ -103,23 +105,18 @@ public class CommonEvent {
             if (!stack.hasTag()) return;
             if (LivingEntity.getEquipmentSlotForItem(stack) != e.getSlotType()) return;
             if (stack.getTagElement(WEAPON_INFO_TAG_KEY) != null) {
-                WeaponInfo info = WeaponInfo.fromCompoundTag(stack.getTagElement(WEAPON_INFO_TAG_KEY));
+                WeaponInfo info = UtilData.getWeaponInfo(stack);
                 if (info.ignoreAttributes()) return;
-                AttackTypeInfo attackInfo =
-                        info.getAttackTypes().get(
-                                info.getAttackTypes().keySet().toArray(AttackType[]::new)[stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
-                        );
+                AttackTypeInfo attackInfo = UtilData.getAttackTypeInfo(stack);
                 if (attackInfo.maxReach() - 3.0 != 0) e.addModifier(ForgeMod.ENTITY_REACH.get(),
                         new AttributeModifier(SKADA_ATTACK_TYPE_REACH_UUID, "attack_type_reach_mod", attackInfo.maxReach() - 3.0, AttributeModifier.Operation.ADDITION));
                 if (attackInfo.attackSpeed() > 0) {
                     e.removeAttribute(Attributes.ATTACK_SPEED);
-                    e.addModifier(Attributes.ATTACK_SPEED,
-                        new AttributeModifier(BASE_ATTACK_SPEED_UUID, "attack_type_speed", attackInfo.attackSpeed() - Attributes.ATTACK_SPEED.getDefaultValue(), AttributeModifier.Operation.ADDITION));
+                    e.addModifier(Attributes.ATTACK_SPEED, attackSpeedModifier(attackInfo));
                 }
                 if (attackInfo.damage() != 0) {
                     e.removeAttribute(Attributes.ATTACK_DAMAGE);
-                    e.addModifier(Attributes.ATTACK_DAMAGE,
-                        new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "attack_type_damage_mod", attackInfo.damage(), AttributeModifier.Operation.ADDITION));
+                    e.addModifier(Attributes.ATTACK_DAMAGE, attackDamageModifier(attackInfo));
                 }
             }
             if (stack.getTagElement(ARMOUR_INFO_TAG_KEY) != null) {
@@ -136,6 +133,8 @@ public class CommonEvent {
                         new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID[LivingEntity.getEquipmentSlotForItem(stack).getIndex()], "armour_bonus_mod", info.armourBonus(), AttributeModifier.Operation.ADDITION));
                 if (info.armourToughnessBonus() != 0) e.addModifier(Attributes.ARMOR_TOUGHNESS,
                         new AttributeModifier(SKADA_ARMOUR_BASE_MOD_UUID[LivingEntity.getEquipmentSlotForItem(stack).getIndex()], "armour_toughness_bonus_mod", info.armourToughnessBonus(), AttributeModifier.Operation.ADDITION));
+                if (info.burden() != 0) e.addModifier(Attributes.ATTACK_SPEED,
+                    new AttributeModifier(SKADA_ARMOUR_BURDEN_MOD_UUID[LivingEntity.getEquipmentSlotForItem(stack).getIndex()], "armour_burden_mod", -0.12 * info.burden(), AttributeModifier.Operation.ADDITION));
             }
         }
 
@@ -184,29 +183,12 @@ public class CommonEvent {
                     DataResult<Map<String, WeaponInfo>> info = WeaponInfo.STRING_MAP_CODEC.parse(JsonOps.INSTANCE, obj);
                     String[] split = rl.getPath().split("/");
                     String modId = split[split.length-1].substring(0, split[split.length-1].length()-5);
-                    info.result().ifPresent((map) -> {
-                        if (map.size() > 40) {
-                            LOGGER.info("Weapon info from {} has more than 40 entries, splitting into multiple maps", rl);
-                            Map<String, WeaponInfo> subMap = new HashMap<>();
-                            for (Map.Entry<String, WeaponInfo> entry : map.entrySet()) {
-                                subMap.put(entry.getKey(), entry.getValue());
-                                if (subMap.size() == 40) {
-                                    weaponMapToSend.put(modId, new HashMap<>(subMap));
-                                    subMap.clear();
-                                }
-                            }
-                            if (!subMap.isEmpty()) {
-                                weaponMapToSend.put(modId, subMap);
-                            }
-                        }
-                        else {
-                            weaponMapToSend.put(modId, map);
-                        }
-                    });
+                    info.result().ifPresent((map) -> addWeaponInfoMapForSync(weaponMapToSend, modId, map, rl.toString()));
                 } catch (Exception e) {
                     LOGGER.error("Failed to read weapon info from " + rl, e);
                 }
             });
+            ManualWeaponInfos.all().forEach((modId, map) -> addWeaponInfoMapForSync(weaponMapToSend, modId, map, modId));
             manager.listResources("armour_info", (rl) -> rl.getPath().endsWith(".json")).forEach((rl, resource) -> {
                 try {
                     BufferedReader reader = new BufferedReader(manager.openAsReader(rl));
@@ -256,6 +238,26 @@ public class CommonEvent {
                         SkadaNetwork.serverToAll(new S2CSendArmourInfoMap(Map.of(key, value)))
                 );
                 SkadaNetwork.serverToAll(new S2CSendReticles(RETICLES.values().stream().toList()));
+            }
+        }
+
+        private static void addWeaponInfoMapForSync(HashMultimap<String, Map<String, WeaponInfo>> weaponMapToSend, String modId, Map<String, WeaponInfo> map, String sourceLabel) {
+            if (map.size() > 40) {
+                LOGGER.info("Weapon info from {} has more than 40 entries, splitting into multiple maps", sourceLabel);
+                Map<String, WeaponInfo> subMap = new HashMap<>();
+                for (Map.Entry<String, WeaponInfo> entry : map.entrySet()) {
+                    subMap.put(entry.getKey(), entry.getValue());
+                    if (subMap.size() == 40) {
+                        weaponMapToSend.put(modId, new HashMap<>(subMap));
+                        subMap.clear();
+                    }
+                }
+                if (!subMap.isEmpty()) {
+                    weaponMapToSend.put(modId, subMap);
+                }
+            }
+            else {
+                weaponMapToSend.put(modId, map);
             }
         }
 
@@ -324,6 +326,16 @@ public class CommonEvent {
                 max = (max+step)*-1;
                 step*=-1;
             }
+        }
+
+        static AttributeModifier attackSpeedModifier(AttackTypeInfo attackInfo) {
+            return new AttributeModifier(SKADA_ATTACK_TYPE_SPEED_UUID, "attack_type_speed",
+                    attackInfo.attackSpeed() - Attributes.ATTACK_SPEED.getDefaultValue(), AttributeModifier.Operation.ADDITION);
+        }
+
+        static AttributeModifier attackDamageModifier(AttackTypeInfo attackInfo) {
+            return new AttributeModifier(SKADA_ATTACK_TYPE_DAMAGE_UUID, "attack_type_damage_mod",
+                    attackInfo.damage(), AttributeModifier.Operation.ADDITION);
         }
 
     }

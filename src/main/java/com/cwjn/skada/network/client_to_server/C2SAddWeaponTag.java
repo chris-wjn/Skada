@@ -1,6 +1,7 @@
 package com.cwjn.skada.network.client_to_server;
 
-import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilData;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -29,7 +30,7 @@ public class C2SAddWeaponTag {
         NetworkEvent.Context ctx = ctxSupplier.get();
         ctxSupplier.get().enqueueWork(() -> {
             if (ctx.getSender() != null && msg.containerID == ctx.getSender().containerMenu.containerId) {
-                Util.addWeaponArmourInfoTagIfNotExists(ctx.getSender().containerMenu.getSlot(msg.slot).getItem());
+                UtilData.addWeaponArmourInfoTagIfNotExists(ctx.getSender().containerMenu.getSlot(msg.slot).getItem());
             }
         });
         ctxSupplier.get().setPacketHandled(true);

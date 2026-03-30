@@ -7,6 +7,8 @@ import com.cwjn.skada.data.gen.attack.ElementSpread;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.event.CommonEvent;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilData;
+import com.cwjn.skada.util.UtilText;
 import com.google.common.collect.HashMultimap;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.ChatFormatting;
@@ -39,8 +41,8 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 import static com.cwjn.skada.data.SkadaData.*;
-import static com.cwjn.skada.util.Util.getOtherSlotAttributesAsList;
-import static com.cwjn.skada.util.Util.otherAttributesComponent;
+import static com.cwjn.skada.util.UtilText.getOtherSlotAttributesAsList;
+import static com.cwjn.skada.util.UtilText.otherAttributesComponent;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
@@ -63,10 +65,10 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     this.mainAttributes = HashMultimap
         .create(itemstack.getAttributeModifiers(LivingEntity.getEquipmentSlotForItem(itemstack)));
     this.otherSlots = Arrays.stream(slots).filter((x) -> !itemstack.getAttributeModifiers(x).isEmpty()).toList();
-    info = Util.getWeaponInfo(itemstack);
-    attackTypes = Util.getAttackTypes(itemstack);
-    AttackTypeInfo currentInfo = Util.getAttackTypeInfo(itemstack);
-    int index = itemstack.getOrCreateTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
+    info = UtilData.getWeaponInfo(itemstack);
+    attackTypes = UtilData.getAttackTypes(itemstack);
+    AttackTypeInfo currentInfo = UtilData.getAttackTypeInfo(itemstack);
+    int index = UtilData.getAttackTypeIndex(itemstack);
     lines.add(attackTypesComponent(attackTypes[index]));
     if (!info.ignoreAttributes())
       lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.REACH));
@@ -85,13 +87,13 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
       lines.addAll(attackDamageComponent(info.getSpread(), true));
     }
     if (!this.mainAttributes.isEmpty()) {
-      lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.shift_for_other_attributes")));
+      lines.add(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.shift_for_other_attributes")));
       if (Screen.hasShiftDown()) {
         lines.addAll(otherAttributesComponent(mainAttributes));
       }
     }
     if (!otherSlots.isEmpty()) {
-      lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.alt_for_other_slot_attributes")));
+      lines.add(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.alt_for_other_slot_attributes")));
       if (Screen.hasAltDown()) {
         for (EquipmentSlot slot : otherSlots) {
           lines.addAll(getOtherSlotAttributesAsList(slot, itemstack.getAttributeModifiers(slot)));
@@ -119,16 +121,16 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     MutableComponent comp = Component.empty();
     comp.append(Component.translatable("skada.icon.attack_damage").withStyle(ICONS));
     if (showFinalDamage)
-      comp.append(Util.pixelFontComponent(
+      comp.append(UtilText.pixelFontComponent(
           Component.translatable("skada.tooltip.info.attack_damage", df.format(damage * spread.getPowerBudget()))));
     else
-      comp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_damage_no_sum")));
+      comp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_damage_no_sum")));
     list.add(comp);
     double powerRatio = spread.getPowerBudget() / spread.sumRatio();
     if (showFinalDamage) {
       spread.getRatios().keySet().forEach(key -> list.add(Component.literal("   ")
           .append(Component.translatable("skada.icon.element." + key.name()).withStyle(ICONS))
-          .append(Util.pixelFontComponent(
+          .append(UtilText.pixelFontComponent(
               Component.translatable("skada.tooltip.info.element." + key.name(),
                   (int) (spread.getRatios().get(key) * 100 / spread.sumRatio()),
                   Util.round(spread.getRatios().get(key) * powerRatio * damage, 1)))
@@ -136,7 +138,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     } else {
       spread.getRatios().keySet().forEach(key -> list.add(Component.literal("   ")
           .append(Component.translatable("skada.icon.element." + key.name()).withStyle(ICONS))
-          .append(Util.pixelFontComponent(
+          .append(UtilText.pixelFontComponent(
               Component.translatable("skada.tooltip.info.element." + key.name() + "_no_sum",
                   (int) (spread.getRatios().get(key) * 100 / spread.sumRatio())))
               .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(key.colour() & 0xFFFFFF))))));
@@ -216,7 +218,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     MutableComponent[] attackTypeComponents = new MutableComponent[info.getAttackTypes().size() + 2
         + info.getAttackTypes().size() - 1];
     // attackTypeComponents[0] = Component.literal("[");
-    retComp.append(Util.pixelFontComponent(Component.literal("[")));
+    retComp.append(UtilText.pixelFontComponent(Component.literal("[")));
     // attackTypeComponents[attackTypeComponents.length-1] = Component.literal("]");
     int countArrow = font.width(retComp);
 
@@ -229,17 +231,17 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     for (int i = 1; i <= attackTypeComponents.length - 2; i++) {
       MutableComponent thisComp;
       if (doSlash) {
-        thisComp = Util.pixelFontComponent(Component.literal("/"));
+        thisComp = UtilText.pixelFontComponent(Component.literal("/"));
         countArrow += font.width(thisComp);
         doSlash = false;
       } else if (attackType.equals(attackTypes[correctAttackIndex])) {
-        thisComp = Util.pixelFontComponent(Component.literal(attackTypes[correctAttackIndex].name().toUpperCase()))
+        thisComp = UtilText.pixelFontComponent(Component.literal(attackTypes[correctAttackIndex].name().toUpperCase()))
             .withStyle(ChatFormatting.AQUA);
         correctAttackIndex++;
         arrowXCoord = countArrow + (font.width(thisComp) / 2) - 2;
         doSlash = true;
       } else {
-        thisComp = Util.pixelFontComponent(Component.literal(attackTypes[correctAttackIndex].name().toUpperCase()))
+        thisComp = UtilText.pixelFontComponent(Component.literal(attackTypes[correctAttackIndex].name().toUpperCase()))
             .withStyle(ChatFormatting.DARK_GRAY);
         correctAttackIndex++;
         countArrow += font.width(thisComp);
@@ -248,7 +250,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
       // attackTypeComponents[i] = thisComp;
       retComp.append(thisComp);
     }
-    retComp.append(Util.pixelFontComponent(Component.literal("]")));
+    retComp.append(UtilText.pixelFontComponent(Component.literal("]")));
     // return Util.pixelFontComponent(attackTypeComponents);
     return retComp;
   }
@@ -260,33 +262,33 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     switch (componentType) {
       case REACH:
         mainAttributes.get(ForgeMod.ENTITY_REACH.get()).removeIf(m -> m.getId().equals(SkadaData.SKADA_ATTACK_TYPE_REACH_UUID));
-        retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.reach",
+        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.reach",
             df.format(attackTypeInfo.minReach()),
             df.format(attackTypeInfo.maxReach()))));
         break;
       case LETHALITY:
-        retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.lethality",
+        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.lethality",
             df.format(attackTypeInfo.lethality()))));
         break;
       case ATTACK_SPEED:
-        mainAttributes.get(Attributes.ATTACK_SPEED).removeIf(m -> m.getId().equals(SkadaData.BASE_ATTACK_SPEED_UUID));
-        retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_speed",
+        mainAttributes.get(Attributes.ATTACK_SPEED).removeIf(m -> m.getId().equals(SkadaData.SKADA_ATTACK_TYPE_SPEED_UUID));
+        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_speed",
             Util.round(attackTypeInfo.attackSpeed(), 1))));
         break;
       case PRECISION:
-        retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.precision",
+        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.precision",
             df.format(attackTypeInfo.precision()))));
         break;
       case VELOCITY_CROSSBOW:
-        retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
+        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
             df.format(attackTypeInfo.damage() + 3.15))));
         break;
       case VELOCITY_BOW:
-        retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
+        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
             df.format(attackTypeInfo.damage() + 3.0))));
         break;
       case CRITICAL_FAIL:
-        retComp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.critical_fail",
+        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.critical_fail",
             df.format(attackTypeInfo.failChance() * 100))));
         break;
     }

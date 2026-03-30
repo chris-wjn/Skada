@@ -1,11 +1,11 @@
 package com.cwjn.skada.network.client_to_server;
 
+import com.cwjn.skada.util.UtilData;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
-
-import static com.cwjn.skada.data.SkadaData.CURRENT_ATTACK_TYPE_TAG_KEY;
 
 public class C2SUpdateAttackIndexFromMenu {
 
@@ -33,7 +33,7 @@ public class C2SUpdateAttackIndexFromMenu {
         NetworkEvent.Context ctx = ctxSupplier.get();
         ctxSupplier.get().enqueueWork(() -> {
             if (ctx.getSender() != null && msg.containerID == ctx.getSender().containerMenu.containerId) {
-                ctx.getSender().containerMenu.getSlot(msg.slot).getItem().getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, msg.value);
+                UtilData.setAttackTypeIndex(ctx.getSender().containerMenu.getSlot(msg.slot).getItem(), msg.value);
             }
         });
         ctxSupplier.get().setPacketHandled(true);

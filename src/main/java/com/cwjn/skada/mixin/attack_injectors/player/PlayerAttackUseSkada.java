@@ -6,7 +6,9 @@ import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.DamageInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.AttackType;
-import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilCombat;
+import com.cwjn.skada.util.UtilData;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -31,9 +33,9 @@ public class PlayerAttackUseSkada {
 //    private boolean addDamageInfoToPlayerAttack(Entity instance, DamageSource source, float amount) {
 //        DamageInfo damageInfo;
 //        ItemStack heldItem = thisPlayer().getMainHandItem();
-//        WeaponInfo weaponInfo = Util.getWeaponInfo(thisPlayer());
-//        AttackType attackType = Util.getAttackType(thisPlayer());
-//        AttackTypeInfo attackInfo = Util.getAttackTypeInfo(thisPlayer());
+//        WeaponInfo weaponInfo = UtilData.getWeaponInfo(thisPlayer());
+//        AttackType attackType = UtilData.getAttackType(thisPlayer());
+//        AttackTypeInfo attackInfo = UtilData.getAttackTypeInfo(thisPlayer());
 //
 //        if (weaponInfo.ignoreAttributes()) weaponInfo = WeaponInfo.NO_WEAPON;
 //
@@ -57,14 +59,14 @@ public class PlayerAttackUseSkada {
     private DamageSource convertDamageSource(DamageSource source) {
         DamageInfo damageInfo;
         ItemStack heldItem = thisPlayer().getMainHandItem();
-        WeaponInfo weaponInfo = Util.getWeaponInfo(thisPlayer());
-        AttackType attackType = Util.getAttackType(thisPlayer());
-        AttackTypeInfo attackInfo = Util.getAttackTypeInfo(thisPlayer());
+        WeaponInfo weaponInfo = UtilData.getWeaponInfo(thisPlayer());
+        AttackType attackType = UtilData.getAttackType(thisPlayer());
+        AttackTypeInfo attackInfo = UtilData.getAttackTypeInfo(thisPlayer());
 
         if (weaponInfo.ignoreAttributes()) weaponInfo = WeaponInfo.NO_WEAPON;
 
         if (thisPlayer() instanceof ServerPlayer player) {
-            Util.rollCriticalFail(heldItem, attackInfo.failChance(), thisPlayer().getRandom(), player);
+            UtilCombat.rollCriticalFail(heldItem, attackInfo.failChance(), thisPlayer().getRandom(), player);
         }
 
         damageInfo = new DamageInfo(attackInfo.lethality(), attackInfo.precision(), false, attackType, weaponInfo.getSpread().instance());
@@ -87,7 +89,7 @@ public class PlayerAttackUseSkada {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z")
     )
     private float applyMinimumReachModification(float amount) {
-        AttackTypeInfo attackInfo = Util.getAttackTypeInfo(thisPlayer());
+        AttackTypeInfo attackInfo = UtilData.getAttackTypeInfo(thisPlayer());
         double distance = thisPlayer().distanceTo(skada$target);
         if (distance < attackInfo.minReach()) amount *= CommonConfig.INEFFECTIVE_REACH_DAMAGE_MODIFIER.get();
         return amount;

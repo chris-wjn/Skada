@@ -18,11 +18,14 @@ import com.cwjn.skada.network.client_to_server.C2SUpdateAttackIndex;
 import com.cwjn.skada.network.client_to_server.C2SUpdateAttackIndexFromMenu;
 import com.cwjn.skada.util.Keybinds;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilData;
+import com.cwjn.skada.util.UtilText;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -88,7 +91,7 @@ public class ClientEvent {
         public static void onTooltipEvent(ItemTooltipEvent e) {
             //if the item has modifiers but isn't a weapon or armour, use the Vanilla tooltip method in Util to add default modifier tooltip lines
             if (e.getItemStack().hasTag() && shouldShowInTooltip(getHideFlags(e.getItemStack()), ItemStack.TooltipPart.MODIFIERS) && !e.getItemStack().getTag().contains(WEAPON_INFO_TAG_KEY) && !e.getItemStack().getTag().contains(ARMOUR_INFO_TAG_KEY)) {
-                e.getToolTip().addAll(Util.getVanillaTooltip(Minecraft.getInstance().player, e.getItemStack()));
+                e.getToolTip().addAll(UtilText.getVanillaTooltip(Minecraft.getInstance().player, e.getItemStack()));
             }
         }
 
@@ -101,16 +104,20 @@ public class ClientEvent {
             return (pHideFlags & pPart.getMask()) == 0;
         }
 
+        /**
+         * Player can cycle attack types if there is another attack type to cycle to
+         * and if the chat window is not open.
+         * @param stack the stack to check for attack types
+         * @return whether the player can cycle attack types
+         */
         @SuppressWarnings("null")
         private static boolean canCycleAttackType(ItemStack stack) {
-            return stack.hasTag() && stack.getTag().contains(CURRENT_ATTACK_TYPE_TAG_KEY) && stack.getTag().contains(NUM_ATTACK_TYPES_TAG_KEY);
+          return UtilData.getAttackTypes(stack).length > 1 && !(Minecraft.getInstance().screen instanceof ChatScreen);
         }
 
         private static int getNextAttackTypeIndex(ItemStack stack) {
-            @SuppressWarnings("null")
-            int currentAttackType = stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY);
-            @SuppressWarnings("null")
-            int maxAttackTypes = stack.getTag().getInt(NUM_ATTACK_TYPES_TAG_KEY);
+            int currentAttackType = UtilData.getAttackTypeIndex(stack);
+            int maxAttackTypes = UtilData.getAttackTypes(stack).length;
             return currentAttackType + 1 == maxAttackTypes ? 0 : currentAttackType + 1;
         }
 
@@ -127,11 +134,11 @@ public class ClientEvent {
 
                     int nextAttackType = getNextAttackTypeIndex(i);
                     if (screen instanceof CreativeModeInventoryScreen) {
-                        i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, nextAttackType);
+                        UtilData.setAttackTypeIndex(i, nextAttackType);
                         Minecraft.getInstance().gameMode.handleCreativeModeItemAdd(i.copy(), hoveredSlot.index);
                     }
                     else {
-                        i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, nextAttackType);
+                        UtilData.setAttackTypeIndex(i, nextAttackType);
                         SkadaNetwork.playerToServer(new C2SUpdateAttackIndexFromMenu(nextAttackType, screen.getMenu().containerId, hoveredSlot.index));
                     }
                 }
@@ -141,7 +148,7 @@ public class ClientEvent {
                     if (!canCycleAttackType(i)) return;
 
                     int nextAttackType = getNextAttackTypeIndex(i);
-                    i.getTag().putInt(CURRENT_ATTACK_TYPE_TAG_KEY, nextAttackType);
+                    UtilData.setAttackTypeIndex(i, nextAttackType);
                     SkadaNetwork.playerToServer(new C2SUpdateAttackIndex(nextAttackType));
                 }
             }
@@ -157,9 +164,9 @@ public class ClientEvent {
                 Player p = Minecraft.getInstance().player;
                 e.addListener(new OpenStatScreenButton(x, y, Component.empty(), b -> {
                     Minecraft.getInstance().setScreen(new StatScreen(
-                            Util.getWeaponInfo(p),
-                            Util.getAttackType(p),
-                            Util.getAttackTypeInfo(p)
+                            UtilData.getWeaponInfo(p),
+                            UtilData.getAttackType(p),
+                            UtilData.getAttackTypeInfo(p)
                     ));
                 }));
             }
@@ -187,8 +194,8 @@ public class ClientEvent {
             stack.translate(middleX - 0.5f, middleY, 0);
             double guiScale = event.getWindow().getGuiScale();
             stack.scale((float)(1.0/guiScale), (float)(1.0/guiScale), 1.0f);
-            AttackType attackType = Util.getAttackType(Minecraft.getInstance().player);
-            AttackTypeInfo attackTypeInfo = Util.getAttackTypeInfo(Minecraft.getInstance().player);
+            AttackType attackType = UtilData.getAttackType(Minecraft.getInstance().player);
+            AttackTypeInfo attackTypeInfo = UtilData.getAttackTypeInfo(Minecraft.getInstance().player);
 
             if (attackTypeInfo.hasReticleShapes()) {
                 for (ReticleShape rs : attackTypeInfo.getReticleShapes()) {

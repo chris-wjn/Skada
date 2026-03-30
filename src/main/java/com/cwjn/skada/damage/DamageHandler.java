@@ -26,7 +26,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import static com.cwjn.skada.data.SkadaData.DEBUG_ENABLED;
-import static com.cwjn.skada.util.ConsoleColour.*;
+import static com.cwjn.skada.util.UtilColour.*;
 
 @Mod.EventBusSubscriber
 public class DamageHandler {
@@ -43,7 +43,7 @@ public class DamageHandler {
     LivingEntity target = event.getEntity();
     if (target.getServer() != null) target.getServer().getProfiler().push("SkadaDamageHandler");
     boolean isProjectile = false;
-    if (DEBUG_ENABLED) Skada.LOGGER.debug(UNDERLINE + "Damage event for entity: {}, initial damage: {}, source: {}" + RESET, target.getName().getString(), event.getAmount(), event.getSource().getMsgId());
+    if (DEBUG_ENABLED) Skada.LOGGER.debug(CONSOLE_UNDERLINE + "Damage event for entity: {}, initial damage: {}, source: {}" + CONSOLE_RESET, target.getName().getString(), event.getAmount(), event.getSource().getMsgId());
     double amount = event.getAmount();
     if (event.getSource() instanceof SkadaDamageSource) {
       if (DEBUG_ENABLED) Skada.LOGGER.debug("Damage source is a SkadaDamageSource.");
@@ -91,10 +91,10 @@ public class DamageHandler {
 
         if (DEBUG_ENABLED) Skada.LOGGER.debug("Pre-lethality damage: {}", amount);
         switch (info.attackType().type().getOperation()) {
-          case SUM_WITH_DAMAGE -> amount += info.attackType().type().apply(lethality, armour, toughness, healthContext);
-          case SUM_WITH_ARMOUR -> armour += info.attackType().type().apply(lethality, armour, toughness, healthContext);
-          case MULTIPLY_WITH_DAMAGE -> amount *= info.attackType().type().apply(lethality, armour, toughness, healthContext);
-          case MULTIPLY_WITH_ARMOUR -> armour *= info.attackType().type().apply(lethality, armour, toughness, healthContext);
+          case SUM_WITH_DAMAGE -> amount += info.attackType().type().apply(lethality, armour, healthContext);
+          case SUM_WITH_ARMOUR -> armour += info.attackType().type().apply(lethality, armour, healthContext);
+          case MULTIPLY_WITH_DAMAGE -> amount *= info.attackType().type().apply(lethality, armour, healthContext);
+          case MULTIPLY_WITH_ARMOUR -> armour *= info.attackType().type().apply(lethality, armour, healthContext);
         }
         if (DEBUG_ENABLED) Skada.LOGGER.debug("Post-lethality damage: {}", amount);
       }

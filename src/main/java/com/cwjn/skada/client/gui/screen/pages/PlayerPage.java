@@ -3,8 +3,10 @@ package com.cwjn.skada.client.gui.screen.pages;
 import com.cwjn.skada.SkadaRegistry;
 import com.cwjn.skada.client.gui.screen.JournalPage;
 import com.cwjn.skada.client.gui.screen.StatScreen;
-import com.cwjn.skada.util.ColourLibrary;
+import com.cwjn.skada.util.UtilColour;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilText;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -72,24 +74,24 @@ public class PlayerPage extends JournalPage {
     int healthY = screen.getBookY() + PLAYER_BOX_Y_OFFSET + 182;
     float currentHealth = Util.round(Minecraft.getInstance().player.getHealth(), 1);
     float maxHealth = Util.round(Minecraft.getInstance().player.getMaxHealth(), 1);
-    Component health = Util.pixelFontComponent(currentHealth + "/" + maxHealth, false, true, false);
-    pGuiGraphics.drawCenteredString(font, health, healthX, healthY, ColourLibrary.HEALTH_RED);
+    Component health = UtilText.pixelFontComponent(currentHealth + "/" + maxHealth, false, true, false);
+    pGuiGraphics.drawCenteredString(font, health, healthX, healthY, UtilColour.HEALTH_RED);
     int healthIconX = -18 + healthX - font.width(health.getVisualOrderText()) / 2;
     pGuiGraphics.blit(HEALTH_ICON, healthIconX, healthY, 0, 0, 16, 16, 16, 16);
 
-    drawIconThenNumber(pGuiGraphics, TOUGHNESS_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 50, player.getAttributeValue(Attributes.ARMOR_TOUGHNESS), ColourLibrary.LIGHTER_GRAY);
-    drawIconThenNumber(pGuiGraphics, ARMOUR_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 70, player.getAttributeValue(Attributes.ARMOR), ColourLibrary.LIGHTER_GRAY);
+    drawIconThenNumber(pGuiGraphics, TOUGHNESS_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 50, player.getAttributeValue(Attributes.ARMOR_TOUGHNESS), UtilColour.LIGHTER_GRAY);
+    drawIconThenNumber(pGuiGraphics, ARMOUR_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 70, player.getAttributeValue(Attributes.ARMOR), UtilColour.LIGHTER_GRAY);
     double bps = Util.getPlayerSpeedInBlocksPerSecond(player.getAttributeValue(Attributes.MOVEMENT_SPEED));
-    drawIconThenNumber(pGuiGraphics, MOVESPEED_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 90, bps, Util.getColourByPercentage(bps, 4.3, true));
-    drawIconThenNumber(pGuiGraphics, SLASH_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 110, player.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute()), Util.getColourByPercentage(player.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute()), 0, true));
-    drawIconThenNumber(pGuiGraphics, THRUST_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 130, player.getAttributeValue(SkadaRegistry.THRUST.get().resistAttribute()), Util.getColourByPercentage(player.getAttributeValue(SkadaRegistry.THRUST.get().resistAttribute()), 0, true));
-    drawIconThenNumber(pGuiGraphics, STRIKE_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 150, player.getAttributeValue(SkadaRegistry.STRIKE.get().resistAttribute()), Util.getColourByPercentage(player.getAttributeValue(SkadaRegistry.STRIKE.get().resistAttribute()), 0, true));
-    drawIconThenNumber(pGuiGraphics, SkadaRegistry.HEAT.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 50, player.getAttributeValue(SkadaRegistry.HEAT.get().resist()), ColourLibrary.HEAT);
-    drawIconThenNumber(pGuiGraphics, SkadaRegistry.COLD.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 70, player.getAttributeValue(SkadaRegistry.COLD.get().resist()), ColourLibrary.COLD);
-    drawIconThenNumber(pGuiGraphics, SkadaRegistry.LIGHTNING.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 90, player.getAttributeValue(SkadaRegistry.LIGHTNING.get().resist()), ColourLibrary.LIGHTNING);
-    drawIconThenNumber(pGuiGraphics, SkadaRegistry.ENDER.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 110, player.getAttributeValue(SkadaRegistry.ENDER.get().resist()), ColourLibrary.ENDER);
-    drawIconThenNumber(pGuiGraphics, SkadaRegistry.WITHER.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 130, player.getAttributeValue(SkadaRegistry.WITHER.get().resist()), ColourLibrary.WITHER);
-    drawIconThenNumber(pGuiGraphics, SkadaRegistry.AETHER.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 150, player.getAttributeValue(SkadaRegistry.AETHER.get().resist()), ColourLibrary.AETHER);
+    drawIconThenNumber(pGuiGraphics, MOVESPEED_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 90, bps, UtilColour.getColourByPercentage(bps, 4.3, true));
+    drawIconThenNumber(pGuiGraphics, SLASH_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 110, player.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute()), UtilColour.getColourByPercentage(player.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute()), 0, true));
+    drawIconThenNumber(pGuiGraphics, THRUST_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 130, player.getAttributeValue(SkadaRegistry.THRUST.get().resistAttribute()), UtilColour.getColourByPercentage(player.getAttributeValue(SkadaRegistry.THRUST.get().resistAttribute()), 0, true));
+    drawIconThenNumber(pGuiGraphics, STRIKE_ICON, screen.getBookX() + PLAYER_BOX_X_OFFSET - 45, screen.getBookY() + 150, player.getAttributeValue(SkadaRegistry.STRIKE.get().resistAttribute()), UtilColour.getColourByPercentage(player.getAttributeValue(SkadaRegistry.STRIKE.get().resistAttribute()), 0, true));
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.HEAT.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 50, player.getAttributeValue(SkadaRegistry.HEAT.get().resist()), UtilColour.HEAT);
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.COLD.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 70, player.getAttributeValue(SkadaRegistry.COLD.get().resist()), UtilColour.COLD);
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.LIGHTNING.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 90, player.getAttributeValue(SkadaRegistry.LIGHTNING.get().resist()), UtilColour.LIGHTNING);
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.ENDER.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 110, player.getAttributeValue(SkadaRegistry.ENDER.get().resist()), UtilColour.ENDER);
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.WITHER.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 130, player.getAttributeValue(SkadaRegistry.WITHER.get().resist()), UtilColour.WITHER);
+    drawIconThenNumber(pGuiGraphics, SkadaRegistry.AETHER.get().icon(), screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40, screen.getBookY() + 150, player.getAttributeValue(SkadaRegistry.AETHER.get().resist()), UtilColour.AETHER);
     pGuiGraphics.pose().pushPose();
     pGuiGraphics.pose().scale(0.5f, 0.5f, 1f);
     pGuiGraphics.blit(ARMOUR_ICON, (screen.getBookX() + PLAYER_BOX_X_OFFSET + PLAYER_BOX_WIDTH + 40 - 10)*2, (screen.getBookY() + 50 +9)*2, 0, 0, 16, 16, 16, 16);
@@ -104,7 +106,7 @@ public class PlayerPage extends JournalPage {
 
   private void drawIconThenNumber(GuiGraphics pGuiGraphics, ResourceLocation icon, int x, int y, double value, int colour) {
     String valueString = new BigDecimal(value).setScale(1, BigDecimal.ROUND_HALF_UP).toString();
-    Component valueComponent = Util.pixelFontComponent(valueString, false, true, false);
+    Component valueComponent = UtilText.pixelFontComponent(valueString, false, true, false);
     pGuiGraphics.drawString(Minecraft.getInstance().font, valueComponent, x, y, colour);
     pGuiGraphics.blit(icon, -18 + x, y, 0, 0, 16, 16, 16, 16);
   }

@@ -11,6 +11,8 @@ import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilCombat;
+
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.IForgeRegistry;
 
@@ -31,10 +33,10 @@ public abstract class SkadaData {
   public static Supplier<IForgeRegistry<Element>> REGISTRY_ELEMENT;
   public static final HashMap<EntityType<?>, MobData> MOB_DATA = new HashMap<>();
   public static Map<String, ReticleShape> RETICLES = new HashMap<>();
-        public static final LethalityFunction NONE = new LethalityFunction((lethality, armour, armourToughness, healthContext) -> 0, SUM_WITH_DAMAGE);
-  public static final LethalityFunction PERCENT_DAMAGE_BONUS = new LethalityFunction(Util::percentBonusDamage, MULTIPLY_WITH_DAMAGE);
-  public static final LethalityFunction PERCENT_HEALTH_DAMAGE = new LethalityFunction(Util::percentHealthDamage, SUM_WITH_DAMAGE);
-  public static final LethalityFunction PERCENT_REDUC = new LethalityFunction(Util::percentReduc, MULTIPLY_WITH_ARMOUR);
+        public static final LethalityFunction NONE = new LethalityFunction((lethality, armour, healthContext) -> 0, SUM_WITH_DAMAGE);
+  public static final LethalityFunction PERCENT_DAMAGE_BONUS = new LethalityFunction(UtilCombat::percentBonusDamage, MULTIPLY_WITH_DAMAGE);
+  public static final LethalityFunction PERCENT_HEALTH_DAMAGE = new LethalityFunction(UtilCombat::percentHealthDamage, SUM_WITH_DAMAGE);
+  public static final LethalityFunction PERCENT_REDUC = new LethalityFunction(UtilCombat::percentReduc, MULTIPLY_WITH_ARMOUR);
   public static final AttackTypeGeneratorConfiguration SLASH_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(
           PrecisionGenerationUtil::slash, LethalityGenerationUtil::slash, CriticalFailGenerationUtil::slash, AttackSpeedGenerationUtil::slash);
   public static final AttackTypeGeneratorConfiguration STRIKE_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(
@@ -45,6 +47,7 @@ public abstract class SkadaData {
   public static final String WEAPON_INFO_TAG_KEY = "skada.weapon_info.tagkey";
   public static final String ARMOUR_INFO_TAG_KEY = "skada.armour_info.tagkey";
   public static final String CURRENT_ATTACK_TYPE_TAG_KEY = "skada.current_attack_type.tagKey";
+        public static final String CURRENT_ATTACK_TYPE_ID_TAG_KEY = "skada.current_attack_type_id.tagKey";
   public static final String NUM_ATTACK_TYPES_TAG_KEY = "skada.num_attack_types.tagKey";
   public static final String ATTACK_TYPES_ARRAY_TAG_KEY = "skada.attack_types_array.tagKey";
   public static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
@@ -58,6 +61,12 @@ public abstract class SkadaData {
           UUID.fromString("b8c4d5e6-f7a8-9012-3456-789abcdef012"),
           UUID.fromString("c9d5e6f7-a8b9-0123-4567-89abcdef0123"),
           UUID.fromString("dae6f7a8-b9c0-1234-5678-9abcdef01234")
+  };
+  public static final UUID[] SKADA_ARMOUR_BURDEN_MOD_UUID = {
+          UUID.fromString("0a3b4c5d-6e7f-4819-9012-3456789abcde"),
+          UUID.fromString("1b4c5d6e-7f80-492a-a123-456789abcdef"),
+          UUID.fromString("2c5d6e7f-8091-4a3b-b234-56789abcdef0"),
+          UUID.fromString("3d6e7f80-91a2-4b4c-c345-6789abcdef01")
   };
   public static final UUID SKADA_MOB_MODIFIER_OPERATION_0 = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
   public static final UUID SKADA_MOB_MODIFIER_OPERATION_1 = UUID.fromString("5520c08a-21d8-4b25-bfb4-a7b69fb96040");

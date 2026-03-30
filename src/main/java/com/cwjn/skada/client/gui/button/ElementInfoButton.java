@@ -4,6 +4,8 @@ import com.cwjn.skada.client.gui.screen.widget.ElementInfoPanel;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilText;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -58,7 +60,7 @@ public class ElementInfoButton extends Button {
         //name
         int NAME_OFFSET_X = 28, NAME_OFFSET_Y = 15;
         pGuiGraphics.drawString(minecraft.font,
-                Util.pixelFontComponent(StringUtils.capitalize(this.element.name()), false, true, false),
+                UtilText.pixelFontComponent(StringUtils.capitalize(this.element.name()), false, true, false),
                 getX()+NAME_OFFSET_X, getY()+NAME_OFFSET_Y, this.element.colour(), true);
 
         //damage and armour icons
@@ -81,13 +83,13 @@ public class ElementInfoButton extends Button {
         int ROUNDING_PRECISION = 1;
         int AFFINITY_DEFAULT = 1;
         pGuiGraphics.drawString(minecraft.font,
-                Util.pixelFontComponent(Util.roundToString(
+                UtilText.pixelFontComponent(Util.roundToString(
                         (player.getAttributeValue(this.element.baseDamage()) +
                                 weaponInfo.getSpread().getDamageFromElementRatio(player.getAttributeValue(Attributes.ATTACK_DAMAGE), this.element))
                                 * (player.getAttributeValue(this.element.affinity())+AFFINITY_DEFAULT), ROUNDING_PRECISION), false, true, false),
                 getX()+DAMAGE_TEXT_OFFSET_X, getY()+DAMAGE_TEXT_OFFSET_Y, this.element.colour(), true);
         pGuiGraphics.drawString(minecraft.font,
-                Util.pixelFontComponent(Util.roundToString(
+                UtilText.pixelFontComponent(Util.roundToString(
                         player.getAttributeValue(this.element.resist()),
                         ROUNDING_PRECISION), false, true, false),
                 getX()+ARMOUR_TEXT_OFFSET_X, getY()+ARMOUR_TEXT_OFFSET_Y, this.element.colour(), true);

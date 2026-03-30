@@ -1,0 +1,12 @@
+{
+  "density": 9.0,
+  "hardness": 8.5,
+  "toughness": 8.0,
+  "flexibility": 3.0,
+  "spread": {
+    "powerBudget": 1.0,
+    "ratios": {
+      "skada:heat": 0.45
+    }
+  }
+}

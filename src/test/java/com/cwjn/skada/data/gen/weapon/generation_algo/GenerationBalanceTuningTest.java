@@ -186,6 +186,17 @@ class GenerationBalanceTuningTest {
   }
 
   @Test
+  void attackSpeedCurveUsesDiminishingReturnsAtFastExtreme() {
+    double moderateHandling = AttackSpeedGenerationUtil.baseAttackSpeedDelta(0.28, 0.0, 0.20);
+    double strongHandling = AttackSpeedGenerationUtil.baseAttackSpeedDelta(0.40, 0.0, 0.10);
+    double extremeHandling = AttackSpeedGenerationUtil.baseAttackSpeedDelta(0.55, 0.0, 0.04);
+
+    assertTrue(moderateHandling < strongHandling);
+    assertTrue(strongHandling < extremeHandling);
+    assertTrue(extremeHandling - strongHandling < strongHandling - moderateHandling);
+  }
+
+  @Test
   void thrustAlignmentEfficiencyPenalizesRotationalToolPoints() {
     ThrustCapable pickLike = new ThrustCapable() {
       @Override

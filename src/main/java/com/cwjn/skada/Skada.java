@@ -2,7 +2,7 @@ package com.cwjn.skada;
 
 import com.cwjn.skada.mixin.new_features.AccessRangedAttribute;
 import com.cwjn.skada.network.SkadaNetwork;
-import com.cwjn.skada.util.Util;
+import com.cwjn.skada.data.gen.JsonUtil;
 import com.mojang.logging.LogUtils;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.api.distmarker.Dist;
@@ -64,17 +64,11 @@ public class Skada {
         Path dirWeapon = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons");
         Path dirArmour = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour");
         Path dirMobs = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs");
-        Path dirWeaponGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "weapons", "generated");
-        Path dirArmourGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "armour", "generated");
-        Path dirMobsGenerated = Paths.get(FMLPaths.CONFIGDIR.get().toAbsolutePath().toString(), "skada", "mobs", "generated");
         try {
             Files.createDirectories(dir);
             Files.createDirectories(dirWeapon);
             Files.createDirectories(dirArmour);
             Files.createDirectories(dirMobs);
-            Files.createDirectories(dirWeaponGenerated);
-            Files.createDirectories(dirArmourGenerated);
-            Files.createDirectories(dirMobsGenerated);
         }
         catch (IOException e) {
             if (e instanceof FileAlreadyExistsException) {}
@@ -86,19 +80,19 @@ public class Skada {
 
     @SubscribeEvent
     public void loadResources(ServerAboutToStartEvent event) {
-        Util.updateWeaponInfoItemsFromResources(event.getServer().getResourceManager());
-        Util.updateArmourInfoItemsFromResources(event.getServer().getResourceManager());
-        Util.updateMobInfoFromResources(event.getServer().getResourceManager());
-        Util.updateReticleListFromResources(event.getServer().getResourceManager());
+        JsonUtil.updateWeaponInfoItemsFromResources(event.getServer().getResourceManager());
+        JsonUtil.updateArmourInfoItemsFromResources(event.getServer().getResourceManager());
+        JsonUtil.updateMobInfoFromResources(event.getServer().getResourceManager());
+        JsonUtil.updateReticleListFromResources(event.getServer().getResourceManager());
     }
 
     @SubscribeEvent
     public void loadResourcesOnReload(OnDatapackSyncEvent event) {
         if (event.getPlayer() == null) {
-            Util.updateWeaponInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
-            Util.updateArmourInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
-            Util.updateMobInfoFromResources(event.getPlayerList().getServer().getResourceManager());
-            Util.updateReticleListFromResources(event.getPlayerList().getServer().getResourceManager());
+            JsonUtil.updateWeaponInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
+            JsonUtil.updateArmourInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
+            JsonUtil.updateMobInfoFromResources(event.getPlayerList().getServer().getResourceManager());
+            JsonUtil.updateReticleListFromResources(event.getPlayerList().getServer().getResourceManager());
         }
     }
 

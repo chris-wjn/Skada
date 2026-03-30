@@ -1,0 +1,30 @@
+{
+  "helmet": {
+    "element_resist_ratio": 0.2,
+    "attack_resist_ratio": 0.2,
+    "armour_ratio": 0.2,
+    "armour_toughness_ratio": 0.2,
+    "burden_ratio": 0.15
+  },
+  "chestplate": {
+    "element_resist_ratio": 0.35,
+    "attack_resist_ratio": 0.35,
+    "armour_ratio": 0.35,
+    "armour_toughness_ratio": 0.35,
+    "burden_ratio": 0.4
+  },
+  "leggings": {
+    "element_resist_ratio": 0.29,
+    "attack_resist_ratio": 0.29,
+    "armour_ratio": 0.29,
+    "armour_toughness_ratio": 0.29,
+    "burden_ratio": 0.3
+  },
+  "boots": {
+    "element_resist_ratio": 0.16,
+    "attack_resist_ratio": 0.16,
+    "armour_ratio": 0.16,
+    "armour_toughness_ratio": 0.16,
+    "burden_ratio": 0.15
+  }
+}
