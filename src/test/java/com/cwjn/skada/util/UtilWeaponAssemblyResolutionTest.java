@@ -1,5 +1,6 @@
 package com.cwjn.skada.util;
 
+import com.cwjn.skada.data.gen.JsonUtil;
 import com.cwjn.skada.data.gen.weapon.parts.HandlePart;
 import com.cwjn.skada.data.gen.weapon.parts.WeaponPartEntry;
 import com.cwjn.skada.data.gen.weapon.util.WeaponAxis;
@@ -58,10 +59,10 @@ class UtilWeaponAssemblyResolutionTest {
                 """).getAsJsonObject();
 
         Map<String, JsonObject> partMap = Map.of(
-                "skada:flamberge_blade", Util.normalizeWeaponPartDefinitionJson(wrappedLocalPart),
-                "othermod:grip", Util.normalizeWeaponPartDefinitionJson(externalPart));
+                "skada:flamberge_blade", JsonUtil.normalizeWeaponPartDefinitionJson(wrappedLocalPart),
+                "othermod:grip", JsonUtil.normalizeWeaponPartDefinitionJson(externalPart));
 
-        JsonObject resolvedAssemblyJson = Util.resolveWeaponAssemblyPartReferences(assemblyJson, "skada", partMap);
+        JsonObject resolvedAssemblyJson = JsonUtil.resolveWeaponAssemblyPartReferences(assemblyJson, "skada", partMap);
         JsonArray resolvedParts = resolvedAssemblyJson.getAsJsonArray("parts");
         WeaponPartEntry firstEntry = WeaponPartEntry.CODEC.parse(JsonOps.INSTANCE, resolvedParts.get(0)).result().orElseThrow();
         WeaponPartEntry secondEntry = WeaponPartEntry.CODEC.parse(JsonOps.INSTANCE, resolvedParts.get(1)).result().orElseThrow();

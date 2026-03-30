@@ -1,8 +1,11 @@
 package com.cwjn.skada.data.armour;
 
 import com.cwjn.skada.data.SkadaData;
-import com.cwjn.skada.data.gen.armour.ArmourMaterialInfo;
+import com.cwjn.skada.data.gen.armour.ArmourConstructionInfo;
+import com.cwjn.skada.data.gen.armour.ArmourGenerationContext;
+import com.cwjn.skada.data.gen.armour.ArmourGenerationContextFactory;
 import com.cwjn.skada.data.gen.armour.ArmourPieceInfo;
+import com.cwjn.skada.data.gen.weapon.MaterialInfo;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;
@@ -21,29 +24,72 @@ import java.util.Map;
 public record ArmourInfo(Map<Element, Double> elementalResists,
                          Map<AttackType, Double> attackResists,
                          double armourBonus,
-                         double armourToughnessBonus) {
+                         double armourToughnessBonus,
+                         double burden) {
 
     public static Codec<ArmourInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).fieldOf("elemental_resists").forGetter(ArmourInfo::getElementalResistsAsStringMap),
             Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).fieldOf("attack_type_resists").forGetter(ArmourInfo::getAttackResistsAsStringMap),
             Codec.DOUBLE.fieldOf("armour_bonus").forGetter(ArmourInfo::armourBonus),
-            Codec.DOUBLE.fieldOf("armour_toughness_bonus").forGetter(ArmourInfo::armourToughnessBonus)
+            Codec.DOUBLE.fieldOf("armour_toughness_bonus").forGetter(ArmourInfo::armourToughnessBonus),
+            Codec.DOUBLE.optionalFieldOf("burden", 0.0).forGetter(ArmourInfo::burden)
     ).apply(instance, ArmourInfo::fromStringMap));
 
-    public static ArmourInfo generate(ArmourPieceInfo info, ArmourMaterialInfo material) {
+    public static ArmourInfo generate(ArmourPieceInfo info, MaterialInfo material, ArmourConstructionInfo construction) {
+        ArmourGenerationContext context = ArmourGenerationContextFactory.create(material, construction, info);
         Map<Element, Double> elementResists = new HashMap<>();
         Map<AttackType, Double> attackResists = new HashMap<>();
-        for (Map.Entry<Element, Double> e : material.elementResists().entrySet()) {
-            elementResists.put(e.getKey(), Util.round(e.getValue() * info.elementResistRatio(), 2));
+
+        double elementalScale = Util.round(
+                (0.2 * context.normalizedFlexibility())
+                        + (0.3 * context.constructionResponse().paddingStrength())
+                        + (0.2 * context.constructionResponse().continuityQuality())
+                        + (0.3 * context.constructionResponse().effectiveThickness() / 10.0),
+                3);
+        for (Map.Entry<Element, Double> e : material.spread().getRatios().entrySet()) {
+            if (e.getKey().equals(Element.basic())) {
+                continue;
+            }
+            double value = e.getValue() * material.spread().getPowerBudget() * elementalScale * info.elementResistRatio();
+            if (value > 0.0) {
+                elementResists.put(e.getKey(), Util.round(value, 2));
+            }
         }
-        for (Map.Entry<AttackType, Double> e : material.attackResists().entrySet()) {
-            attackResists.put(e.getKey(), Util.round(e.getValue() * info.attackResistRatio(), 2));
-        }
+
+        AttackType slashType = SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation("skada", "slash"));
+        AttackType thrustType = SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation("skada", "thrust"));
+        AttackType strikeType = SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation("skada", "strike"));
+
+        double effectiveThicknessNorm = Math.min(1.0, context.constructionResponse().effectiveThickness() / 10.0);
+        double slashResist = 0.4 + (0.9 * context.normalizedHardness()) + (0.8 * context.constructionResponse().continuityQuality())
+                + (0.35 * context.constructionResponse().deflectionQuality()) - (0.35 * context.constructionResponse().gapExposure());
+        double thrustResist = 0.35 + (0.75 * context.normalizedToughness()) + (0.95 * effectiveThicknessNorm)
+                + (0.55 * (1.0 - context.constructionResponse().seamWeakness())) - (0.7 * context.constructionResponse().gapExposure());
+        double strikeResist = 0.2 + (0.7 * context.normalizedDensity()) + (0.8 * context.constructionResponse().paddingStrength())
+                + (0.45 * context.constructionResponse().rigidityQuality()) + (0.3 * context.constructionResponse().deflectionQuality());
+
+        attackResists.put(slashType, Util.round(Math.max(0.0, slashResist) * info.attackResistRatio(), 2));
+        attackResists.put(thrustType, Util.round(Math.max(0.0, thrustResist) * info.attackResistRatio(), 2));
+        attackResists.put(strikeType, Util.round(Math.max(0.0, strikeResist) * info.attackResistRatio(), 2));
+
+        double armourBonus = (1.0 + (1.15 * context.normalizedDensity()) + (0.65 * context.normalizedHardness())
+            + (1.25 * effectiveThicknessNorm) + (0.85 * context.constructionResponse().continuityQuality()))
+            * 2.0 * info.armourRatio();
+        double toughnessBonus = (0.5 + (1.3 * context.normalizedToughness()) + (0.3 * context.normalizedHardness())
+            + (0.75 * effectiveThicknessNorm) + (0.7 * context.constructionResponse().rigidityQuality()))
+            * 2.1 * info.armourToughnessRatio();
+        double burden = context.constructionResponse().burdenFactor() * info.burdenRatio();
+
         return new ArmourInfo(
                 elementResists,
                 attackResists,
-                Util.round(material.armourBonus() * info.armourRatio(), 2),
-                Util.round(material.armourToughnessBonus() * info.armourToughnessRatio(), 2));
+                Util.round(armourBonus, 2),
+                Util.round(toughnessBonus, 2),
+                Util.round(burden, 2));
+    }
+
+    public static ArmourInfo generate(ArmourGenerationContext context) {
+        return generate(context.piece(), context.material(), context.construction());
     }
 
     public CompoundTag toCompoundTag() {
@@ -58,6 +104,7 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
         }
         tag.putDouble("armour_bonus", armourBonus);
         tag.putDouble("armour_toughness_bonus", armourToughnessBonus);
+        tag.putDouble("burden", burden);
         tag.put("elemental_resists", elementTag);
         tag.put("attack_resists", attackTag);
         return tag;
@@ -74,7 +121,7 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
         for (String key : attackTag.getAllKeys()) {
             attackMap.put(SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation(key)), attackTag.getDouble(key));
         }
-        return new ArmourInfo(elementMap, attackMap, tag.getDouble("armour_bonus"), tag.getDouble("armour_toughness_bonus"));
+        return new ArmourInfo(elementMap, attackMap, tag.getDouble("armour_bonus"), tag.getDouble("armour_toughness_bonus"), tag.getDouble("burden"));
     }
 
     private Map<String, Double> getAttackResistsAsStringMap() {
@@ -93,7 +140,7 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
         }
         return retMap;
     }
-    private static ArmourInfo fromStringMap(Map<String, Double> elementalResists, Map<String, Double> attackResists, double armourBonus, double armourToughnessBonus) {
+    private static ArmourInfo fromStringMap(Map<String, Double> elementalResists, Map<String, Double> attackResists, double armourBonus, double armourToughnessBonus, double burden) {
         //convert the maps of String, Double to maps of Element/AttackType, Double
         Map<Element, Double> elementMap = new HashMap<>();
         Map<AttackType, Double> attackMap = new HashMap<>();
@@ -103,10 +150,10 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
         for (Map.Entry<String, Double> a : attackResists.entrySet()) {
             attackMap.put(SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation(a.getKey())), a.getValue());
         }
-        return new ArmourInfo(elementMap, attackMap, armourBonus, armourToughnessBonus);
+        return new ArmourInfo(elementMap, attackMap, armourBonus, armourToughnessBonus, burden);
     }
     public static Codec<Map<String, ArmourInfo>> STRING_MAP_CODEC = Codec.unboundedMap(Codec.STRING, CODEC);
     public static Codec<Map<String, Map<String, ArmourInfo>>> STRING_STRING_MAP_CODEC = Codec.unboundedMap(Codec.STRING, STRING_MAP_CODEC);
 
-    public static ArmourInfo DEFAULT = new ArmourInfo(Map.of(), Map.of(), 0, 0);
+    public static ArmourInfo DEFAULT = new ArmourInfo(Map.of(), Map.of(), 0, 0, 0);
 }

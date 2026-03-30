@@ -7,6 +7,7 @@ import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackDeliverySnap
 import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackGenerationContextFactory;
 import com.cwjn.skada.data.gen.weapon.generation_algo.context.AssemblyPhysicsSnapshot;
 import com.cwjn.skada.data.gen.weapon.generation_algo.context.MaterialResponseSnapshot;
+import com.cwjn.skada.data.gen.weapon.util.PhysicsUtil;
 import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackGenerationContextSlash;
 import com.cwjn.skada.data.gen.weapon.generation_algo.context.ContactSnapshotSlash;
 import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackGenerationContextStrike;
@@ -119,7 +120,7 @@ public abstract class LethalityGenerationUtil {
     MaterialResponseSnapshot material = context.material();
 
     double momentOfInertia = assembly.momentOfInertiaBaseZKgM2();
-    double angularVelocity = Util.angularVelocity(momentOfInertia, SkadaData.PLAYER_STRENGTH);
+    double angularVelocity = PhysicsUtil.angularVelocity(momentOfInertia, SkadaData.PLAYER_STRENGTH);
     double angularMomentum = momentOfInertia * angularVelocity;
     double rotationalKineticEnergy = 0.5 * momentOfInertia * angularVelocity * angularVelocity;
     double baseLethality = slashBaseLethalityFromEnergy(rotationalKineticEnergy);
@@ -210,7 +211,7 @@ public abstract class LethalityGenerationUtil {
     AttackDeliverySnapshot delivery = context.delivery();
 
     double momentOfInertia = assembly.momentOfInertiaBaseZKgM2();
-    double angularVelocity = Util.angularVelocity(momentOfInertia, SkadaData.PLAYER_STRENGTH);
+    double angularVelocity = PhysicsUtil.angularVelocity(momentOfInertia, SkadaData.PLAYER_STRENGTH);
     double angularMomentum = Math.max(0.0, momentOfInertia * angularVelocity);
 
     double strikePointNorm = delivery.strikePointNorm();

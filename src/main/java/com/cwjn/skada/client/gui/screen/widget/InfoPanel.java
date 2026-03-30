@@ -1,6 +1,6 @@
 package com.cwjn.skada.client.gui.screen.widget;
 
-import com.cwjn.skada.util.ColourLibrary;
+import com.cwjn.skada.util.UtilColour;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -22,9 +22,9 @@ public class InfoPanel {
         if (!visible) return;
 
         // Render border
-        graphics.fill(x-1, y-1, x + WIDTH + 1, y + 293 + 1, ColourLibrary.UI_BORDER_COLOUR | 0xFF000000);
+        graphics.fill(x-1, y-1, x + WIDTH + 1, y + 293 + 1, UtilColour.UI_BORDER_COLOUR | 0xFF000000);
         // Render panel background
-        graphics.fill(x, y, x + WIDTH, y + 293, ColourLibrary.UI_BACKGROUND_COLOUR | 0xFF000000);
+        graphics.fill(x, y, x + WIDTH, y + 293, UtilColour.UI_BACKGROUND_COLOUR | 0xFF000000);
 
 
         // Render title

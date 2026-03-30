@@ -2,6 +2,8 @@ package com.cwjn.skada.damage;
 
 import com.cwjn.skada.data.damage.ElementSpreadInstance;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilCombat;
+
 import net.minecraft.util.RandomSource;
 
 final class DamageMath {
@@ -71,7 +73,7 @@ final class DamageMath {
    * @return The damage after applying precision adjustments.
    */
   public static double getDamageFromPrecisionNormalDistribution(double rawPrecision, double targetToughness, double damage, RandomSource random) {
-    double consistency = Util.precisionScoreToConsistency(rawPrecision, targetToughness);
+    double consistency = UtilCombat.precisionScoreToConsistency(rawPrecision, targetToughness);
     double standardDeviation = (1.0 - consistency) * damage;
     double z = random.nextGaussian();
     double normalDistributionModifier = Math.abs(z) * standardDeviation;

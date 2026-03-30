@@ -11,7 +11,7 @@ import com.cwjn.skada.data.gen.weapon.attack_capability.StrikeCapable;
 import com.cwjn.skada.data.gen.weapon.attack_capability.ThrustCapable;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
-import com.cwjn.skada.util.ColourLibrary;
+import com.cwjn.skada.util.UtilColour;
 import com.cwjn.skada.util.Util;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
@@ -31,13 +31,13 @@ public class SkadaRegistry {
     public static final DeferredRegister<AttackType> ATTACK_TYPES = DeferredRegister.create(Util.rl("damage_class"), MODID);
     public static final DeferredRegister<Element> ELEMENTS = DeferredRegister.create(Util.rl("element"), MODID);
 
-    public static final RegistryObject<Element> HEAT = element("heat", ColourLibrary.HEAT);
-    public static final RegistryObject<Element> COLD = element("cold", ColourLibrary.COLD);
-    public static final RegistryObject<Element> LIGHTNING = element("lightning", ColourLibrary.LIGHTNING);
-    public static final RegistryObject<Element> ENDER = element("ender", ColourLibrary.ENDER);
-    public static final RegistryObject<Element> WITHER = element("wither", ColourLibrary.WITHER);
-    public static final RegistryObject<Element> AETHER = element("aether", ColourLibrary.AETHER);
-    public static final RegistryObject<Element> PHYSICAL = element("basic", ColourLibrary.BASIC);
+    public static final RegistryObject<Element> HEAT = element("heat", UtilColour.HEAT);
+    public static final RegistryObject<Element> COLD = element("cold", UtilColour.COLD);
+    public static final RegistryObject<Element> LIGHTNING = element("lightning", UtilColour.LIGHTNING);
+    public static final RegistryObject<Element> ENDER = element("ender", UtilColour.ENDER);
+    public static final RegistryObject<Element> WITHER = element("wither", UtilColour.WITHER);
+    public static final RegistryObject<Element> AETHER = element("aether", UtilColour.AETHER);
+    public static final RegistryObject<Element> PHYSICAL = element("basic", UtilColour.BASIC);
 
     public static final RegistryObject<AttackType> SLASH = attackType("slash", SkadaData.PERCENT_DAMAGE_BONUS, SkadaData.SLASH_GENERATOR_CONFIG, SlashCapable.class);
     public static final RegistryObject<AttackType> THRUST = attackType("thrust", SkadaData.PERCENT_HEALTH_DAMAGE, SkadaData.THRUST_GENERATOR_CONFIG, ThrustCapable.class);

@@ -3,6 +3,7 @@ package com.cwjn.skada.client.gui.tooltip;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilText;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.client.Minecraft;
@@ -29,15 +30,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.cwjn.skada.data.SkadaData.*;
-import static com.cwjn.skada.util.Util.getOtherSlotAttributesAsList;
-import static com.cwjn.skada.util.Util.otherAttributesComponent;
+import static com.cwjn.skada.util.UtilText.getOtherSlotAttributesAsList;
+import static com.cwjn.skada.util.UtilText.otherAttributesComponent;
 
 public class ClientArmourTooltipComponent implements ClientTooltipComponent {
 
     private static final DecimalFormat df = new DecimalFormat("#.#");
     private final Multimap<Attribute, AttributeModifier> mainAttributes;
     private final List<EquipmentSlot> otherSlots;
-    private final Player player = Minecraft.getInstance().player;
     private final List<Component> lines = new ArrayList<>();
 
     private static final Style ICONS = Style.EMPTY.withFont(Util.rl("icons"));
@@ -48,16 +48,17 @@ public class ClientArmourTooltipComponent implements ClientTooltipComponent {
         this.otherSlots = Arrays.stream(slots).filter((x) -> !item.getAttributeModifiers(x).isEmpty()).toList();
         lines.add(armourComponent(mainAttributes));
         lines.add(toughnessComponent(mainAttributes));
+        lines.add(burdenComponent(mainAttributes));
         lines.addAll(elementComponents(mainAttributes));
         lines.addAll(damageClassComponent(mainAttributes));
         if (!this.mainAttributes.isEmpty()) {
-            lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.shift_for_other_attributes")));
+            lines.add(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.shift_for_other_attributes")));
             if (Screen.hasShiftDown()) {
                 lines.addAll(otherAttributesComponent(mainAttributes));
             }
         }
         if (!otherSlots.isEmpty()) {
-            lines.add(Util.pixelFontComponent(Component.translatable("skada.tooltip.alt_for_other_slot_attributes")));
+            lines.add(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.alt_for_other_slot_attributes")));
             if (Screen.hasAltDown()) {
                 for (EquipmentSlot slot : otherSlots) {
                     lines.addAll(getOtherSlotAttributesAsList(slot, item.getAttributeModifiers(slot)));
@@ -74,7 +75,7 @@ public class ClientArmourTooltipComponent implements ClientTooltipComponent {
                 .mapToDouble(AttributeModifier::getAmount)
                 .sum();
         this.mainAttributes.get(Attributes.ARMOR).removeIf((x) -> x.getOperation() == AttributeModifier.Operation.ADDITION);
-        comp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.armour",
+        comp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.armour",
                 df.format(armourAggregate))));
         return comp;
     }
@@ -87,10 +88,22 @@ public class ClientArmourTooltipComponent implements ClientTooltipComponent {
                 .mapToDouble(AttributeModifier::getAmount)
                 .sum();
         this.mainAttributes.get(Attributes.ARMOR_TOUGHNESS).removeIf((x) -> x.getOperation() == AttributeModifier.Operation.ADDITION);
-        comp.append(Util.pixelFontComponent(Component.translatable("skada.tooltip.info.toughness",
+        comp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.toughness",
                 df.format(toughnessAggregate))));
         return comp;
     }
+
+        private Component burdenComponent(Multimap<Attribute, AttributeModifier> mainAttributes) {
+        MutableComponent comp = Component.empty();
+        comp.append(Component.translatable("skada.icon.weight").withStyle(ICONS));
+        double burdenAggregate = mainAttributes.get(Attributes.ATTACK_SPEED).stream()
+            .filter((x) -> Arrays.stream(SKADA_ARMOUR_BURDEN_MOD_UUID).anyMatch(uuid -> uuid.equals(x.getId())))
+            .mapToDouble(AttributeModifier::getAmount)
+            .sum();
+        comp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.burden",
+            df.format(Math.abs(burdenAggregate / 0.12)))));
+        return comp;
+        }
 
     private List<Component> elementComponents(Multimap<Attribute, AttributeModifier> mainAttributes) {
         List<Component> list = new ArrayList<>();
@@ -103,7 +116,7 @@ public class ClientArmourTooltipComponent implements ClientTooltipComponent {
             this.mainAttributes.get(e.getAttribute()).removeIf((x) -> x.getOperation() == AttributeModifier.Operation.ADDITION);
             MutableComponent comp = Component.empty();
             comp.append(Component.translatable("skada.icon.element." + e.name()).withStyle(ICONS));
-            comp.append(Util.pixelFontComponent(
+            comp.append(UtilText.pixelFontComponent(
                     Component.translatable("skada.tooltip.info.element.resist." + e.name(),
                             df.format(elementAggregate))));
             list.add(comp);
@@ -122,7 +135,7 @@ public class ClientArmourTooltipComponent implements ClientTooltipComponent {
             this.mainAttributes.get(at.getAttribute()).removeIf((x) -> x.getOperation() == AttributeModifier.Operation.ADDITION);
             MutableComponent comp = Component.empty();
             comp.append(Component.translatable("skada.icon.attack_type." + at.name()).withStyle(ICONS));
-            comp.append(Util.pixelFontComponent(
+            comp.append(UtilText.pixelFontComponent(
                     Component.translatable("skada.tooltip.info.attack_type.resist." + at.name(),
                             df.format(attackTypeAggregate))));
             list.add(comp);

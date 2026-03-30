@@ -2,7 +2,8 @@ package com.cwjn.skada.mixin.vanilla_rework;
 
 import com.cwjn.skada.network.SkadaNetwork;
 import com.cwjn.skada.network.client_to_server.C2SAddWeaponTag;
-import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilData;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.nbt.CompoundTag;
@@ -40,7 +41,7 @@ public abstract class RemoveItemstackModifierTooltipLines {
             if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen && screen.getSlotUnderMouse() != null) {
                 SkadaNetwork.playerToServer(new C2SAddWeaponTag(screen.getMenu().containerId, screen.getSlotUnderMouse().index));
             }
-            Util.addWeaponArmourInfoTagIfNotExists((ItemStack) (Object) this);
+            UtilData.addWeaponArmourInfoTagIfNotExists(thisItemStack());
         }
         return false;
     }

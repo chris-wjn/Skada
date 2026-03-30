@@ -5,7 +5,9 @@ import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.DamageInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.AttackType;
-import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilCombat;
+import com.cwjn.skada.util.UtilData;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,9 +21,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import static com.cwjn.skada.data.SkadaData.CURRENT_ATTACK_TYPE_TAG_KEY;
-import static com.cwjn.skada.data.SkadaData.WEAPON_INFO_TAG_KEY;
 
 @Mixin(CrossbowItem.class)
 public abstract class CrossbowItemUseSkada {
@@ -54,20 +53,18 @@ public abstract class CrossbowItemUseSkada {
             )
     )
     private static void onShootProjectile(Level pLevel, LivingEntity pShooter, InteractionHand pHand, ItemStack pCrossbowStack, ItemStack pAmmoStack, float pSoundPitch, boolean pIsCreativeMode, float pVelocity, float pInaccuracy, float pProjectileAngle, CallbackInfo ci, boolean flag, Projectile projectile) {
-        if (pCrossbowStack.getTagElement(WEAPON_INFO_TAG_KEY) != null) {
-            WeaponInfo info = WeaponInfo.fromCompoundTag(pCrossbowStack.getTagElement(WEAPON_INFO_TAG_KEY));
-            AttackTypeInfo attackInfo =
-                    info.getAttackTypes().get(
-                            info.getAttackTypes().keySet().toArray(AttackType[]::new)[pCrossbowStack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
-                    );
+        WeaponInfo info = UtilData.getWeaponInfo(pCrossbowStack);
+        if (!info.getAttackTypes().isEmpty()) {
+            AttackType attackType = UtilData.getAttackType(pCrossbowStack);
+            AttackTypeInfo attackInfo = UtilData.getAttackTypeInfo(pCrossbowStack);
             if (pShooter instanceof ServerPlayer player) {
-                Util.rollCriticalFail(pCrossbowStack, attackInfo.failChance(), pShooter.getRandom(), player);
+                UtilCombat.rollCriticalFail(pCrossbowStack, attackInfo.failChance(), pShooter.getRandom(), player);
             }
             ((AccessProjectileData) projectile).setDamageInfo(new DamageInfo(
                     attackInfo.lethality(),
                     attackInfo.precision(),
                     false,
-                    info.getAttackTypes().keySet().toArray(AttackType[]::new)[pCrossbowStack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)],
+                attackType,
                     info.getSpread().instance()));
         }
     }
@@ -77,15 +74,12 @@ public abstract class CrossbowItemUseSkada {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/Projectile;shoot(DDDFF)V")
     )
     private static void velocity(Projectile instance, double pX, double pY, double pZ, float pVelocity, float pInaccuracy) {
-        if (thisCrossbow.getTagElement(WEAPON_INFO_TAG_KEY) != null) {
-            WeaponInfo info = WeaponInfo.fromCompoundTag(thisCrossbow.getTagElement(WEAPON_INFO_TAG_KEY));
-            AttackTypeInfo attackInfo =
-                    info.getAttackTypes().get(
-                            info.getAttackTypes().keySet().toArray(AttackType[]::new)[thisCrossbow.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
-                    );
-                float inaccuracy = (float) Util.precisionScoreToProjectileInaccuracy(attackInfo.precision());
+        WeaponInfo info = UtilData.getWeaponInfo(thisCrossbow);
+        if (!info.getAttackTypes().isEmpty()) {
+            AttackTypeInfo attackInfo = UtilData.getAttackTypeInfo(thisCrossbow);
+            float inaccuracy = (float) UtilCombat.precisionScoreToProjectileInaccuracy(attackInfo.precision());
             float defaultVelocity = getShootingPower(thisCrossbow);
-            float velocity = (float) Util.projectileVelocityWithDamageBonus(defaultVelocity, attackInfo.damage());
+            float velocity = (float) UtilCombat.projectileVelocityWithDamageBonus(defaultVelocity, attackInfo.damage());
             instance.shoot(pX, pY, pZ, velocity, inaccuracy);
         }
         else {

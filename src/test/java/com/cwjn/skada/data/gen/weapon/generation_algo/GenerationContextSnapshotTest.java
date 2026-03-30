@@ -11,6 +11,7 @@ import com.cwjn.skada.data.gen.weapon.attack_capability.NoneCapable;
 import com.cwjn.skada.data.gen.weapon.attack_capability.SlashCapable;
 import com.cwjn.skada.data.gen.weapon.attack_capability.StrikeCapable;
 import com.cwjn.skada.data.gen.weapon.attack_capability.ThrustCapable;
+import com.cwjn.skada.data.gen.JsonUtil;
 import com.cwjn.skada.data.gen.attack.AttackTypeJsonInfo;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
@@ -136,7 +137,7 @@ class GenerationContextSnapshotTest {
 
   private static WeaponAssembly loadAssembly(String name) throws IOException {
     JsonObject rawAssembly = JsonParser.parseString(Files.readString(GENERATOR_ROOT.resolve(Path.of("weapon_profile", name + ".json")))).getAsJsonObject();
-    JsonObject resolvedAssembly = Util.resolveWeaponAssemblyPartReferences(rawAssembly, "skada", loadPartMap());
+    JsonObject resolvedAssembly = JsonUtil.resolveWeaponAssemblyPartReferences(rawAssembly, "skada", loadPartMap());
     return WeaponAssembly.CODEC.parse(JsonOps.INSTANCE, resolvedAssembly).result().orElseThrow().withMaterialWoodenHandle(MaterialInfo.getDefault());
   }
 
@@ -148,7 +149,7 @@ class GenerationContextSnapshotTest {
         try {
           String name = path.getFileName().toString().replace(".json", "");
           JsonObject rawPart = GSON.fromJson(Files.readString(path), JsonObject.class);
-          partMap.put("skada:" + name, Util.normalizeWeaponPartDefinitionJson(rawPart));
+          partMap.put("skada:" + name, JsonUtil.normalizeWeaponPartDefinitionJson(rawPart));
         } catch (IOException e) {
           throw new IllegalStateException("Failed to load part json " + path, e);
         }

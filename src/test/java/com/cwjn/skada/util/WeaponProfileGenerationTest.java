@@ -3,6 +3,7 @@ package com.cwjn.skada.util;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
+import com.cwjn.skada.data.gen.JsonUtil;
 import com.cwjn.skada.data.gen.attack.AttackTypeJsonInfo;
 import com.cwjn.skada.data.gen.weapon.WeaponAssembly;
 import com.cwjn.skada.data.gen.weapon.MaterialInfo;
@@ -67,10 +68,15 @@ class WeaponProfileGenerationTest {
   @Test
   void swordProfileGeneratesAttackStatsFromJsonAssembly() throws IOException {
     WeaponAssembly sword = loadAssembly("sword");
+    AttackType slashType = sword.getAttackTypes().keySet().stream()
+      .filter(type -> "slash".equals(type.name()))
+      .findFirst()
+      .orElseThrow();
+    WeaponInfo generatedInfo = WeaponInfo.generate(MaterialInfo.getDefault(), sword, false, 1.6, 0.0);
 
     assertTrue(LethalityGenerationUtil.slash(sword) > 0.0);
     assertTrue(PrecisionGenerationUtil.slash(sword) > 0.0);
-    assertTrue(AttackSpeedGenerationUtil.slash(sword) > 0.0);
+    assertTrue(generatedInfo.getAttackTypes().get(slashType).attackSpeed() > 0.5);
     assertTrue(CriticalFailGenerationUtil.slash(sword) > 0.0);
   }
 
@@ -205,6 +211,67 @@ class WeaponProfileGenerationTest {
   }
 
   @Test
+  void explicitAttackSpeedOverrideIsRespected() throws IOException {
+    WeaponAssembly sword = loadAssembly("sword");
+    double swordBaseAttackSpeed = 1.6;
+    Map<AttackType, AttackTypeJsonInfo> updatedAttackTypes = new LinkedHashMap<>(sword.getAttackTypes());
+    AttackTypeJsonInfo slashInfo = updatedAttackTypes.entrySet().stream()
+      .filter(entry -> "slash".equals(entry.getKey().name()))
+      .map(Map.Entry::getValue)
+      .findFirst()
+      .orElseThrow();
+    AttackType slashType = updatedAttackTypes.keySet().stream()
+      .filter(type -> "slash".equals(type.name()))
+      .findFirst()
+      .orElseThrow();
+
+    updatedAttackTypes.put(slashType, new AttackTypeJsonInfo(
+      slashInfo.minReach(),
+      slashInfo.maxReach(),
+      0.0,
+      slashInfo.lethalityModifier(),
+      slashInfo.precisionModifier(),
+      slashInfo.damage(),
+      slashInfo.critFailModifier(),
+      slashInfo.reticleShapes()));
+
+    WeaponInfo info = WeaponInfo.generate(MaterialInfo.getDefault(), new WeaponAssembly(sword.parts(), updatedAttackTypes), false, swordBaseAttackSpeed, 0.0);
+    AttackTypeInfo generatedSlash = info.getAttackTypes().get(slashType);
+
+    assertEquals(0.0, generatedSlash.attackSpeed(), 1.0e-9);
+  }
+
+  @Test
+  void generatedAttackSpeedSoftCapsVerySlowProfilesWithoutFlatMinimum() throws IOException {
+    WeaponAssembly pickaxe = loadAssembly("pickaxe");
+    AttackType thrustType = pickaxe.getAttackTypes().keySet().stream()
+      .filter(type -> "thrust".equals(type.name()))
+      .findFirst()
+      .orElseThrow();
+
+    WeaponInfo info = WeaponInfo.generate(MaterialInfo.getDefault(), pickaxe, false, 0.2, 0.0);
+    double generatedAttackSpeed = info.getAttackTypes().get(thrustType).attackSpeed();
+
+    assertTrue(generatedAttackSpeed > 0.45, "Very slow generated profiles should be compressed back toward the readable APS floor");
+    assertTrue(generatedAttackSpeed < 0.5, "The low-end attack-speed soft cap should still allow exceptional weapons to land slightly below the preferred floor");
+  }
+
+  @Test
+  void generatedAttackSpeedSoftCapsVeryFastProfilesWithoutFlatMaximum() throws IOException {
+    WeaponAssembly sword = loadAssembly("sword");
+    AttackType slashType = sword.getAttackTypes().keySet().stream()
+      .filter(type -> "slash".equals(type.name()))
+      .findFirst()
+      .orElseThrow();
+
+    WeaponInfo info = WeaponInfo.generate(MaterialInfo.getDefault(), sword, false, 2.9, 0.0);
+    double generatedAttackSpeed = info.getAttackTypes().get(slashType).attackSpeed();
+
+    assertTrue(generatedAttackSpeed > 2.5, "Very fast generated profiles should still be able to exceed the preferred APS ceiling");
+    assertTrue(generatedAttackSpeed < 2.7, "The high-end attack-speed soft cap should keep exceptional APS values from running away");
+  }
+
+  @Test
   void stockTridentProfileCanOptIntoDamage() throws IOException {
     WeaponInfo info = WeaponInfo.generate(loadAssembly("trident"), false, 1.1, 8.0);
     AttackTypeInfo generatedThrust = info.getAttackTypes().entrySet().stream()
@@ -218,7 +285,7 @@ class WeaponProfileGenerationTest {
 
   private static WeaponAssembly loadAssembly(String name) throws IOException {
     JsonObject rawAssembly = JsonParser.parseString(Files.readString(GENERATOR_ROOT.resolve(Path.of("weapon_profile", name + ".json")))).getAsJsonObject();
-    JsonObject resolvedAssembly = Util.resolveWeaponAssemblyPartReferences(rawAssembly, "skada", loadPartMap());
+    JsonObject resolvedAssembly = JsonUtil.resolveWeaponAssemblyPartReferences(rawAssembly, "skada", loadPartMap());
     return WeaponAssembly.CODEC.parse(JsonOps.INSTANCE, resolvedAssembly).result().orElseThrow().withMaterialWoodenHandle(MaterialInfo.getDefault());
   }
 
@@ -230,7 +297,7 @@ class WeaponProfileGenerationTest {
         try {
           String name = path.getFileName().toString().replace(".json", "");
           JsonObject rawPart = GSON.fromJson(Files.readString(path), JsonObject.class);
-          partMap.put("skada:" + name, Util.normalizeWeaponPartDefinitionJson(rawPart));
+          partMap.put("skada:" + name, JsonUtil.normalizeWeaponPartDefinitionJson(rawPart));
         } catch (IOException e) {
           throw new IllegalStateException("Failed to load part json " + path, e);
         }

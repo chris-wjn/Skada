@@ -5,6 +5,8 @@ import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilData;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
@@ -37,8 +39,8 @@ public class CustomReticlesDetectEntities {
         minecraft.getProfiler().push("SkadaCustomReticlesDetectEntities");
         Player player = minecraft.player;
         Entity entity = minecraft.getCameraEntity();
-        AttackType attackType = Util.getAttackType(player);
-        AttackTypeInfo attackTypeInfo = Util.getAttackTypeInfo(player);
+        AttackType attackType = UtilData.getAttackType(player);
+        AttackTypeInfo attackTypeInfo = UtilData.getAttackTypeInfo(player);
         ReticleShape defaultShape = RETICLES.get(attackType.name() + "_default");
         float xOffset = minecraft.getWindow().getGuiScaledWidth() * 0.5F;
         float yOffset = minecraft.getWindow().getGuiScaledHeight() * 0.5F;

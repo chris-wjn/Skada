@@ -14,7 +14,6 @@ import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackGenerationCo
 import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackGenerationContextStrike;
 import com.cwjn.skada.data.gen.weapon.generation_algo.context.AttackGenerationContextThrust;
 import com.cwjn.skada.data.registry.AttackType;
-import com.cwjn.skada.util.TierStatFunctionInterface;
 
 public record AttackTypeGeneratorConfiguration(TierStatFunctionInterface precision, TierStatFunctionInterface lethality, TierStatFunctionInterface critFail, TierStatFunctionInterface attackSpeed) {
 

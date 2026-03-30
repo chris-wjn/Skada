@@ -6,6 +6,9 @@ import com.cwjn.skada.data.damage.DamageInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.registry.AttackType;
+import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilData;
+
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Drowned;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -16,9 +19,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import static com.cwjn.skada.data.SkadaData.CURRENT_ATTACK_TYPE_TAG_KEY;
-import static com.cwjn.skada.data.SkadaData.WEAPON_INFO_TAG_KEY;
 
 @Mixin(Drowned.class)
 public class DrownedTridentThrowUseSkada {
@@ -35,19 +35,17 @@ public class DrownedTridentThrowUseSkada {
     )
     private void inject(LivingEntity pTarget, float pDistanceFactor, CallbackInfo ci, ThrownTrident tr) {
         ItemStack stack = thisDrowned().getItemInHand(ProjectileUtil.getWeaponHoldingHand(thisDrowned(), item -> item instanceof net.minecraft.world.item.BowItem));
-        if (stack.getTagElement(WEAPON_INFO_TAG_KEY) != null) {
-            WeaponInfo info = WeaponInfo.fromCompoundTag(stack.getTagElement(WEAPON_INFO_TAG_KEY));
-            AttackTypeInfo attackInfo =
-                    info.getAttackTypes().get(
-                            info.getAttackTypes().keySet().toArray(AttackType[]::new)[stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)]
-                    );
+        WeaponInfo info = UtilData.getWeaponInfo(stack);
+        if (!info.getAttackTypes().isEmpty()) {
+            AttackType attackType = UtilData.getAttackType(stack);
+            AttackTypeInfo attackInfo = UtilData.getAttackTypeInfo(stack);
             double lethality = attackInfo.lethality();
             double precision = attackInfo.precision();
             ((AccessProjectileData) tr).setDamageInfo(new DamageInfo(
                     lethality,
                     precision,
                     false,
-                    info.getAttackTypes().keySet().toArray(AttackType[]::new)[stack.getTag().getInt(CURRENT_ATTACK_TYPE_TAG_KEY)],
+                attackType,
                     info.getSpread().instance()));
         }
         else {

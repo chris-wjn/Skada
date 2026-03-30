@@ -23,6 +23,10 @@ import java.util.function.Supplier;
 public class WeaponInfo {
 
     private static final WeaponInfo NO_WEAPON_VALUE = new WeaponInfo(Collections.emptyMap(), new ElementSpread(), false);
+    private static final double ATTACK_SPEED_SOFTCAP_LOW = 0.5;
+    private static final double ATTACK_SPEED_SOFTCAP_HIGH = 2.5;
+    private static final double ATTACK_SPEED_LOW_TAIL = 0.04;
+    private static final double ATTACK_SPEED_HIGH_TAIL = 0.2;
 
     private final Map<AttackType, AttackTypeInfo> attackTypes;
     private final ElementSpread spread;
@@ -97,10 +101,22 @@ public class WeaponInfo {
     }
 
     private static double resolveAttackSpeed(double baseAttackSpeed, double generatedAttackSpeedAdjustment, double configuredAttackSpeed) {
-        if (configuredAttackSpeed > 0.0) {
+        if (Double.isFinite(configuredAttackSpeed)) {
             return Util.round(configuredAttackSpeed, 3);
         }
-        return Util.round(baseAttackSpeed + generatedAttackSpeedAdjustment, 3);
+        return Util.round(softCapGeneratedAttackSpeed(baseAttackSpeed + generatedAttackSpeedAdjustment), 3);
+    }
+
+    private static double softCapGeneratedAttackSpeed(double generatedAttackSpeed) {
+        if (generatedAttackSpeed < ATTACK_SPEED_SOFTCAP_LOW) {
+            return ATTACK_SPEED_SOFTCAP_LOW - ATTACK_SPEED_LOW_TAIL
+                    * (1.0 - Math.exp((generatedAttackSpeed - ATTACK_SPEED_SOFTCAP_LOW) / ATTACK_SPEED_LOW_TAIL));
+        }
+        if (generatedAttackSpeed > ATTACK_SPEED_SOFTCAP_HIGH) {
+            return ATTACK_SPEED_SOFTCAP_HIGH + ATTACK_SPEED_HIGH_TAIL
+                    * (1.0 - Math.exp((ATTACK_SPEED_SOFTCAP_HIGH - generatedAttackSpeed) / ATTACK_SPEED_HIGH_TAIL));
+        }
+        return generatedAttackSpeed;
     }
 
     /*

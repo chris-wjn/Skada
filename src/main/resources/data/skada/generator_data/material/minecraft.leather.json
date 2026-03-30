@@ -1,0 +1,11 @@
+{
+  "density": 0.95,
+  "hardness": 1.2,
+  "toughness": 5.2,
+  "flexibility": 8.5,
+  "spread": {
+    "powerBudget": 1.0,
+    "ratios": {
+    }
+  }
+}

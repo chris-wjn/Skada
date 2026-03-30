@@ -3,8 +3,9 @@ package com.cwjn.skada.client.gui.screen.widget;
 import com.cwjn.skada.SkadaRegistry;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.Element;
-import com.cwjn.skada.util.ColourLibrary;
+import com.cwjn.skada.util.UtilColour;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilText;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -73,9 +74,9 @@ public class ElementInfoPanel {
         int ICON_BOX_WIDTH = 32 + 4; // 32 for the icon, 2 padding on each side
         int ICON_BOX_HEIGHT = 32 + 4;
         //icon box border
-        pGuiGraphics.fill(ICON_BOX_X-1, ICON_BOX_Y-1, ICON_BOX_X + ICON_BOX_WIDTH+1, ICON_BOX_Y + ICON_BOX_HEIGHT+1, ColourLibrary.UI_BORDER_COLOUR | 0xFF000000);
+        pGuiGraphics.fill(ICON_BOX_X-1, ICON_BOX_Y-1, ICON_BOX_X + ICON_BOX_WIDTH+1, ICON_BOX_Y + ICON_BOX_HEIGHT+1, UtilColour.UI_BORDER_COLOUR | 0xFF000000);
         //icon box background
-        pGuiGraphics.fill(ICON_BOX_X, ICON_BOX_Y, ICON_BOX_X + ICON_BOX_WIDTH, ICON_BOX_Y + ICON_BOX_HEIGHT, ColourLibrary.UI_BACKGROUND_COLOUR | 0xFF000000);
+        pGuiGraphics.fill(ICON_BOX_X, ICON_BOX_Y, ICON_BOX_X + ICON_BOX_WIDTH, ICON_BOX_Y + ICON_BOX_HEIGHT, UtilColour.UI_BACKGROUND_COLOUR | 0xFF000000);
 
         //icon
         pGuiGraphics.pose().pushPose();
@@ -87,7 +88,7 @@ public class ElementInfoPanel {
         pGuiGraphics.pose().popPose();
 
         //divider
-        pGuiGraphics.hLine(DIVIDER_X_START, DIVIDER_X_END, DIVIDER_Y, ColourLibrary.UI_BORDER_COLOUR | 0xFF000000);
+        pGuiGraphics.hLine(DIVIDER_X_START, DIVIDER_X_END, DIVIDER_Y, UtilColour.UI_BORDER_COLOUR | 0xFF000000);
 
         //damage info scrollbox
         drawDamageInfo(pGuiGraphics, DIVIDER_Y);
@@ -126,10 +127,10 @@ public class ElementInfoPanel {
         int Y_START = y + 61;
         double scrollPercentage = DAMAGE_INFO_MAX_SCROLL_POSITION > 0 ? (double) DAMAGE_INFO_CURRENT_SCROLL_POSITION / DAMAGE_INFO_MAX_SCROLL_POSITION : 0;
         //border + background
-        pGuiGraphics.fill(X_START-1, Y_START-1, X_START + SCROLLBOX_WIDTH+1, Y_START + SCROLLBOX_HEIGHT+1, ColourLibrary.UI_BORDER_COLOUR | 0xFF000000);
-        pGuiGraphics.fill(X_START, Y_START, X_START + SCROLLBOX_WIDTH, Y_START + SCROLLBOX_HEIGHT, ColourLibrary.UI_BACKGROUND_COLOUR | 0xFF000000);
+        pGuiGraphics.fill(X_START-1, Y_START-1, X_START + SCROLLBOX_WIDTH+1, Y_START + SCROLLBOX_HEIGHT+1, UtilColour.UI_BORDER_COLOUR | 0xFF000000);
+        pGuiGraphics.fill(X_START, Y_START, X_START + SCROLLBOX_WIDTH, Y_START + SCROLLBOX_HEIGHT, UtilColour.UI_BACKGROUND_COLOUR | 0xFF000000);
         if (damageInfoLines == null || damageInfoLines.isEmpty()) {
-            pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent("No damage info available", false, true, false), X_START, Y_START, ColourLibrary.GRAY, true);
+            pGuiGraphics.drawString(minecraft.font, UtilText.pixelFontComponent("No damage info available", false, true, false), X_START, Y_START, UtilColour.GRAY, true);
         }
         else {
             GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -142,7 +143,7 @@ public class ElementInfoPanel {
             for (int i = 0; i < damageInfoLines.size(); i++) {
                 // Draw each line of damage info
                 int currentY = Y_START + ((i * LINE_HEIGHT) - DAMAGE_INFO_CURRENT_SCROLL_POSITION);
-                pGuiGraphics.drawString(minecraft.font, damageInfoLines.get(i), X_START, currentY, ColourLibrary.LIGHT_GRAY, true);
+                pGuiGraphics.drawString(minecraft.font, damageInfoLines.get(i), X_START, currentY, UtilColour.LIGHT_GRAY, true);
             }
             GL11.glDisable(GL11.GL_SCISSOR_TEST);
         }
@@ -154,10 +155,10 @@ public class ElementInfoPanel {
         int Y_START = dividerY + 5;
         double scrollPercentage = ARMOUR_INFO_MAX_SCROLL_POSITION > 0 ? (double) ARMOUR_INFO_CURRENT_SCROLL_POSITION / ARMOUR_INFO_MAX_SCROLL_POSITION : 0;
         //border + background
-        pGuiGraphics.fill(X_START-1, Y_START-1, X_START + SCROLLBOX_WIDTH+1, Y_START + SCROLLBOX_HEIGHT+1, ColourLibrary.UI_BORDER_COLOUR | 0xFF000000);
-        pGuiGraphics.fill(X_START, Y_START, X_START + SCROLLBOX_WIDTH, Y_START + SCROLLBOX_HEIGHT, ColourLibrary.UI_BACKGROUND_COLOUR | 0xFF000000);
+        pGuiGraphics.fill(X_START-1, Y_START-1, X_START + SCROLLBOX_WIDTH+1, Y_START + SCROLLBOX_HEIGHT+1, UtilColour.UI_BORDER_COLOUR | 0xFF000000);
+        pGuiGraphics.fill(X_START, Y_START, X_START + SCROLLBOX_WIDTH, Y_START + SCROLLBOX_HEIGHT, UtilColour.UI_BACKGROUND_COLOUR | 0xFF000000);
         if (armourInfoLines == null || armourInfoLines.isEmpty()) {
-            pGuiGraphics.drawString(minecraft.font, Util.pixelFontComponent("No armour info available", false, true, false), X_START, Y_START, ColourLibrary.GRAY, true);
+            pGuiGraphics.drawString(minecraft.font, UtilText.pixelFontComponent("No armour info available", false, true, false), X_START, Y_START, UtilColour.GRAY, true);
         }
         else {
             GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -170,7 +171,7 @@ public class ElementInfoPanel {
             for (int i = 0; i < armourInfoLines.size(); i++) {
                 // Draw each line of damage info
                 int currentY = Y_START + ((i * LINE_HEIGHT) - ARMOUR_INFO_CURRENT_SCROLL_POSITION);
-                pGuiGraphics.drawString(minecraft.font, armourInfoLines.get(i), X_START, currentY, ColourLibrary.LIGHT_GRAY, true);
+                pGuiGraphics.drawString(minecraft.font, armourInfoLines.get(i), X_START, currentY, UtilColour.LIGHT_GRAY, true);
             }
             GL11.glDisable(GL11.GL_SCISSOR_TEST);
         }
@@ -180,11 +181,11 @@ public class ElementInfoPanel {
         List<Component> retList = new ArrayList<>();
         double weaponDamage = weaponInfo.getSpread().getDamageFromElementRatio(player.getAttributeValue(Attributes.ATTACK_DAMAGE), this.element);
         if (weaponDamage > 0) {
-            retList.add(Util.pixelFontComponent("+" + Util.roundToString(weaponDamage, 1) + " - Weapon Damage", false, false, true));
+            retList.add(UtilText.pixelFontComponent("+" + Util.roundToString(weaponDamage, 1) + " - Weapon Damage", false, false, true));
         }
         AttributeInstance baseDamageInstance = player.getAttribute(element.baseDamage());
         if (baseDamageInstance.getValue() != 0) {
-            retList.add(Util.pixelFontComponent("+" + Util.roundToString(baseDamageInstance.getValue(), 1) + " - Base Damage", false, false, true));
+            retList.add(UtilText.pixelFontComponent("+" + Util.roundToString(baseDamageInstance.getValue(), 1) + " - Base Damage", false, false, true));
             if (!baseDamageInstance.getModifiers().isEmpty()) {
                 for (AttributeModifier modifier : baseDamageInstance.getModifiers()) {
                     switch (modifier.getOperation()) {
@@ -197,7 +198,7 @@ public class ElementInfoPanel {
         }
         AttributeInstance affinityInstance = player.getAttribute(element.affinity());
         if (affinityInstance.getValue() != 0) {
-            retList.add(Util.pixelFontComponent("x" + Util.roundToString(affinityInstance.getValue(), 1) + " - Affinity", false, false, true));
+            retList.add(UtilText.pixelFontComponent("x" + Util.roundToString(affinityInstance.getValue(), 1) + " - Affinity", false, false, true));
             if (!affinityInstance.getModifiers().isEmpty()) {
                 for (AttributeModifier modifier : affinityInstance.getModifiers()) {
                     switch (modifier.getOperation()) {
@@ -217,7 +218,7 @@ public class ElementInfoPanel {
         List<Component> retList = new ArrayList<>();
         AttributeInstance resist = player.getAttribute(element.resist());
         if (resist.getValue() != 0) {
-            retList.add(Util.pixelFontComponent("+" + Util.roundToString(resist.getValue(), 1) + " - Resistance", false, false, true));
+            retList.add(UtilText.pixelFontComponent("+" + Util.roundToString(resist.getValue(), 1) + " - Resistance", false, false, true));
             if (!resist.getModifiers().isEmpty()) {
                 for (AttributeModifier modifier : resist.getModifiers()) {
                     switch (modifier.getOperation()) {
@@ -234,15 +235,15 @@ public class ElementInfoPanel {
     }
 
     private Component additionLine(double number, String reason) {
-        return Util.pixelFontComponent("        " + number + " - " + reason, false, false, true);
+        return UtilText.pixelFontComponent("        " + number + " - " + reason, false, false, true);
     }
 
     private Component baseMultLine(double number, String reason) {
-        return Util.pixelFontComponent("        +" + Util.roundToString(number, 1) + "% - " + reason, false, false, true);
+        return UtilText.pixelFontComponent("        +" + Util.roundToString(number, 1) + "% - " + reason, false, false, true);
     }
 
     private Component totalMultLine(double number, String reason) {
-        return Util.pixelFontComponent("        " + Util.roundToString(number, 1) + "% - " + reason, false, false, true);
+        return UtilText.pixelFontComponent("        " + Util.roundToString(number, 1) + "% - " + reason, false, false, true);
     }
 
     private void drawHorizontalGradient(GuiGraphics graphics, float pX1, float pY1, float pX2, float pY2, float pZ, int pColorFrom, int pColorTo) {
