@@ -15,6 +15,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -24,6 +25,8 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import java.util.Optional;
 
 import static com.cwjn.skada.data.SkadaData.DEBUG_ENABLED;
 import static com.cwjn.skada.util.UtilColour.*;
@@ -49,10 +52,15 @@ public class DamageHandler {
       if (DEBUG_ENABLED) Skada.LOGGER.debug("Damage source is a SkadaDamageSource.");
       source = (SkadaDamageSource) event.getSource();
     } else if (event.getSource().getDirectEntity() instanceof Projectile projectile) {
-      AccessProjectileData proj = (AccessProjectileData) projectile;
-      source = new SkadaDamageSource(event.getSource(), proj.getDamageInfo());
-      isProjectile = true;
-      if (DEBUG_ENABLED) Skada.LOGGER.debug("Damage source is a projectile with damage info: {}", proj.getDamageInfo());
+      Optional<AccessProjectileData> projData = resolveProjectileData(projectile);
+      if (projData.isPresent()) {
+        source = new SkadaDamageSource(event.getSource(), projData.get().getDamageInfo());
+        isProjectile = true;
+        if (DEBUG_ENABLED) Skada.LOGGER.debug("Damage source is a projectile with damage info: {}", projData.get().getDamageInfo());
+      } else {
+        if (DEBUG_ENABLED) Skada.LOGGER.debug("Projectile does not implement AccessProjectileData, treating as environmental.");
+        source = SkadaDamageSource.environmental(event.getSource());
+      }
     } else {
       if (DEBUG_ENABLED) Skada.LOGGER.debug("Damage source is not a SkadaDamageSource, creating environmental source.");
       source = SkadaDamageSource.environmental(event.getSource());
@@ -160,6 +168,16 @@ public class DamageHandler {
     MinecraftForge.EVENT_BUS.post(evt);
     event.setAmount(evt.getTotalDamage());
     if (target.getServer() != null) target.getServer().getProfiler().pop();
+  }
+
+  /**
+   * Resolves projectile data from an entity. Returns empty if the entity does not implement
+   * {@link AccessProjectileData} (i.e. any non-Skada projectile).
+   * Package-private to allow unit testing without Forge bootstrap.
+   */
+  static Optional<AccessProjectileData> resolveProjectileData(Entity projectile) {
+    if (projectile instanceof AccessProjectileData data) return Optional.of(data);
+    return Optional.empty();
   }
 
 }

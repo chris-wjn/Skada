@@ -19,8 +19,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -36,6 +38,7 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
@@ -85,6 +88,9 @@ public class CommonEvent {
 
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ForgeBusEvent {
+
+        static final float BURDEN_EXHAUSTION_RATE_PER_TICK = 0.0005f;
+        static final float BURDEN_JUMP_EXHAUSTION_RATE = 0.02f;
 
         /*
          * Here we listen to when the server wants to try and get an itemstack's attribute modifiers so
@@ -326,6 +332,37 @@ public class CommonEvent {
                 max = (max+step)*-1;
                 step*=-1;
             }
+        }
+
+        @SubscribeEvent
+        public static void onPlayerTick(TickEvent.PlayerTickEvent e) {
+            if (e.phase != TickEvent.Phase.END) return;
+            if (e.player.level().isClientSide()) return;
+            double totalBurden = getTotalEquippedBurden(e.player);
+            if (totalBurden > 0)
+                e.player.causeFoodExhaustion((float)(totalBurden * BURDEN_EXHAUSTION_RATE_PER_TICK));
+        }
+
+        @SubscribeEvent
+        public static void onLivingJump(LivingEvent.LivingJumpEvent e) {
+            if (!(e.getEntity() instanceof Player player)) return;
+            if (player.level().isClientSide()) return;
+            double totalBurden = getTotalEquippedBurden(player);
+            if (totalBurden > 0)
+                player.causeFoodExhaustion((float)(totalBurden * BURDEN_JUMP_EXHAUSTION_RATE));
+        }
+
+        private static double getTotalEquippedBurden(Player player) {
+            double total = 0.0;
+            for (EquipmentSlot slot : new EquipmentSlot[]{ EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET }) {
+                ItemStack stack = player.getItemBySlot(slot);
+                if (stack.isEmpty()) continue;
+                CompoundTag tag = stack.getTagElement(ARMOUR_INFO_TAG_KEY);
+                if (tag == null) continue;
+                ArmourInfo info = ArmourInfo.fromCompoundTag(tag);
+                total += info.burden();
+            }
+            return total;
         }
 
         static AttributeModifier attackSpeedModifier(AttackTypeInfo attackInfo) {

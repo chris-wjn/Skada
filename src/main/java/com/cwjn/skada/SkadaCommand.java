@@ -133,7 +133,6 @@ public class SkadaCommand {
 
   // private int testCommand(CommandSourceStack source) {
   //   try {
-  //     System.out.println("Test command");
   //   } catch (IOException e) {
   //     e.printStackTrace();
   //   }
@@ -155,9 +154,9 @@ public class SkadaCommand {
     Map<String, MaterialInfo> tierMap = new HashMap<>(JsonUtil.loadMaterialInfo(source.getServer().getResourceManager(), player));
     
     Item held = player.getMainHandItem().getItem();
-    System.out.println("Held item: " + held);
+    LOGGER.debug("Held item: {}", held);
     WeaponAssembly profile = resolveWeaponProfile(held, profileMap);
-    System.out.println("Using profile: " + profile);
+    LOGGER.debug("Using profile: {}", profile);
     if (profile == null) {
       player.displayClientMessage(Component.translatable("skada.command_get_physics.error.not_tiered"), false);
       return 0;
@@ -169,17 +168,17 @@ public class SkadaCommand {
         return 0;
       }
       profile = profile.withMaterialWoodenHandle(tier);
-      System.out.println("Using tier: " + tier);
+      LOGGER.debug("Using tier: {}", tier);
       double volume = profile.volume(WeaponAssembly.LARGE_SAMPLE_SIZE);
-      System.out.println("volume: " + volume);
+      LOGGER.debug("volume: {}", volume);
       double mass = profile.mass(WeaponAssembly.LARGE_SAMPLE_SIZE);
-      System.out.println("mass: " + mass);
+      LOGGER.debug("mass: {}", mass);
       double PoB = profile.pointOfBalance(WeaponAssembly.LARGE_SAMPLE_SIZE);
-      System.out.println("PoB: " + PoB);
+      LOGGER.debug("PoB: {}", PoB);
       Vec3 CoM = profile.centerOfMass(WeaponAssembly.LARGE_SAMPLE_SIZE);
-      System.out.println("CoM: " + CoM);
+      LOGGER.debug("CoM: {}", CoM);
       double inertia = PhysicsUtil.toKgM2(profile.momentOfInertiaAboutBase(WeaponAxis.Z, WeaponAssembly.LARGE_SAMPLE_SIZE));
-      System.out.println("inertia: " + inertia);
+      LOGGER.debug("inertia: {}", inertia);
       player.displayClientMessage(Component.translatable("skada.command_get_physics", volume, mass, PoB, CoM, inertia), false);
     }
     else {

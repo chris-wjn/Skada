@@ -148,4 +148,44 @@ class ArmourGenerationBalanceTest {
 
   private record Totals(double armourBonus, double toughnessBonus, double burden, double slashResist) {
   }
+
+  /**
+   * Pins current per-piece output for leather and netherite within ±10%.
+   * Values were captured from the live generator and must not be adjusted
+   * without a deliberate balance decision.
+   * Material and construction definitions match vanillaProfilesPreserveIntendedSetIdentities.
+   */
+  @Test
+  void vanillaArmourPieceBaselinePinsMatchGenerator() {
+    MaterialInfo leatherMaterial   = new MaterialInfo(0.95, 1.2, 5.2, 8.5, new ElementSpread());
+    MaterialInfo netheriteMaterial = new MaterialInfo(9.0, 8.5, 9.0, 1.0, new ElementSpread());
+    ArmourConstructionInfo leather = new ArmourConstructionInfo(3.4, 2, 4.0, 0.28, 0.58, 0.24, 0.3, 0.08, 0.75);
+    ArmourConstructionInfo heavy   = new ArmourConstructionInfo(6.0, 1, 3.0, 0.95, 0.92, 0.1, 0.82, 0.45, 1.25);
+
+    assertArmourPieceWithinTenPercent("leather helmet",      leatherMaterial,   leather,  HELMET,   0.94,  0.74, 0.07);
+    assertArmourPieceWithinTenPercent("leather chestplate",  leatherMaterial,   leather,  CHEST,    1.65,  1.30, 0.19);
+    assertArmourPieceWithinTenPercent("leather leggings",    leatherMaterial,   leather,  LEGS,     1.36,  1.08, 0.14);
+    assertArmourPieceWithinTenPercent("leather boots",       leatherMaterial,   leather,  BOOTS,    0.75,  0.59, 0.07);
+
+    assertArmourPieceWithinTenPercent("netherite helmet",    netheriteMaterial, heavy,    HELMET,   1.64,  1.28, 0.34);
+    assertArmourPieceWithinTenPercent("netherite chestplate",netheriteMaterial, heavy,    CHEST,    2.88,  2.23, 0.91);
+    assertArmourPieceWithinTenPercent("netherite leggings",  netheriteMaterial, heavy,    LEGS,     2.38,  1.85, 0.68);
+    assertArmourPieceWithinTenPercent("netherite boots",     netheriteMaterial, heavy,    BOOTS,    1.32,  1.02, 0.34);
+  }
+
+  private static void assertArmourPieceWithinTenPercent(
+      String label, MaterialInfo material, ArmourConstructionInfo construction,
+      ArmourPieceInfo piece,
+      double expectedArmourBonus, double expectedToughnessBonus, double expectedBurden) {
+    ArmourInfo info = ArmourInfo.generate(piece, material, construction);
+    assertWithinTenPercent(label + " armourBonus",      expectedArmourBonus,   info.armourBonus());
+    assertWithinTenPercent(label + " toughnessBonus",   expectedToughnessBonus, info.armourToughnessBonus());
+    assertWithinTenPercent(label + " burden",           expectedBurden,        info.burden());
+  }
+
+  private static void assertWithinTenPercent(String label, double expected, double actual) {
+    double tolerance = Math.abs(expected) * 0.10;
+    assertTrue(actual >= expected - tolerance && actual <= expected + tolerance,
+        label + ": expected " + expected + " ±10% but got " + actual);
+  }
 }
