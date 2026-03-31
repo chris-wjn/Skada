@@ -4,7 +4,6 @@ import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.LethalityFunction;
 import com.cwjn.skada.data.gen.attack.AttackTypeGeneratorConfiguration;
 import com.cwjn.skada.data.gen.weapon.attack_capability.AttackCapable;
-import com.cwjn.skada.data.gen.weapon.attack_capability.MagicCapable;
 import com.cwjn.skada.data.gen.weapon.attack_capability.NoneCapable;
 import com.cwjn.skada.data.gen.weapon.attack_capability.SlashCapable;
 import com.cwjn.skada.data.gen.weapon.attack_capability.StrikeCapable;
@@ -42,7 +41,6 @@ public class SkadaRegistry {
     public static final RegistryObject<AttackType> SLASH = attackType("slash", SkadaData.PERCENT_DAMAGE_BONUS, SkadaData.SLASH_GENERATOR_CONFIG, SlashCapable.class);
     public static final RegistryObject<AttackType> THRUST = attackType("thrust", SkadaData.PERCENT_HEALTH_DAMAGE, SkadaData.THRUST_GENERATOR_CONFIG, ThrustCapable.class);
     public static final RegistryObject<AttackType> STRIKE = attackType("strike", SkadaData.PERCENT_REDUC, SkadaData.STRIKE_GENERATOR_CONFIG, StrikeCapable.class);
-    public static final RegistryObject<AttackType> MAGIC = attackType("magic", SkadaData.NONE, SkadaData.NULL_GENERATOR_CONFIG, MagicCapable.class);
     public static final RegistryObject<AttackType> NONE = attackType("none", SkadaData.NONE, SkadaData.NULL_GENERATOR_CONFIG, NoneCapable.class);
 
     private static RegistryObject<AttackType> attackType(String name, LethalityFunction type, AttackTypeGeneratorConfiguration tierStatFunction, Class<? extends AttackCapable> capableInterface) {
