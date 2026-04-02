@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.RegistryObject;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,13 +38,13 @@ public class DamageInfoPage extends JournalPage {
 
     @Override
     public void init() {
-        this.scrollBoxTop = screen.getBookY() + 65;
+        this.scrollBoxTop = screen.getBookLocalY() + 65;
         this.scrollBoxBot = scrollBoxTop + SCROLLBOX_HEIGHT - 3;
-        SCROLLBOX_X_OFFSET = screen.getBookX() +51;
+        SCROLLBOX_X_OFFSET = screen.getBookLocalX() +51;
         SCROLLBOX_Y_OFFSET = scrollBoxTop-13;
 
         elementInfoButtons.clear();
-        createElementInfoButtons(screen.getBookX(), screen.getWeaponInfo());
+        createElementInfoButtons(screen.getBookLocalX(), screen.getWeaponInfo());
 
         int totalContentHeight = 48 * elementInfoButtons.size() - 4;
         maxScrollPos = Math.max(0, totalContentHeight - SCROLLBOX_HEIGHT) + 6;
@@ -54,7 +53,7 @@ public class DamageInfoPage extends JournalPage {
     private void createElementInfoButtons(int left, WeaponInfo weaponInfo) {
         for (RegistryObject<Element> element : ELEMENTS.getEntries()) {
             ElementInfoButton button = new ElementInfoButton(0, 0, Component.empty(), element.get(), this::toggleElementInfoWidget, weaponInfo);
-            ElementInfoPanel panel = new ElementInfoPanel(left + BOOK_RIGHT_PAGE_OFFSET_X, scrollBoxTop-13, element.get(), weaponInfo);
+            ElementInfoPanel panel = new ElementInfoPanel(screen, left + BOOK_RIGHT_PAGE_OFFSET_X, scrollBoxTop-13, element.get(), weaponInfo);
             panel.visible = false;
             button.setWidget(panel);
 
@@ -103,17 +102,15 @@ public class DamageInfoPage extends JournalPage {
         double scrollPercentage = maxScrollPos > 0 ? (double) currentScrollPos / maxScrollPos : 0;
 
         pGuiGraphics.blit(DAMAGE_PAGE_SCROLLBOX_BORDER, SCROLLBOX_X_OFFSET, SCROLLBOX_Y_OFFSET, 0, 0, 229, 293, 229, 293);
-        pGuiGraphics.blit(SCROLLBAR, screen.getBookX() + 274, (scrollBoxTop - 2) + (int)(scrollPercentage * (SCROLLBOX_HEIGHT - 25)), 0, 0, 5, 23, 5, 23);
+        pGuiGraphics.blit(SCROLLBAR, screen.getBookLocalX() + 274, (scrollBoxTop - 2) + (int)(scrollPercentage * (SCROLLBOX_HEIGHT - 25)), 0, 0, 5, 23, 5, 23);
         if (currentInfoWidget != null) currentInfoWidget.render(pGuiGraphics);
 
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        int scale = (int) Minecraft.getInstance().getWindow().getGuiScale();
-        GL11.glScissor(screen.getBookX() * scale, Minecraft.getInstance().getWindow().getScreenHeight() - scrollBoxBot * scale, BOOK_WIDTH * scale, SCROLLBOX_HEIGHT * scale);
+        screen.enableScissor(screen.getBookLocalX(), scrollBoxTop, BOOK_WIDTH, SCROLLBOX_HEIGHT);
 
         for (int i = 0; i < elementInfoButtons.size(); i++) {
             ElementInfoButton button = elementInfoButtons.get(i);
             int itemTop = scrollBoxTop + (i * 48 - currentScrollPos);
-            button.setX(screen.getBookX() + 80);
+            button.setX(screen.getBookLocalX() + 80);
             button.setY(itemTop);
 
             boolean isVisible = itemTop < scrollBoxBot && itemTop + ELEMENT_BUTTON_HEIGHT > scrollBoxTop;
@@ -134,6 +131,6 @@ public class DamageInfoPage extends JournalPage {
             }
         }
 
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        screen.disableScissor();
     }
 }

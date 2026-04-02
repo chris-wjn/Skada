@@ -9,7 +9,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +29,9 @@ public class InfoPage extends JournalPage {
 
     @Override
     public void init() {
-        this.scrollBoxTop = screen.getBookY() + 65;
+        this.scrollBoxTop = screen.getBookLocalY() + 65;
         this.scrollBoxBot = scrollBoxTop + StatScreen.SCROLLBOX_HEIGHT - 3;
-        SCROLLBOX_X_OFFSET = screen.getBookX() + 51;
+        SCROLLBOX_X_OFFSET = screen.getBookLocalX() + 51;
         SCROLLBOX_Y_OFFSET = scrollBoxTop - 13;
 
         infoButtons.clear();
@@ -54,7 +53,7 @@ public class InfoPage extends JournalPage {
 
         for (String topic : infoTopics) {
             InfoTileButton button = new InfoTileButton(0, 0, Component.literal(topic), this::showInfoPanel);
-            InfoPanel panel = new InfoPanel(screen.getBookX() + StatScreen.BOOK_RIGHT_PAGE_OFFSET_X+1,
+            InfoPanel panel = new InfoPanel(screen.getBookLocalX() + StatScreen.BOOK_RIGHT_PAGE_OFFSET_X+1,
                     scrollBoxTop - 13, topic);
             panel.visible = false;
             button.setInfoPanel(panel);
@@ -109,7 +108,7 @@ public class InfoPage extends JournalPage {
         // Render scrollbox border and scrollbar
         graphics.blit(StatScreen.DAMAGE_PAGE_SCROLLBOX_BORDER, SCROLLBOX_X_OFFSET, SCROLLBOX_Y_OFFSET,
                 0, 0, 229, 293, 229, 293);
-        graphics.blit(StatScreen.SCROLLBAR, screen.getBookX() + 274,
+        graphics.blit(StatScreen.SCROLLBAR, screen.getBookLocalX() + 274,
                 (scrollBoxTop - 2) + (int)(scrollPercentage * (StatScreen.SCROLLBOX_HEIGHT - 25)),
                 0, 0, 5, 23, 5, 23);
         if (currentInfoPanel != null) {
@@ -117,17 +116,13 @@ public class InfoPage extends JournalPage {
         }
 
         // Enable scissor test for scrollable area
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        int scale = (int) Minecraft.getInstance().getWindow().getGuiScale();
-        GL11.glScissor(screen.getBookX() * scale,
-                Minecraft.getInstance().getWindow().getScreenHeight() - scrollBoxBot * scale,
-                StatScreen.BOOK_WIDTH * scale, StatScreen.SCROLLBOX_HEIGHT * scale);
+        screen.enableScissor(screen.getBookLocalX(), scrollBoxTop, StatScreen.BOOK_WIDTH, StatScreen.SCROLLBOX_HEIGHT);
 
         // Render visible tiles
         for (int i = 0; i < infoButtons.size(); i++) {
             InfoTileButton button = infoButtons.get(i);
             int itemTop = scrollBoxTop + (i * 48 - currentScrollPos);
-            button.setX(screen.getBookX() + 80);
+            button.setX(screen.getBookLocalX() + 80);
             button.setY(itemTop);
 
             boolean isVisible = itemTop < scrollBoxBot && itemTop + TILE_HEIGHT > scrollBoxTop;
@@ -148,6 +143,6 @@ public class InfoPage extends JournalPage {
             }
         }
 
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        screen.disableScissor();
     }
 }

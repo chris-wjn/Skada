@@ -1,6 +1,7 @@
 package com.cwjn.skada.client.gui.screen.widget;
 
 import com.cwjn.skada.SkadaRegistry;
+import com.cwjn.skada.client.gui.screen.StatScreen;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.UtilColour;
@@ -20,7 +21,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +31,7 @@ public class ElementInfoPanel {
     private static final Player player = minecraft.player;
     private final ResourceLocation TEXTURE = Util.rl("textures/gui/damage_page/element_info_widget.png");
     private static final int WIDTH = 229, HEIGHT = 293;
+    private final StatScreen screen;
     private final WeaponInfo weaponInfo;
     private final int x;
     private final int y;
@@ -48,7 +49,8 @@ public class ElementInfoPanel {
     private List<Component> armourInfoLines;
     private final Element element;
 
-    public ElementInfoPanel(int pX, int pY, Element e, WeaponInfo info) {
+    public ElementInfoPanel(StatScreen screen, int pX, int pY, Element e, WeaponInfo info) {
+        this.screen = screen;
         this.x = pX;
         this.y = pY;
         this.element = e;
@@ -133,19 +135,13 @@ public class ElementInfoPanel {
             pGuiGraphics.drawString(minecraft.font, UtilText.pixelFontComponent("No damage info available", false, true, false), X_START, Y_START, UtilColour.GRAY, true);
         }
         else {
-            GL11.glEnable(GL11.GL_SCISSOR_TEST);
-            int scale = (int) minecraft.getWindow().getGuiScale();
-            int SCISSOR_X_START = X_START * scale;
-            int SCISSOR_Y_START = (minecraft.getWindow().getGuiScaledHeight() - Y_START - SCROLLBOX_HEIGHT) * scale;
-            int SCISSOR_WIDTH = SCROLLBOX_WIDTH * scale;
-            int SCISSOR_HEIGHT = (SCROLLBOX_HEIGHT - 3) * scale; // -3 to account for the border
-            GL11.glScissor(SCISSOR_X_START, SCISSOR_Y_START, SCISSOR_WIDTH, SCISSOR_HEIGHT);
+            screen.enableScissor(X_START, Y_START, SCROLLBOX_WIDTH, SCROLLBOX_HEIGHT - 3);
             for (int i = 0; i < damageInfoLines.size(); i++) {
                 // Draw each line of damage info
                 int currentY = Y_START + ((i * LINE_HEIGHT) - DAMAGE_INFO_CURRENT_SCROLL_POSITION);
                 pGuiGraphics.drawString(minecraft.font, damageInfoLines.get(i), X_START, currentY, UtilColour.LIGHT_GRAY, true);
             }
-            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+            screen.disableScissor();
         }
     }
 
@@ -161,19 +157,13 @@ public class ElementInfoPanel {
             pGuiGraphics.drawString(minecraft.font, UtilText.pixelFontComponent("No armour info available", false, true, false), X_START, Y_START, UtilColour.GRAY, true);
         }
         else {
-            GL11.glEnable(GL11.GL_SCISSOR_TEST);
-            int scale = (int) minecraft.getWindow().getGuiScale();
-            int SCISSOR_X_START = X_START * scale;
-            int SCISSOR_Y_START = (minecraft.getWindow().getGuiScaledHeight() - Y_START - SCROLLBOX_HEIGHT) * scale;
-            int SCISSOR_WIDTH = SCROLLBOX_WIDTH * scale;
-            int SCISSOR_HEIGHT = (SCROLLBOX_HEIGHT - 3) * scale; // -3 to account for the border
-            GL11.glScissor(SCISSOR_X_START, SCISSOR_Y_START, SCISSOR_WIDTH, SCISSOR_HEIGHT);
+            screen.enableScissor(X_START, Y_START, SCROLLBOX_WIDTH, SCROLLBOX_HEIGHT - 3);
             for (int i = 0; i < armourInfoLines.size(); i++) {
                 // Draw each line of damage info
                 int currentY = Y_START + ((i * LINE_HEIGHT) - ARMOUR_INFO_CURRENT_SCROLL_POSITION);
                 pGuiGraphics.drawString(minecraft.font, armourInfoLines.get(i), X_START, currentY, UtilColour.LIGHT_GRAY, true);
             }
-            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+            screen.disableScissor();
         }
     }
 

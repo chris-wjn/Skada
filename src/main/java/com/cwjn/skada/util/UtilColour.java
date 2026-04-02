@@ -21,6 +21,7 @@ public class UtilColour {
     public static final int LIGHTER_GRAY = 0xC0C0C0;
     public static final int LIGHT_GRAY = 0xE0E0E0;
     public static final int DARK_GRAY = 0x404040;
+    public static final int UI_TEXT_COLOUR = 0x503933;
     public static final int UI_BORDER_COLOUR = 0x91665B;
     public static final int UI_BACKGROUND_COLOUR = 0xCA8E61;
 

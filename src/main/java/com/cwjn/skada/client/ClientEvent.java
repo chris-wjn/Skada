@@ -11,6 +11,7 @@ import com.cwjn.skada.client.gui.tooltip.WeaponTooltipComponent;
 import com.cwjn.skada.client.hud.MobHealthBar;
 import com.cwjn.skada.client.hud.ReticleCoordinate;
 import com.cwjn.skada.client.hud.ReticleShape;
+import com.cwjn.skada.client.hud.ReticleViewportScaler;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.network.SkadaNetwork;
@@ -179,8 +180,6 @@ public class ClientEvent {
         @SubscribeEvent
         public static void renderCustomReticles(RenderGuiOverlayEvent event) {
             if (!ClientConfig.ENABLE_CUSTOM_RETICLES.get()) return;
-            @SuppressWarnings("null")
-            ItemStack i = Minecraft.getInstance().player.getMainHandItem();
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder buffer = tesselator.getBuilder();
             RenderSystem.enableBlend();
@@ -194,45 +193,31 @@ public class ClientEvent {
             stack.translate(middleX - 0.5f, middleY, 0);
             double guiScale = event.getWindow().getGuiScale();
             stack.scale((float)(1.0/guiScale), (float)(1.0/guiScale), 1.0f);
+            float reticleScale = ReticleViewportScaler.getViewportScale(event.getWindow().getScreenWidth(), event.getWindow().getScreenHeight());
             AttackType attackType = UtilData.getAttackType(Minecraft.getInstance().player);
             AttackTypeInfo attackTypeInfo = UtilData.getAttackTypeInfo(Minecraft.getInstance().player);
+            List<ReticleShape> reticleShapes = attackTypeInfo.hasReticleShapes()
+                    ? attackTypeInfo.getReticleShapes()
+                    : Collections.singletonList(RETICLES.get(attackType.name() + "_default"));
 
-            if (attackTypeInfo.hasReticleShapes()) {
-                for (ReticleShape rs : attackTypeInfo.getReticleShapes()) {
-                    buffer.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-                    for (ReticleCoordinate coord : rs.getOutline()) {
-                        buffer.vertex(stack.last().pose(), coord.x(), coord.y(), 0).color(1f, 1f, 1f, 1f).endVertex();
-                    }
-                    tesselator.end();
-                    if (DEBUG_ENABLED) {
-                        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                        for (Map.Entry<Float, Collection<Float>> map : rs.getFilledShape().asMap().entrySet()) {
-                            for (Float coord : map.getValue()) {
-                                buffer.vertex(stack.last().pose(), map.getKey() - 0.5f, coord - 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                                buffer.vertex(stack.last().pose(), map.getKey() - 0.5f, coord + 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                                buffer.vertex(stack.last().pose(), map.getKey() + 0.5f, coord + 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                                buffer.vertex(stack.last().pose(), map.getKey() + 0.5f, coord - 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                            }
-                        }
-                        tesselator.end();
-                    }
-                }
-            }
-            else {
+            for (ReticleShape rs : reticleShapes) {
                 buffer.begin(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR);
-                List<ReticleCoordinate> shape = RETICLES.get(attackType.name() + "_default").getOutline();
-                for (ReticleCoordinate coord : shape) {
-                    buffer.vertex(stack.last().pose(), coord.x(), coord.y(), 0).color(1f, 1f, 1f, 1f).endVertex();
+                for (ReticleCoordinate coord : rs.getOutline()) {
+                    float scaledX = ReticleViewportScaler.scaleToScreen(coord.x(), reticleScale);
+                    float scaledY = ReticleViewportScaler.scaleToScreen(coord.y(), reticleScale);
+                    buffer.vertex(stack.last().pose(), scaledX, scaledY, 0).color(1f, 1f, 1f, 1f).endVertex();
                 }
                 tesselator.end();
                 if (DEBUG_ENABLED) {
                     buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-                    for (Map.Entry<Float, Collection<Float>> map : RETICLES.get(attackType.name() + "_default").getFilledShape().asMap().entrySet()) {
+                    for (Map.Entry<Float, Collection<Float>> map : rs.getFilledShape().asMap().entrySet()) {
+                        float scaledX = ReticleViewportScaler.scaleToScreen(map.getKey(), reticleScale);
                         for (Float coord : map.getValue()) {
-                            buffer.vertex(stack.last().pose(), map.getKey() - 0.5f, coord - 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                            buffer.vertex(stack.last().pose(), map.getKey() - 0.5f, coord + 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                            buffer.vertex(stack.last().pose(), map.getKey() + 0.5f, coord + 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
-                            buffer.vertex(stack.last().pose(), map.getKey() + 0.5f, coord - 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            float scaledY = ReticleViewportScaler.scaleToScreen(coord, reticleScale);
+                            buffer.vertex(stack.last().pose(), scaledX - 0.5f, scaledY - 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            buffer.vertex(stack.last().pose(), scaledX - 0.5f, scaledY + 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            buffer.vertex(stack.last().pose(), scaledX + 0.5f, scaledY + 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
+                            buffer.vertex(stack.last().pose(), scaledX + 0.5f, scaledY - 0.5f, 0).color(1f, 0f, 0f, 1f).endVertex();
                         }
                     }
                     tesselator.end();

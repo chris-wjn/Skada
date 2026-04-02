@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Nonnull;
+
 import com.cwjn.skada.ClientConfig;
 import com.cwjn.skada.data.SkadaData;
 import com.google.common.collect.Multimap;
@@ -87,6 +89,7 @@ public abstract class UtilText {
    */
   @SuppressWarnings("null")
   @OnlyIn(Dist.CLIENT)
+  @Nonnull
   public static MutableComponent pixelFontComponent(MutableComponent comp, boolean useBoldNumbers, boolean usePixel16, boolean usePixel12) {
     if ((Minecraft.getInstance().getLanguageManager().getSelected().startsWith("en")
             || Minecraft.getInstance().getLanguageManager().getSelected().startsWith("sv"))
@@ -157,6 +160,10 @@ public abstract class UtilText {
       }
       return retComp;
     }
+  }
+
+  public static MutableComponent compassNineFontComponent(MutableComponent comp) {
+    return comp.withStyle(Style.EMPTY.withFont(Util.rl("compass9")));
   }
 
   @SuppressWarnings("null")

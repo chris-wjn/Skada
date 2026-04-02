@@ -243,30 +243,45 @@ tasks.register('installMod') {
     }
 }
 
-// Helper task for fixing VS Code run configs - COMMENTED OUT due to GString issues
-// tasks.register('fixVSCodeRuns') {
-//     group = 'ide'
-//     description = 'Patches .vscode/launch.json to use Gradle build outputs instead of bin/main'
-//     doLast {
-//         def launch = file('.vscode/launch.json')
-//         if (!launch.exists()) {
-//             println '.vscode/launch.json not found; nothing to patch'
-//             return
-//         }
-//         def text = launch.getText('UTF-8')
-//         // Combine classes and resources into single classpath with proper separator
-//         // Old format: skada%%bin\main;skada%%bin\main (two separate modid entries cause module conflicts)
-//         // New format: skada%%(classes;resources) (single modid with classpath combining both)
-//         def sep = System.properties['os.name'].toLowerCase().contains('windows') ? ';' : ':'
-//         text = text.replaceAll('"MOD_CLASSES"\\s*:\\s*"[^"]*bin\\\\\\\\main[^"]*"', 
-//             "\"MOD_CLASSES\": \"skada%%\${workspaceFolder}\\\\build\\\\classes\\\\java\\\\main$sep\${workspaceFolder}\\\\build\\\\resources\\\\main\"")
-//         launch.write(text, 'UTF-8')
-//         println 'Patched .vscode/launch.json MOD_CLASSES -> combined classpath (prevents Java module conflicts)'
-//     }
-// }
+tasks.register('fixVSCodeRuns') {
+    group = 'ide'
+    description = 'Patches .vscode/launch.json to use correctly-prefixed Gradle build outputs and the runClient pre-launch compile task'
+    doLast {
+        def launch = file('.vscode/launch.json')
+        if (!launch.exists()) {
+            println '.vscode/launch.json not found; nothing to patch'
+            return
+        }
 
-// Auto-patch after VS Code run configs are (re)generated
-// TEMPORARILY DISABLED - causes GString issues with runClient task
-// tasks.matching { it.name == 'genVSCodeRuns' }.configureEach {
-//     finalizedBy tasks.named('fixVSCodeRuns')
-// }
+        def text = launch.getText('UTF-8')
+        def clientLaunchEntry = '''
+|      "name": "runClient",
+|      "request": "launch",
+|      "mainClass": "cpw.mods.bootstraplauncher.BootstrapLauncher",
+|      "projectName": "Skada",
+|      "cwd": "${workspaceFolder}\\run",'''.stripMargin().trim()
+        def clientLaunchPatched = '''
+|      "name": "runClient",
+|      "request": "launch",
+|      "mainClass": "cpw.mods.bootstraplauncher.BootstrapLauncher",
+|      "projectName": "Skada",
+|      "preLaunchTask": "classes",
+|      "cwd": "${workspaceFolder}\\run",'''.stripMargin().trim()
+        def legacyEntry = '"MOD_CLASSES": "skada%%${workspaceFolder}\\\\bin\\\\main;skada%%${workspaceFolder}\\\\bin\\\\main"'
+        def malformedEntry = '"MOD_CLASSES": "skada%%${workspaceFolder}\\\\build\\\\classes\\\\java\\\\main;${workspaceFolder}\\\\build\\\\resources\\\\main"'
+        def correctEntry = '"MOD_CLASSES": "skada%%${workspaceFolder}\\\\build\\\\resources\\\\main;skada%%${workspaceFolder}\\\\build\\\\classes\\\\java\\\\main"'
+        def patched = text.replace(clientLaunchEntry, clientLaunchPatched).replace(legacyEntry, correctEntry).replace(malformedEntry, correctEntry)
+
+        if (patched == text) {
+            println 'No VS Code MOD_CLASSES entries needed patching'
+            return
+        }
+
+        launch.write(patched, 'UTF-8')
+        println 'Patched .vscode/launch.json MOD_CLASSES -> per-entry skada prefixes for resources/classes'
+    }
+}
+
+tasks.matching { it.name == 'genVSCodeRuns' }.configureEach {
+    finalizedBy tasks.named('fixVSCodeRuns')
+}

@@ -2,6 +2,7 @@ package com.cwjn.skada.mixin.new_features;
 
 import com.cwjn.skada.client.ClientHandler;
 import com.cwjn.skada.client.hud.ReticleShape;
+import com.cwjn.skada.client.hud.ReticleViewportScaler;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.util.Util;
@@ -22,6 +23,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static com.cwjn.skada.data.SkadaData.RETICLES;
@@ -45,24 +48,15 @@ public class CustomReticlesDetectEntities {
         float xOffset = minecraft.getWindow().getGuiScaledWidth() * 0.5F;
         float yOffset = minecraft.getWindow().getGuiScaledHeight() * 0.5F;
         float guiScale = (float) minecraft.getWindow().getGuiScale();
+        float reticleScale = ReticleViewportScaler.getViewportScale(minecraft.getWindow().getScreenWidth(), minecraft.getWindow().getScreenHeight());
+        List<ReticleShape> reticleShapes = attackTypeInfo.hasReticleShapes()
+                ? attackTypeInfo.getReticleShapes()
+                : Collections.singletonList(defaultShape);
 
-        if (attackTypeInfo.hasReticleShapes()) {
-            ClientHandler.hitResults = new HitResult[attackTypeInfo.getReticleShapes().stream().mapToInt(s -> s.getFilledShape().size()).sum()];
-            int i = 0;
-            for (ReticleShape rs : attackTypeInfo.getReticleShapes()) {
-                for (Map.Entry<Float, Collection<Float>> map : rs.getFilledShape().asMap().entrySet()) {
-                    for (Float coord : map.getValue()) {
-                        doRayTrace(i, pPartialTicks, minecraft, entity, Util.get3DCoordFrom2D(xOffset + (map.getKey()/guiScale), yOffset + (coord/guiScale), pPartialTicks));
-                        i++;
-                    }
-                }
-            }
-        }
-        else {
-            /*
+        /*
             We use the amount of rays we're going to shoot to determine the area of the hitResults array.
          */
-            ClientHandler.hitResults = new HitResult[defaultShape.getFilledShape().size()];
+        ClientHandler.hitResults = new HitResult[reticleShapes.stream().mapToInt(s -> s.getFilledShape().size()).sum()];
         /*
             Start at index 0, and iterate through the shape's coordinates.
             For each coordinate, we calculate the 3D position of the ray trace, and then call doRayTrace to perform the actual ray tracing
@@ -70,10 +64,13 @@ public class CustomReticlesDetectEntities {
             The index is used to store the hit result in the hitResults array. The index should never
             exceed the area of the hitResults array, which is equal to the number of coordinates in the shape.
          */
-            int i = 0;
-            for (Map.Entry<Float, Collection<Float>> map : defaultShape.getFilledShape().asMap().entrySet()) {
+        int i = 0;
+        for (ReticleShape rs : reticleShapes) {
+            for (Map.Entry<Float, Collection<Float>> map : rs.getFilledShape().asMap().entrySet()) {
                 for (Float coord : map.getValue()) {
-                    doRayTrace(i, pPartialTicks, minecraft, entity, Util.get3DCoordFrom2D(xOffset + (map.getKey()/guiScale), yOffset + (coord/guiScale), pPartialTicks));
+                    float guiX = xOffset + ReticleViewportScaler.scaleToGui(map.getKey(), reticleScale, guiScale);
+                    float guiY = yOffset + ReticleViewportScaler.scaleToGui(coord, reticleScale, guiScale);
+                    doRayTrace(i, pPartialTicks, minecraft, entity, Util.get3DCoordFrom2D(guiX, guiY, pPartialTicks));
                     i++;
                 }
             }
