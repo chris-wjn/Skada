@@ -6,7 +6,10 @@
   "plugin": "com.cwjn.skada.mixin.SkadaMixinPlugin",
   "mixins": [
     "attack_injectors.mob.DrownedTridentThrowUseSkada",
+    "attack_injectors.mob.IronGolemAttackUseSkada",
     "attack_injectors.mob.LlamaSpitUseSkada",
+    "attack_injectors.mob.MobAttackUseSkada",
+    "attack_injectors.mob.PolarBearAttackUseSkada",
     "attack_injectors.mob.ProjectileUtilGetMobArrowUseSkada",
     "attack_injectors.player.BowItemUseSkada",
     "attack_injectors.player.CrossbowItemUseSkada",
@@ -17,6 +20,7 @@
     "new_features.ItemInfo",
     "new_features.ProjectileData",
     "vanilla_rework.AbstractArrowRemoveCritMechanic",
+    "vanilla_rework.ThrownTridentDamageSkada",
     "vanilla_rework.ClientboundSetEntityMotionPacketRemoveVelocityClamp",
     "vanilla_rework.RemoveKnockback",
     "vanilla_rework.RemoveSweepAttack",
@@ -28,6 +32,7 @@
     "defaultRequire": 1
   },
   "client": [
+    "new_features.CustomReticlesShortenVanillaCrosshair",
     "new_features.CustomReticlesDetectEntities",
     "new_features.CustomReticlesHitDetectedEntities",
     "vanilla_rework.RemoveItemstackModifierTooltipLines"

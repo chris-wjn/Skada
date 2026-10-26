@@ -2,12 +2,12 @@ package com.cwjn.skada.client.gui.tooltip;
 
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
+import com.cwjn.skada.data.damage.AttackSelection;
 import com.cwjn.skada.data.damage.WeaponInfo;
-import com.cwjn.skada.data.gen.attack.ElementSpread;
+import com.cwjn.skada.generation.attack.ElementSpread;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.event.CommonEvent;
 import com.cwjn.skada.util.Util;
-import com.cwjn.skada.util.UtilData;
 import com.cwjn.skada.util.UtilText;
 import com.google.common.collect.HashMultimap;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -31,6 +31,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TridentItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeMod;
@@ -58,6 +59,9 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
   private static final Style ICONS = Style.EMPTY.withFont(Util.rl("icons"));
   private static final ResourceLocation SPRITES = Util.rl("textures/gui/spritesheet.png");
   private static final DecimalFormat df = new DecimalFormat("#.#");
+  private static final double BOW_BASE_VELOCITY = 3.0;
+  private static final double CROSSBOW_BASE_VELOCITY = 3.15;
+  private static final double TRIDENT_BASE_VELOCITY = 2.5;
 
   public ClientWeaponTooltipComponent(ItemStack itemstack) {
     EquipmentSlot[] slots = Arrays.stream(EquipmentSlot.values())
@@ -65,24 +69,26 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     this.mainAttributes = HashMultimap
         .create(itemstack.getAttributeModifiers(LivingEntity.getEquipmentSlotForItem(itemstack)));
     this.otherSlots = Arrays.stream(slots).filter((x) -> !itemstack.getAttributeModifiers(x).isEmpty()).toList();
-    info = UtilData.getWeaponInfo(itemstack);
-    attackTypes = UtilData.getAttackTypes(itemstack);
-    AttackTypeInfo currentInfo = UtilData.getAttackTypeInfo(itemstack);
-    int index = UtilData.getAttackTypeIndex(itemstack);
-    lines.add(attackTypesComponent(attackTypes[index]));
-    if (!info.ignoreAttributes())
+    AttackSelection selected = AttackSelection.resolve(itemstack);
+    info = selected.weapon();
+    attackTypes = selected.order().toArray(AttackType[]::new);
+    AttackTypeInfo currentInfo = selected.stats();
+    lines.add(attackTypesComponent(selected.type()));
+    if (info.applicability().melee())
       lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.REACH));
     lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.LETHALITY));
     lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.PRECISION));
     lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.CRITICAL_FAIL));
-    if (!info.ignoreAttributes())
+    if (info.applicability().melee())
       lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.ATTACK_SPEED));
-    if (itemstack.getItem() instanceof CrossbowItem) {
+    if (info.applicability().projectile() && itemstack.getItem() instanceof CrossbowItem) {
       lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.VELOCITY_CROSSBOW));
       lines.addAll(attackDamageComponent(info.getSpread(), false));
-    } else if (itemstack.getItem() instanceof BowItem) {
+    } else if (info.applicability().projectile() && itemstack.getItem() instanceof BowItem) {
       lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.VELOCITY_BOW));
       lines.addAll(attackDamageComponent(info.getSpread(), false));
+    } else if (itemstack.getItem() instanceof TridentItem) {
+      lines.addAll(attackDamageComponent(info.getSpread(), true));
     } else {
       lines.addAll(attackDamageComponent(info.getSpread(), true));
     }
@@ -126,21 +132,20 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     else
       comp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_damage_no_sum")));
     list.add(comp);
-    double powerRatio = spread.getPowerBudget() / spread.sumRatio();
     if (showFinalDamage) {
       spread.getRatios().keySet().forEach(key -> list.add(Component.literal("   ")
           .append(Component.translatable("skada.icon.element." + key.name()).withStyle(ICONS))
           .append(UtilText.pixelFontComponent(
               Component.translatable("skada.tooltip.info.element." + key.name(),
-                  (int) (spread.getRatios().get(key) * 100 / spread.sumRatio()),
-                  Util.round(spread.getRatios().get(key) * powerRatio * damage, 1)))
+                  (int) (spread.getRatios().get(key) * 100 / spread.getPowerBudget()),
+                  Util.round(spread.getRatios().get(key) * damage, 1)))
               .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(key.colour() & 0xFFFFFF))))));
     } else {
       spread.getRatios().keySet().forEach(key -> list.add(Component.literal("   ")
           .append(Component.translatable("skada.icon.element." + key.name()).withStyle(ICONS))
           .append(UtilText.pixelFontComponent(
               Component.translatable("skada.tooltip.info.element." + key.name() + "_no_sum",
-                  (int) (spread.getRatios().get(key) * 100 / spread.sumRatio())))
+                  (int) (spread.getRatios().get(key) * 100 / spread.getPowerBudget())))
               .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(key.colour() & 0xFFFFFF))))));
     }
     return list;
@@ -281,11 +286,15 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
         break;
       case VELOCITY_CROSSBOW:
         retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
-            df.format(attackTypeInfo.damage() + 3.15))));
+            df.format(attackTypeInfo.damage() + CROSSBOW_BASE_VELOCITY))));
         break;
       case VELOCITY_BOW:
         retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
-            df.format(attackTypeInfo.damage() + 3.0))));
+            df.format(attackTypeInfo.damage() + BOW_BASE_VELOCITY))));
+        break;
+      case VELOCITY_TRIDENT:
+        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
+            df.format(attackTypeInfo.damage() + TRIDENT_BASE_VELOCITY))));
         break;
       case CRITICAL_FAIL:
         retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.critical_fail",
@@ -301,26 +310,8 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     ATTACK_SPEED,
     VELOCITY_CROSSBOW,
     VELOCITY_BOW,
+    VELOCITY_TRIDENT,
     CRITICAL_FAIL,
     PRECISION
   }
-
-  private void drawHorizontalGradient(GuiGraphics graphics, float pX1, float pY1, float pX2, float pY2, float pZ,
-      int pColorFrom, int pColorTo) {
-    VertexConsumer vertexConsumer = graphics.bufferSource().getBuffer(RenderType.gui());
-    float f = (float) FastColor.ARGB32.alpha(pColorFrom) / 255.0F;
-    float f1 = (float) FastColor.ARGB32.red(pColorFrom) / 255.0F;
-    float f2 = (float) FastColor.ARGB32.green(pColorFrom) / 255.0F;
-    float f3 = (float) FastColor.ARGB32.blue(pColorFrom) / 255.0F;
-    float f4 = (float) FastColor.ARGB32.alpha(pColorTo) / 255.0F;
-    float f5 = (float) FastColor.ARGB32.red(pColorTo) / 255.0F;
-    float f6 = (float) FastColor.ARGB32.green(pColorTo) / 255.0F;
-    float f7 = (float) FastColor.ARGB32.blue(pColorTo) / 255.0F;
-    Matrix4f matrix4f = graphics.pose().last().pose();
-    vertexConsumer.vertex(matrix4f, pX1, pY1, pZ).color(f1, f2, f3, f).endVertex();// top left
-    vertexConsumer.vertex(matrix4f, pX1, pY2, pZ).color(f1, f2, f3, f).endVertex();// bottom left
-    vertexConsumer.vertex(matrix4f, pX2, pY2, pZ).color(f5, f6, f7, f4).endVertex();// bottom right
-    vertexConsumer.vertex(matrix4f, pX2, pY1, pZ).color(f5, f6, f7, f4).endVertex();// top right
-  }
-
 }

@@ -1,67 +1,23 @@
 package com.cwjn.skada.util;
 
-import com.cwjn.skada.CommonConfig;
 import com.cwjn.skada.Skada;
-import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.SkadaData;
-import com.cwjn.skada.data.armour.AccessArmourInfo;
-import com.cwjn.skada.data.armour.ArmourInfo;
-import com.cwjn.skada.data.damage.AccessWeaponInfo;
-import com.cwjn.skada.data.damage.AttackTypeInfo;
-import com.cwjn.skada.data.damage.WeaponInfo;
-import com.cwjn.skada.data.gen.armour.ArmourConstructionInfo;
-import com.cwjn.skada.data.gen.armour.ArmourPieceInfo;
-import com.cwjn.skada.data.gen.weapon.MaterialInfo;
-import com.cwjn.skada.data.gen.weapon.WeaponAssembly;
-import com.cwjn.skada.data.gen.weapon.parts.WeaponPart;
-import com.cwjn.skada.data.mob.MobData;
-import com.cwjn.skada.data.registry.AttackType;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.lang.Math;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-
-import static com.cwjn.skada.Skada.LOGGER;
-import static com.cwjn.skada.data.SkadaData.*;
-import static net.minecraft.world.item.ItemStack.ATTRIBUTE_MODIFIER_FORMAT;
 
 public abstract class Util {
 

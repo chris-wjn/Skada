@@ -1,13 +1,18 @@
 package com.cwjn.skada.client;
 
 import com.cwjn.skada.ClientConfig;
+import com.cwjn.skada.client.ClientBestiaryCache;
 import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.armour.AccessArmourInfo;
 import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.damage.AccessWeaponInfo;
+import com.cwjn.skada.data.mob.BestiaryEntryView;
+import com.cwjn.skada.util.UtilCombat.CriticalFailSeverity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
@@ -17,6 +22,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Vector3f;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -78,11 +84,44 @@ public class ClientHandler {
         }
     }
 
+    /**
+     * Plays the client-local sound cue for a server-reported critical fail.
+     *
+     * @param severity the critical fail severity that determines the sound variant
+     */
+    public static void playCriticalFailSound(CriticalFailSeverity severity) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null) return;
+
+        switch (severity) {
+            case EDGE_DAMAGE -> minecraft.getSoundManager()
+                    .play(SimpleSoundInstance.forUI(SoundEvents.GRINDSTONE_USE, 0.9F, 0.7F));
+            case DEFORMATION -> minecraft.getSoundManager()
+                    .play(SimpleSoundInstance.forUI(SoundEvents.ANVIL_HIT, 0.9F, 0.8F));
+            case CATASTROPHIC -> minecraft.getSoundManager()
+                    .play(SimpleSoundInstance.forUI(SoundEvents.ITEM_BREAK, 0.9F, 0.9F));
+            case NONE -> {
+            }
+        }
+    }
+
     public static void updateReticles(List<ReticleShape> reticles) {
         LOGGER.info("Received {} reticle shapes from server.", reticles.size());
         for (ReticleShape r : reticles) {
             RETICLES.put(r.getName(), r);
         }
+    }
+
+    public static void updateBestiaryEntries(List<BestiaryEntryView> entries) {
+        LOGGER.info("Received {} bestiary entries from server.", entries.size());
+        ClientBestiaryCache.replaceEntries(entries);
+    }
+
+    public static void updateBestiaryUnlocks(Collection<ResourceLocation> unlockedEntryIds,
+                                             Collection<ResourceLocation> newlyUnlockedEntryIds) {
+        LOGGER.info("Received bestiary unlock state from server: {} unlocked, {} newly unlocked.",
+                unlockedEntryIds.size(), newlyUnlockedEntryIds.size());
+        ClientBestiaryCache.replaceUnlockState(unlockedEntryIds, newlyUnlockedEntryIds);
     }
 
 }

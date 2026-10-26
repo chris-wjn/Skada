@@ -1,0 +1,9 @@
+{
+  "values": [
+    "#skada:generator/armour/material/chain",
+    "#skada:generator/armour/material/iron",
+    "#skada:generator/armour/material/gold",
+    "#skada:generator/armour/material/diamond",
+    "#skada:generator/armour/material/netherite"
+  ]
+}

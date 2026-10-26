@@ -2,7 +2,7 @@ package com.cwjn.skada;
 
 import com.cwjn.skada.mixin.new_features.AccessRangedAttribute;
 import com.cwjn.skada.network.SkadaNetwork;
-import com.cwjn.skada.data.gen.JsonUtil;
+import com.cwjn.skada.data.JsonLoader;
 import com.mojang.logging.LogUtils;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.api.distmarker.Dist;
@@ -55,7 +55,7 @@ public class Skada {
         mixinHealth.setMax(Double.MAX_VALUE);
         mixinArmour.setMax(Double.MAX_VALUE);
         mixinArmour.setMin(-Double.MAX_VALUE);
-        mixinDefense.setMax(Double.MAX_VALUE);
+        mixinDefense.setMax(50);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -80,19 +80,23 @@ public class Skada {
 
     @SubscribeEvent
     public void loadResources(ServerAboutToStartEvent event) {
-        JsonUtil.updateWeaponInfoItemsFromResources(event.getServer().getResourceManager());
-        JsonUtil.updateArmourInfoItemsFromResources(event.getServer().getResourceManager());
-        JsonUtil.updateMobInfoFromResources(event.getServer().getResourceManager());
-        JsonUtil.updateReticleListFromResources(event.getServer().getResourceManager());
+        JsonLoader.updateWeaponInfoItemsFromResources(event.getServer().getResourceManager());
+        JsonLoader.updateArmourInfoItemsFromResources(event.getServer().getResourceManager());
+        JsonLoader.updateMobInfoFromResources(event.getServer().getResourceManager());
+        JsonLoader.updateBestiaryInfoFromResources(event.getServer().getResourceManager());
+        JsonLoader.rebuildBestiaryEntryViews();
+        JsonLoader.updateReticleListFromResources(event.getServer().getResourceManager());
     }
 
     @SubscribeEvent
     public void loadResourcesOnReload(OnDatapackSyncEvent event) {
         if (event.getPlayer() == null) {
-            JsonUtil.updateWeaponInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
-            JsonUtil.updateArmourInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
-            JsonUtil.updateMobInfoFromResources(event.getPlayerList().getServer().getResourceManager());
-            JsonUtil.updateReticleListFromResources(event.getPlayerList().getServer().getResourceManager());
+            JsonLoader.updateWeaponInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
+            JsonLoader.updateArmourInfoItemsFromResources(event.getPlayerList().getServer().getResourceManager());
+            JsonLoader.updateMobInfoFromResources(event.getPlayerList().getServer().getResourceManager());
+            JsonLoader.updateBestiaryInfoFromResources(event.getPlayerList().getServer().getResourceManager());
+            JsonLoader.rebuildBestiaryEntryViews();
+            JsonLoader.updateReticleListFromResources(event.getPlayerList().getServer().getResourceManager());
         }
     }
 

@@ -34,6 +34,18 @@ public class JournalPage {
     return false;
   }
 
+  public boolean handleMouseClicked(double mouseX, double mouseY, int button) {
+    return false;
+  }
+
+  public boolean handleMouseReleased(double mouseX, double mouseY, int button) {
+    return false;
+  }
+
+  public boolean handleMouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    return false;
+  }
+
   public void clearButtons() {
 
   }

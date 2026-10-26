@@ -1,0 +1,20 @@
+{
+  "values": [
+    "minecraft:mob_attack",
+    "minecraft:player_attack",
+    "minecraft:generic",
+    "minecraft:sting",
+    "minecraft:thorns",
+    "minecraft:cactus",
+    "minecraft:anvil",
+    "minecraft:falling_stalactite",
+    "minecraft:stalagmite",
+    "minecraft:fall",
+    "minecraft:fly_into_wall",
+    "minecraft:crushing",
+    "minecraft:piston",
+    "minecraft:starve",
+    "minecraft:dry_out",
+    "minecraft:out_of_world"
+  ]
+}

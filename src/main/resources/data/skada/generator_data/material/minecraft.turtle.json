@@ -6,6 +6,7 @@
   "spread": {
     "powerBudget": 1.0,
     "ratios": {
+      "skada:cold":0.8
     }
   }
 }

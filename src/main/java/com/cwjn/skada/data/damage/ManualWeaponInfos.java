@@ -1,6 +1,6 @@
 package com.cwjn.skada.data.damage;
 
-import com.cwjn.skada.data.gen.attack.ElementSpread;
+import com.cwjn.skada.generation.attack.ElementSpread;
 import com.cwjn.skada.data.registry.AttackType;
 
 import java.util.LinkedHashMap;
@@ -41,7 +41,7 @@ public final class ManualWeaponInfos {
     private static WeaponInfo bow() {
         return new WeaponInfo(singleAttackInfo(
                 AttackType.thrust(),
-                AttackTypeInfo.of(
+                new AttackTypeInfo(
                         12.0,
                         8.5,
                         0.0,
@@ -51,13 +51,13 @@ public final class ManualWeaponInfos {
                         0.004,
                         List.of())),
                 new ElementSpread(),
-                true);
+                WeaponStatApplicability.PROJECTILE);
     }
 
     private static WeaponInfo crossbow() {
         return new WeaponInfo(singleAttackInfo(
                 AttackType.thrust(),
-                AttackTypeInfo.of(
+                new AttackTypeInfo(
                         16.0,
                         11.0,
                         0.0,
@@ -67,7 +67,7 @@ public final class ManualWeaponInfos {
                         0.002,
                         List.of())),
                 new ElementSpread(),
-                true);
+                WeaponStatApplicability.PROJECTILE);
     }
 
     private static Map<AttackType, AttackTypeInfo> singleAttackInfo(AttackType attackType, AttackTypeInfo info) {

@@ -1,10 +1,12 @@
 package com.cwjn.skada.client.gui.screen.widget;
 
 import com.cwjn.skada.SkadaRegistry;
+import com.cwjn.skada.client.gui.screen.StatScreen;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.UtilColour;
 import com.cwjn.skada.util.Util;
+import com.cwjn.skada.util.UtilDefenseDisplay;
 import com.cwjn.skada.util.UtilText;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -13,17 +15,21 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ElementInfoPanel {
 
@@ -31,6 +37,7 @@ public class ElementInfoPanel {
     private static final Player player = minecraft.player;
     private final ResourceLocation TEXTURE = Util.rl("textures/gui/damage_page/element_info_widget.png");
     private static final int WIDTH = 229, HEIGHT = 293;
+    private final StatScreen screen;
     private final WeaponInfo weaponInfo;
     private final int x;
     private final int y;
@@ -48,7 +55,8 @@ public class ElementInfoPanel {
     private List<Component> armourInfoLines;
     private final Element element;
 
-    public ElementInfoPanel(int pX, int pY, Element e, WeaponInfo info) {
+    public ElementInfoPanel(StatScreen screen, int pX, int pY, Element e, WeaponInfo info) {
+        this.screen = screen;
         this.x = pX;
         this.y = pY;
         this.element = e;
@@ -133,19 +141,13 @@ public class ElementInfoPanel {
             pGuiGraphics.drawString(minecraft.font, UtilText.pixelFontComponent("No damage info available", false, true, false), X_START, Y_START, UtilColour.GRAY, true);
         }
         else {
-            GL11.glEnable(GL11.GL_SCISSOR_TEST);
-            int scale = (int) minecraft.getWindow().getGuiScale();
-            int SCISSOR_X_START = X_START * scale;
-            int SCISSOR_Y_START = (minecraft.getWindow().getGuiScaledHeight() - Y_START - SCROLLBOX_HEIGHT) * scale;
-            int SCISSOR_WIDTH = SCROLLBOX_WIDTH * scale;
-            int SCISSOR_HEIGHT = (SCROLLBOX_HEIGHT - 3) * scale; // -3 to account for the border
-            GL11.glScissor(SCISSOR_X_START, SCISSOR_Y_START, SCISSOR_WIDTH, SCISSOR_HEIGHT);
+            screen.enableScissor(X_START, Y_START, SCROLLBOX_WIDTH, SCROLLBOX_HEIGHT - 3);
             for (int i = 0; i < damageInfoLines.size(); i++) {
                 // Draw each line of damage info
                 int currentY = Y_START + ((i * LINE_HEIGHT) - DAMAGE_INFO_CURRENT_SCROLL_POSITION);
                 pGuiGraphics.drawString(minecraft.font, damageInfoLines.get(i), X_START, currentY, UtilColour.LIGHT_GRAY, true);
             }
-            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+            screen.disableScissor();
         }
     }
 
@@ -161,19 +163,13 @@ public class ElementInfoPanel {
             pGuiGraphics.drawString(minecraft.font, UtilText.pixelFontComponent("No armour info available", false, true, false), X_START, Y_START, UtilColour.GRAY, true);
         }
         else {
-            GL11.glEnable(GL11.GL_SCISSOR_TEST);
-            int scale = (int) minecraft.getWindow().getGuiScale();
-            int SCISSOR_X_START = X_START * scale;
-            int SCISSOR_Y_START = (minecraft.getWindow().getGuiScaledHeight() - Y_START - SCROLLBOX_HEIGHT) * scale;
-            int SCISSOR_WIDTH = SCROLLBOX_WIDTH * scale;
-            int SCISSOR_HEIGHT = (SCROLLBOX_HEIGHT - 3) * scale; // -3 to account for the border
-            GL11.glScissor(SCISSOR_X_START, SCISSOR_Y_START, SCISSOR_WIDTH, SCISSOR_HEIGHT);
+            screen.enableScissor(X_START, Y_START, SCROLLBOX_WIDTH, SCROLLBOX_HEIGHT - 3);
             for (int i = 0; i < armourInfoLines.size(); i++) {
                 // Draw each line of damage info
                 int currentY = Y_START + ((i * LINE_HEIGHT) - ARMOUR_INFO_CURRENT_SCROLL_POSITION);
                 pGuiGraphics.drawString(minecraft.font, armourInfoLines.get(i), X_START, currentY, UtilColour.LIGHT_GRAY, true);
             }
-            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+            screen.disableScissor();
         }
     }
 
@@ -188,11 +184,7 @@ public class ElementInfoPanel {
             retList.add(UtilText.pixelFontComponent("+" + Util.roundToString(baseDamageInstance.getValue(), 1) + " - Base Damage", false, false, true));
             if (!baseDamageInstance.getModifiers().isEmpty()) {
                 for (AttributeModifier modifier : baseDamageInstance.getModifiers()) {
-                    switch (modifier.getOperation()) {
-                        case ADDITION -> retList.add(additionLine(modifier.getAmount(), I18n.get(modifier.getName())));
-                        case MULTIPLY_BASE -> retList.add(baseMultLine(modifier.getAmount() * 100, I18n.get(modifier.getName())));
-                        case MULTIPLY_TOTAL -> retList.add(totalMultLine(modifier.getAmount() * 100, I18n.get(modifier.getName())));
-                    }
+                    retList.add(modifierLine(element.baseDamage(), modifier));
                 }
             }
         }
@@ -201,11 +193,7 @@ public class ElementInfoPanel {
             retList.add(UtilText.pixelFontComponent("x" + Util.roundToString(affinityInstance.getValue(), 1) + " - Affinity", false, false, true));
             if (!affinityInstance.getModifiers().isEmpty()) {
                 for (AttributeModifier modifier : affinityInstance.getModifiers()) {
-                    switch (modifier.getOperation()) {
-                        case ADDITION -> retList.add(additionLine(modifier.getAmount(), I18n.get(modifier.getName())));
-                        case MULTIPLY_BASE -> retList.add(baseMultLine(modifier.getAmount() * 100, I18n.get(modifier.getName())));
-                        case MULTIPLY_TOTAL -> retList.add(totalMultLine(modifier.getAmount() * 100, I18n.get(modifier.getName())));
-                    }
+                    retList.add(modifierLine(element.affinity(), modifier));
                 }
             }
         }
@@ -218,14 +206,11 @@ public class ElementInfoPanel {
         List<Component> retList = new ArrayList<>();
         AttributeInstance resist = player.getAttribute(element.resist());
         if (resist.getValue() != 0) {
-            retList.add(UtilText.pixelFontComponent("+" + Util.roundToString(resist.getValue(), 1) + " - Resistance", false, false, true));
+            retList.add(totalResistanceLine(resist.getValue()));
+            retList.add(totalMitigationLine(resist.getValue()));
             if (!resist.getModifiers().isEmpty()) {
                 for (AttributeModifier modifier : resist.getModifiers()) {
-                    switch (modifier.getOperation()) {
-                        case ADDITION -> retList.add(additionLine(modifier.getAmount(), I18n.get(modifier.getName())));
-                        case MULTIPLY_BASE -> retList.add(baseMultLine(modifier.getAmount() * 100, I18n.get(modifier.getName())));
-                        case MULTIPLY_TOTAL -> retList.add(totalMultLine(modifier.getAmount() * 100, I18n.get(modifier.getName())));
-                    }
+                    retList.add(modifierLine(element.resist(), modifier));
                 }
             }
         }
@@ -234,16 +219,106 @@ public class ElementInfoPanel {
         return retList;
     }
 
-    private Component additionLine(double number, String reason) {
-        return UtilText.pixelFontComponent("        " + number + " - " + reason, false, false, true);
+    /**
+     * Formats one modifier entry and appends the best source label available.
+     */
+    private Component modifierLine(Attribute attribute, AttributeModifier modifier) {
+        String reason = I18n.get(modifier.getName());
+        Component source = resolveModifierSource(attribute, modifier);
+        return switch (modifier.getOperation()) {
+            case ADDITION -> additionLine(modifier.getAmount(), reason, source);
+            case MULTIPLY_BASE -> baseMultLine(modifier.getAmount() * 100, reason, source);
+            case MULTIPLY_TOTAL -> totalMultLine(modifier.getAmount() * 100, reason, source);
+        };
     }
 
-    private Component baseMultLine(double number, String reason) {
-        return UtilText.pixelFontComponent("        +" + Util.roundToString(number, 1) + "% - " + reason, false, false, true);
+    /**
+     * Resolves where a modifier came from so the info panel can distinguish item-backed
+     * modifiers from future non-item sources without changing the rendering code again.
+     */
+    private Component resolveModifierSource(Attribute attribute, AttributeModifier modifier) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            ItemStack stack = player.getItemBySlot(slot);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            for (AttributeModifier stackModifier : stack.getAttributeModifiers(slot).get(attribute)) {
+                if (sameModifier(modifier, stackModifier)) {
+                    return stack.getHoverName().copy();
+                }
+            }
+        }
+        if (!modifier.getName().isBlank()) {
+            return Component.literal(I18n.get(modifier.getName()));
+        }
+        return Component.translatable("skada.statscreen.element_panel.source.unknown");
     }
 
-    private Component totalMultLine(double number, String reason) {
-        return UtilText.pixelFontComponent("        " + Util.roundToString(number, 1) + "% - " + reason, false, false, true);
+    /**
+     * Matches flattened player attribute modifiers back to an originating source entry.
+     */
+    private boolean sameModifier(AttributeModifier left, AttributeModifier right) {
+        return Objects.equals(left.getId(), right.getId())
+                && left.getOperation() == right.getOperation()
+                && Double.compare(left.getAmount(), right.getAmount()) == 0;
+    }
+
+    private Component totalResistanceLine(double totalRating) {
+        String translationKey;
+        if (element.usesArmourAsResistance()) {
+            translationKey = totalRating < 0
+                    ? "skada.statscreen.element_panel.total_armour_vulnerability"
+                    : "skada.statscreen.element_panel.total_armour";
+        } else {
+            translationKey = totalRating < 0
+                    ? "skada.statscreen.element_panel.total_vulnerability_rating"
+                    : "skada.statscreen.element_panel.total_resistance";
+        }
+        return UtilText.pixelFontComponent(Component.translatable(translationKey, signedRating(totalRating)));
+    }
+
+    private Component totalMitigationLine(double totalRating) {
+        double mitigationPercent = element.usesArmourAsResistance()
+                ? UtilDefenseDisplay.armourMitigationPercent(totalRating)
+                : UtilDefenseDisplay.elementalMitigationPercent(totalRating);
+        String translationKey = mitigationPercent < 0
+                ? "skada.statscreen.element_panel.total_vulnerability"
+                : "skada.statscreen.element_panel.total_reduction";
+        return UtilText.pixelFontComponent(Component.translatable(translationKey, Util.roundToString(Math.abs(mitigationPercent), 1)));
+    }
+
+    private String signedRating(double value) {
+        return value > 0 ? "+" + Util.roundToString(value, 1) : Util.roundToString(value, 1);
+    }
+
+    private Component additionLine(double number, String reason, Component source) {
+        return modifierTextLine(number, false, reason, source);
+    }
+
+    private Component baseMultLine(double number, String reason, Component source) {
+        return modifierTextLine(Util.roundToString(number, 1), true, reason, source, true);
+    }
+
+    private Component totalMultLine(double number, String reason, Component source) {
+        return modifierTextLine(Util.roundToString(number, 1), false, reason, source, true);
+    }
+
+    /**
+     * Builds the final modifier line with an operation-specific amount, reason, and source.
+     */
+    private Component modifierTextLine(double number, boolean positivePrefix, String reason, Component source) {
+        return modifierTextLine(Util.roundToString(number, 1), positivePrefix, reason, source, false);
+    }
+
+    /**
+     * Builds the final modifier line with an operation-specific amount, reason, and source.
+     */
+    private Component modifierTextLine(String numberText, boolean positivePrefix, String reason, Component source, boolean appendPercent) {
+        String prefix = positivePrefix ? "+" : "";
+        String suffix = appendPercent ? "%" : "";
+        MutableComponent line = Component.literal("        " + prefix + numberText + suffix + " - " + reason);
+        line.append(Component.translatable("skada.statscreen.element_panel.source", source));
+        return UtilText.pixelFontComponent(line, false, false, true);
     }
 
     private void drawHorizontalGradient(GuiGraphics graphics, float pX1, float pY1, float pX2, float pY2, float pZ, int pColorFrom, int pColorTo) {

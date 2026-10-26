@@ -19,6 +19,20 @@ base {
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+
+// Minecraft integration tests load with the development mod, but stay out of its release jar.
+sourceSets {
+    gametest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+configurations {
+    gametestImplementation.extendsFrom implementation
+    gametestRuntimeOnly.extendsFrom runtimeOnly
+}
+
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
 
@@ -56,25 +70,18 @@ minecraft {
         }
 
         client {
+            mods."${mod_id}".source sourceSets.gametest
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', mod_id
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            // JVM args for HotSwapAgent / DCEVM. Download the agent and enable enhanced redefinition.
-            // NOTE: hotswap-agent.jar is optional - only add if it exists
-            if (file('libs/hotswap-agent.jar').exists()) {
-                jvmArgs += [
-                        "-javaagent:" + (String)(projectDir.absolutePath + "/libs/hotswap-agent.jar"),
-                        "-XX:+UnlockDiagnosticVMOptions",
-                        "-XX:+AllowEnhancedClassRedefinition"
-                ]
-            }
             if (project.hasProperty('debugPort')) {
                 jvmArgs += ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:" + (String)(project.property('debugPort'))]
             }
         }
 
         server {
+            mods."${mod_id}".source sourceSets.gametest
             workingDirectory project.file('runServer')
             property 'forge.enabledGameTestNamespaces', mod_id
             property 'mixin.env.remapRefMap', 'true'
@@ -85,6 +92,7 @@ minecraft {
         // By default, the server will crash when no gametests are provided.
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
+            mods."${mod_id}".source sourceSets.gametest
             property 'forge.enabledGameTestNamespaces', mod_id
         }
 
@@ -121,6 +129,7 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.mockito:mockito-core:5.11.0'
     minecraft "net.neoforged:forge:${minecraft_version}-${neo_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation fg.deobf("maven.modrinth:spark:1.10.53-forge")
@@ -131,6 +140,10 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform() // run JUnit 5 tests
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('gametestClasses')
 }
 
 tasks.register('syncGameTestStructures', Copy) {
@@ -210,26 +223,9 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
-// Download Hotswap Agent for enhanced class redefinition (used for hot-reload workflows)
-task downloadHotswapAgent {
-    doLast {
-        def libsDir = file('libs')
-        libsDir.mkdirs()
-        def out = file('libs/hotswap-agent.jar')
-        if (!out.exists()) {
-            println 'Downloading hotswap-agent to ' + out
-            def url = 'https://repo1.maven.org/maven2/org/hotswapagent/hotswap-agent/1.4.2/hotswap-agent-1.4.2.jar'
-            url.toURL().withInputStream { i -> out.withOutputStream { it << i } }
-        } else {
-            println 'hotswap-agent already present'
-        }
-    }
-}
-
 // Copies the built mod jar into the run/mods folder so the dev client loads the latest build
 tasks.register('installMod') {
     dependsOn 'jar'
-    dependsOn downloadHotswapAgent
     doLast {
         def built = tasks.named('jar').get().archiveFile.get().asFile
         def outDir = file('run/mods')
@@ -241,31 +237,3 @@ tasks.register('installMod') {
         println "Installed ${built.name} -> ${outDir}"
     }
 }
-
-// Helper task for fixing VS Code run configs - COMMENTED OUT due to GString issues
-// tasks.register('fixVSCodeRuns') {
-//     group = 'ide'
-//     description = 'Patches .vscode/launch.json to use Gradle build outputs instead of bin/main'
-//     doLast {
-//         def launch = file('.vscode/launch.json')
-//         if (!launch.exists()) {
-//             println '.vscode/launch.json not found; nothing to patch'
-//             return
-//         }
-//         def text = launch.getText('UTF-8')
-//         // Combine classes and resources into single classpath with proper separator
-//         // Old format: skada%%bin\main;skada%%bin\main (two separate modid entries cause module conflicts)
-//         // New format: skada%%(classes;resources) (single modid with classpath combining both)
-//         def sep = System.properties['os.name'].toLowerCase().contains('windows') ? ';' : ':'
-//         text = text.replaceAll('"MOD_CLASSES"\\s*:\\s*"[^"]*bin\\\\\\\\main[^"]*"', 
-//             "\"MOD_CLASSES\": \"skada%%\${workspaceFolder}\\\\build\\\\classes\\\\java\\\\main$sep\${workspaceFolder}\\\\build\\\\resources\\\\main\"")
-//         launch.write(text, 'UTF-8')
-//         println 'Patched .vscode/launch.json MOD_CLASSES -> combined classpath (prevents Java module conflicts)'
-//     }
-// }
-
-// Auto-patch after VS Code run configs are (re)generated
-// TEMPORARILY DISABLED - causes GString issues with runClient task
-// tasks.matching { it.name == 'genVSCodeRuns' }.configureEach {
-//     finalizedBy tasks.named('fixVSCodeRuns')
-// }

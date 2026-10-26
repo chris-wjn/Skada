@@ -1,5 +1,6 @@
 package com.cwjn.skada.damage;
 
+import com.cwjn.skada.Skada;
 import com.cwjn.skada.SkadaRegistry;
 import com.cwjn.skada.data.damage.DamageInfo;
 import com.cwjn.skada.data.damage.ElementSpreadInstance;
@@ -14,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.cwjn.skada.data.SkadaData.DEBUG_ENABLED;
 
 public class SkadaDamageSource extends DamageSource {
 
@@ -60,7 +63,11 @@ public class SkadaDamageSource extends DamageSource {
                 ratios.put(element.get(), 1.0);
             }
         }
-        ElementSpreadInstance spread = new ElementSpreadInstance(1.0, ratios);
+        if (ratios.isEmpty()) {
+            if (DEBUG_ENABLED) Skada.LOGGER.warn("No elemental tags matched damage source '{}', defaulting to physical. Consider adding it to a convert_ tag.", source.typeHolder().unwrap().left().orElse(null));
+            ratios.put(Element.physical(), 1.0);
+        }
+        ElementSpreadInstance spread = new ElementSpreadInstance(ratios);
         return new SkadaDamageSource(source.typeHolder(), source.getEntity(), source.getDirectEntity(), source.getSourcePosition(), DamageInfo.environmental(spread));
     }
 

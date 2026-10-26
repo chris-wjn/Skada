@@ -1,0 +1,610 @@
+{
+  "allay": {
+    "description": "skada.bestiary.minecraft.allay.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "axolotl": {
+    "description": "skada.bestiary.minecraft.axolotl.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "passive"
+    ]
+  },
+  "bat": {
+    "description": "skada.bestiary.minecraft.bat.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "bee": {
+    "description": "skada.bestiary.minecraft.bee.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "blaze": {
+    "description": "skada.bestiary.minecraft.blaze.desc",
+    "tags": [
+      "nether",
+      "hostile"
+    ],
+    "preview": {
+      "scale": 0.85,
+      "offset_x": -4,
+      "offset_y": 3
+    }
+  },
+  "camel": {
+    "description": "skada.bestiary.minecraft.camel.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "cat": {
+    "description": "skada.bestiary.minecraft.cat.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "cave_spider": {
+    "description": "skada.bestiary.minecraft.cave_spider.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "chicken": {
+    "description": "skada.bestiary.minecraft.chicken.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "cod": {
+    "description": "skada.bestiary.minecraft.cod.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "passive"
+    ]
+  },
+  "cow": {
+    "description": "skada.bestiary.minecraft.cow.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "creeper": {
+    "description": "skada.bestiary.minecraft.creeper.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "dolphin": {
+    "description": "skada.bestiary.minecraft.dolphin.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "neutral"
+    ]
+  },
+  "donkey": {
+    "description": "skada.bestiary.minecraft.donkey.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "drowned": {
+    "description": "skada.bestiary.minecraft.drowned.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "hostile"
+    ]
+  },
+  "elder_guardian": {
+    "description": "skada.bestiary.minecraft.elder_guardian.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "hostile"
+    ]
+  },
+  "ender_dragon": {
+    "description": [
+      "skada.bestiary.minecraft.ender_dragon.desc.1",
+      "skada.bestiary.minecraft.ender_dragon.desc.2"
+    ],
+    "tags": [
+      "end",
+      "hostile"
+    ],
+    "preview": {
+      "scale": 0.22,
+      "offset_x": -24,
+      "offset_y": 8
+    }
+  },
+  "enderman": {
+    "description": "skada.bestiary.minecraft.enderman.desc",
+    "tags": [
+      "overworld",
+      "nether",
+      "end",
+      "neutral"
+    ]
+  },
+  "endermite": {
+    "description": "skada.bestiary.minecraft.endermite.desc",
+    "tags": [
+      "end",
+      "hostile"
+    ]
+  },
+  "evoker": {
+    "description": "skada.bestiary.minecraft.evoker.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "fox": {
+    "description": "skada.bestiary.minecraft.fox.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "frog": {
+    "description": "skada.bestiary.minecraft.frog.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "passive"
+    ]
+  },
+  "ghast": {
+    "description": "skada.bestiary.minecraft.ghast.desc",
+    "tags": [
+      "nether",
+      "hostile"
+    ],
+    "preview": {
+      "scale": 0.45,
+      "offset_x": 0,
+      "offset_y": 12
+    }
+  },
+  "giant": {
+    "description": "skada.bestiary.minecraft.giant.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "glow_squid": {
+    "description": "skada.bestiary.minecraft.glow_squid.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "passive"
+    ]
+  },
+  "goat": {
+    "description": "skada.bestiary.minecraft.goat.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "guardian": {
+    "description": "skada.bestiary.minecraft.guardian.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "hostile"
+    ]
+  },
+  "hoglin": {
+    "description": "skada.bestiary.minecraft.hoglin.desc",
+    "tags": [
+      "nether",
+      "hostile"
+    ]
+  },
+  "horse": {
+    "description": "skada.bestiary.minecraft.horse.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "husk": {
+    "description": "skada.bestiary.minecraft.husk.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "illusioner": {
+    "description": "skada.bestiary.minecraft.illusioner.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "llama": {
+    "description": "skada.bestiary.minecraft.llama.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "iron_golem": {
+    "description": "skada.bestiary.minecraft.iron_golem.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "magma_cube": {
+    "description": "skada.bestiary.minecraft.magma_cube.desc",
+    "tags": [
+      "nether",
+      "hostile"
+    ]
+  },
+  "mooshroom": {
+    "description": "skada.bestiary.minecraft.mooshroom.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "mule": {
+    "description": "skada.bestiary.minecraft.mule.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "ocelot": {
+    "description": "skada.bestiary.minecraft.ocelot.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "panda": {
+    "description": "skada.bestiary.minecraft.panda.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "parrot": {
+    "description": "skada.bestiary.minecraft.parrot.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "phantom": {
+    "description": "skada.bestiary.minecraft.phantom.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "pig": {
+    "description": "skada.bestiary.minecraft.pig.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "piglin": {
+    "description": "skada.bestiary.minecraft.piglin.desc",
+    "tags": [
+      "nether",
+      "neutral"
+    ]
+  },
+  "piglin_brute": {
+    "description": "skada.bestiary.minecraft.piglin_brute.desc",
+    "tags": [
+      "nether",
+      "hostile"
+    ]
+  },
+  "pillager": {
+    "description": "skada.bestiary.minecraft.pillager.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "polar_bear": {
+    "description": "skada.bestiary.minecraft.polar_bear.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "pufferfish": {
+    "description": "skada.bestiary.minecraft.pufferfish.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "neutral"
+    ]
+  },
+  "rabbit": {
+    "description": "skada.bestiary.minecraft.rabbit.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "ravager": {
+    "description": "skada.bestiary.minecraft.ravager.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ],
+    "preview": {
+      "scale": 0.72,
+      "offset_x": 0,
+      "offset_y": 16
+    }
+  },
+  "salmon": {
+    "description": "skada.bestiary.minecraft.salmon.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "passive"
+    ]
+  },
+  "sheep": {
+    "description": "skada.bestiary.minecraft.sheep.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "shulker": {
+    "description": "skada.bestiary.minecraft.shulker.desc",
+    "tags": [
+      "end",
+      "hostile"
+    ]
+  },
+  "silverfish": {
+    "description": "skada.bestiary.minecraft.silverfish.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "skeleton": {
+    "description": "skada.bestiary.minecraft.skeleton.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "skeleton_horse": {
+    "description": "skada.bestiary.minecraft.skeleton_horse.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "slime": {
+    "description": "skada.bestiary.minecraft.slime.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "sniffer": {
+    "description": "skada.bestiary.minecraft.sniffer.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "snow_golem": {
+    "description": "skada.bestiary.minecraft.snow_golem.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "spider": {
+    "description": "skada.bestiary.minecraft.spider.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "squid": {
+    "description": "skada.bestiary.minecraft.squid.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "passive"
+    ]
+  },
+  "stray": {
+    "description": "skada.bestiary.minecraft.stray.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "strider": {
+    "description": "skada.bestiary.minecraft.strider.desc",
+    "tags": [
+      "nether",
+      "passive"
+    ]
+  },
+  "tadpole": {
+    "description": "skada.bestiary.minecraft.tadpole.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "passive"
+    ]
+  },
+  "trader_llama": {
+    "description": "skada.bestiary.minecraft.trader_llama.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "tropical_fish": {
+    "description": "skada.bestiary.minecraft.tropical_fish.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "passive"
+    ]
+  },
+  "turtle": {
+    "description": "skada.bestiary.minecraft.turtle.desc",
+    "tags": [
+      "overworld",
+      "aquatic",
+      "passive"
+    ]
+  },
+  "vex": {
+    "description": "skada.bestiary.minecraft.vex.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "vindicator": {
+    "description": "skada.bestiary.minecraft.vindicator.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "villager": {
+    "description": "skada.bestiary.minecraft.villager.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "wandering_trader": {
+    "description": "skada.bestiary.minecraft.wandering_trader.desc",
+    "tags": [
+      "overworld",
+      "passive"
+    ]
+  },
+  "warden": {
+    "description": [
+      "skada.bestiary.minecraft.warden.desc.1",
+      "skada.bestiary.minecraft.warden.desc.2"
+    ],
+    "tags": [
+      "overworld",
+      "hostile"
+    ],
+    "preview": {
+      "scale": 0.68,
+      "offset_x": 0,
+      "offset_y": 12
+    }
+  },
+  "witch": {
+    "description": "skada.bestiary.minecraft.witch.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "wither": {
+    "description": [
+      "skada.bestiary.minecraft.wither.desc.1",
+      "skada.bestiary.minecraft.wither.desc.2"
+    ],
+    "tags": [
+      "nether",
+      "hostile"
+    ],
+    "preview": {
+      "scale": 0.55,
+      "offset_x": 0,
+      "offset_y": 8
+    }
+  },
+  "wither_skeleton": {
+    "description": "skada.bestiary.minecraft.wither_skeleton.desc",
+    "tags": [
+      "nether",
+      "hostile"
+    ]
+  },
+  "wolf": {
+    "description": "skada.bestiary.minecraft.wolf.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "zoglin": {
+    "description": "skada.bestiary.minecraft.zoglin.desc",
+    "tags": [
+      "nether",
+      "hostile"
+    ]
+  },
+  "zombie": {
+    "description": "skada.bestiary.minecraft.zombie.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "zombie_horse": {
+    "description": "skada.bestiary.minecraft.zombie_horse.desc",
+    "tags": [
+      "overworld",
+      "neutral"
+    ]
+  },
+  "zombie_villager": {
+    "description": "skada.bestiary.minecraft.zombie_villager.desc",
+    "tags": [
+      "overworld",
+      "hostile"
+    ]
+  },
+  "zombified_piglin": {
+    "description": "skada.bestiary.minecraft.zombified_piglin.desc",
+    "tags": [
+      "nether",
+      "neutral"
+    ]
+  }
+}

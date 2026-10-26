@@ -18,14 +18,17 @@ public class CommonConfig {
     public static final ForgeConfigSpec.BooleanValue ENABLE_CRITICAL_FAIL;
     public static final ForgeConfigSpec.DoubleValue CRITICAL_FAIL_DURABILITY_LOSS;
     public static final ForgeConfigSpec.BooleanValue SQUEEZE_DAMAGE_VALUES;
+    public static final ForgeConfigSpec.DoubleValue DAMAGE_DIFFERENCE_AMOUNT;
 
     static {
 
         BUILDER.comment("Gameplay Settings").push("gameplay");
-        SQUEEZE_DAMAGE_VALUES = BUILDER.comment("When generating, assign damage modifiers to minimize the difference in damage between weapons of the same type but different material")
+        SQUEEZE_DAMAGE_VALUES = BUILDER.comment("When generating weapon stats, compress base damage differences among eligible weapons sharing an assembly within a namespace. The lowest base damage and attack-type damage offsets stay unchanged.")
                 .define("squeezeDamageValues", true);
-        BUILDER.pop();
-
+        DAMAGE_DIFFERENCE_AMOUNT = BUILDER.comment(
+                        "Fraction of the original base damage differences to retain when squeezeDamageValues is enabled; this is not a fixed damage increase per material tier.",
+                        "0.5 halves the differences, 0.25 retains one quarter, 0 gives all eligible weapons in the group the lowest base damage, and 1 preserves the original differences.")
+                .defineInRange("damageDifference", 0.5, 0.0, 1.0);
         BUILDER.comment("Combat Settings").push("combat");
 
         BUILDER.push("Precision Settings");

@@ -6,11 +6,28 @@ import com.cwjn.skada.util.UtilCombat;
 
 import net.minecraft.util.RandomSource;
 
-final class DamageMath {
+public final class DamageMath {
 
   private static final double MIN_DAMAGE_MULTIPLIER = 0.5;
 
   private DamageMath() {
+  }
+
+  /**
+   * Converts an armour-scale rating into a signed mitigation percentage.
+   * Positive values mitigate damage while negative values become vulnerability.
+   *
+   * @param rating the armour-style mitigation rating
+   * @return the signed mitigation percentage represented by the rating
+   */
+  public static double getSignedArmourStyleMitigationPercent(double rating) {
+    if (rating == 0.0) {
+      return 0.0;
+    }
+
+    return rating < 0.0
+      ? -100.0 / (1.0 + Math.exp((rating / 10.0) + 2.0))
+      : 100.0 / (1.0 + Math.exp((-rating / 10.0) + 2.0));
   }
 
   /**
@@ -28,24 +45,18 @@ final class DamageMath {
       return damage;
     }
 
-    double resistance = armour < 0
-      ? -100 / (1 + Math.exp((armour / 10) + 2))
-      : 100 / (1 + Math.exp((-armour / 10) + 2));
+    double resistance = getSignedArmourStyleMitigationPercent(armour);
     return resistance >= 100 ? 0 : damage * (1 - resistance / 100);
   }
 
   /**
-   * Uses a radical formula to reduce damage based on elemental resistance.
-   *  <pre>
-   *      if x >= 0, y = √(x/4)
-   *      if x < 0, y = -√(-x/4)
-   *  </pre>
+   * Uses the shared armour-style signed mitigation curve for non-physical elemental resistance.
    * @param damage The damage to be reduced.
    * @param resistance The resistance value, can be negative.
    * @return The damage after elemental resistance reduction.
    */
   public static double getDamageAfterElementalResistance(double damage, double resistance) {
-    return damage * (1 - (resistance > 0 ? Math.sqrt(resistance / 4) : -Math.sqrt(-resistance / 4)));
+    return getDamageAfterArmourReduction(damage, resistance);
   }
 
   /**

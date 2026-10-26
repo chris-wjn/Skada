@@ -2,11 +2,9 @@ package com.cwjn.skada.data;
 
 import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.data.damage.LethalityFunction;
-import com.cwjn.skada.data.gen.attack.AttackTypeGeneratorConfiguration;
-import com.cwjn.skada.data.gen.weapon.generation_algo.AttackSpeedGenerationUtil;
-import com.cwjn.skada.data.gen.weapon.generation_algo.CriticalFailGenerationUtil;
-import com.cwjn.skada.data.gen.weapon.generation_algo.LethalityGenerationUtil;
-import com.cwjn.skada.data.gen.weapon.generation_algo.PrecisionGenerationUtil;
+import com.cwjn.skada.generation.attack.AttackTypeGeneratorConfiguration;
+import com.cwjn.skada.data.mob.BestiaryEntryView;
+import com.cwjn.skada.data.mob.BestiaryInfo;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
@@ -32,18 +30,21 @@ public abstract class SkadaData {
   public static Supplier<IForgeRegistry<AttackType>> REGISTRY_ATTACK_TYPE;
   public static Supplier<IForgeRegistry<Element>> REGISTRY_ELEMENT;
   public static final HashMap<EntityType<?>, MobData> MOB_DATA = new HashMap<>();
+        public static final HashMap<EntityType<?>, BestiaryInfo> BESTIARY_INFO = new HashMap<>();
+        public static final HashMap<EntityType<?>, BestiaryEntryView> BESTIARY_ENTRY_VIEWS = new HashMap<>();
   public static Map<String, ReticleShape> RETICLES = new HashMap<>();
         public static final LethalityFunction NONE = new LethalityFunction((lethality, armour, healthContext) -> 0, SUM_WITH_DAMAGE);
   public static final LethalityFunction PERCENT_DAMAGE_BONUS = new LethalityFunction(UtilCombat::percentBonusDamage, MULTIPLY_WITH_DAMAGE);
   public static final LethalityFunction PERCENT_HEALTH_DAMAGE = new LethalityFunction(UtilCombat::percentHealthDamage, SUM_WITH_DAMAGE);
   public static final LethalityFunction PERCENT_REDUC = new LethalityFunction(UtilCombat::percentReduc, MULTIPLY_WITH_ARMOUR);
   public static final AttackTypeGeneratorConfiguration SLASH_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(
-          PrecisionGenerationUtil::slash, LethalityGenerationUtil::slash, CriticalFailGenerationUtil::slash, AttackSpeedGenerationUtil::slash);
+          AttackTypeGeneratorConfiguration::generateSlash);
   public static final AttackTypeGeneratorConfiguration STRIKE_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(
-          PrecisionGenerationUtil::strike, LethalityGenerationUtil::strike, CriticalFailGenerationUtil::strike, AttackSpeedGenerationUtil::strike);
+          AttackTypeGeneratorConfiguration::generateStrike);
   public static final AttackTypeGeneratorConfiguration THRUST_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(
-          PrecisionGenerationUtil::thrust, LethalityGenerationUtil::thrust, CriticalFailGenerationUtil::thrust, AttackSpeedGenerationUtil::thrust);
-  public static final AttackTypeGeneratorConfiguration NULL_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration((a) -> 0, (a) -> 0, (a) -> 0, (a) -> 0);
+          AttackTypeGeneratorConfiguration::generateThrust);
+  public static final AttackTypeGeneratorConfiguration NULL_GENERATOR_CONFIG = new AttackTypeGeneratorConfiguration(
+          assembly -> new AttackTypeGeneratorConfiguration.GeneratedStats(0, 0, 0, 0));
   public static final String WEAPON_INFO_TAG_KEY = "skada.weapon_info.tagkey";
   public static final String ARMOUR_INFO_TAG_KEY = "skada.armour_info.tagkey";
   public static final String CURRENT_ATTACK_TYPE_TAG_KEY = "skada.current_attack_type.tagKey";

@@ -9,6 +9,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -19,7 +20,7 @@ public class Keybinds {
 
     @SubscribeEvent
     public static void registerKeyBinding(final RegisterKeyMappingsEvent event) {
-        cycleAttackType = create("cycle_attack_type", KeyEvent.VK_K);
+        cycleAttackType = create("cycle_attack_type", MouseEvent.BUTTON3);
         statScreen = create("stat_screen", KeyEvent.VK_O);
         event.register(cycleAttackType);
         event.register(statScreen);

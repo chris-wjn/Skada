@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.jetbrains.annotations.NotNull;
 
 public record Element(String name,
@@ -30,8 +31,12 @@ public record Element(String name,
         return SkadaData.REGISTRY_ELEMENT.get().getValue(name);
     }
 
-    public static Element basic() {
-        return SkadaData.REGISTRY_ELEMENT.get().getValue(Util.rl("basic"));
+    public static Element physical() {
+        return SkadaData.REGISTRY_ELEMENT.get().getValue(Util.rl("physical"));
+    }
+
+    public boolean usesArmourAsResistance() {
+        return Attributes.ARMOR.equals(resist);
     }
 
     public TagKey<DamageType> getTagKey() {

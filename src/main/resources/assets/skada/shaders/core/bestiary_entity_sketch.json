@@ -1,0 +1,119 @@
+{
+  "blend": {
+    "func": "add",
+    "srcrgb": "srcalpha",
+    "dstrgb": "1-srcalpha"
+  },
+  "vertex": "skada:bestiary_entity_sketch",
+  "fragment": "skada:bestiary_entity_sketch",
+  "samplers": [
+    {
+      "name": "Sampler0"
+    },
+    {
+      "name": "DepthSampler"
+    }
+  ],
+  "attributes": [
+    "Position",
+    "UV0"
+  ],
+  "uniforms": [
+    {
+      "name": "ModelViewMat",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "ProjMat",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "InputSize",
+      "type": "float",
+      "count": 2,
+      "values": [
+        128.0,
+        128.0
+      ]
+    },
+    {
+      "name": "SourceEdgeFadeFlags",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "ToneDebugMode",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "InkColor",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.314,
+        0.224,
+        0.200,
+        1.0
+      ]
+    },
+    {
+      "name": "PageColor",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.910,
+        0.725,
+        0.510,
+        1.0
+      ]
+    }
+  ]
+}

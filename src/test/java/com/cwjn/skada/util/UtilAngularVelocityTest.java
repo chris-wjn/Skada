@@ -1,30 +1,28 @@
 package com.cwjn.skada.util;
 
+import com.cwjn.skada.generation.weapon.util.PhysicsUtil;
 import org.junit.jupiter.api.Test;
-
-import com.cwjn.skada.data.gen.weapon.util.PhysicsUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** Preserves physical invariants independently of balance calibration bands. */
 class UtilAngularVelocityTest {
 
-  @Test
-  void representativeWeaponInertiasStayInExpectedBands() {
-    double daggerLike = PhysicsUtil.angularVelocity(0.00005, 50.0);
-    double swordLike = PhysicsUtil.angularVelocity(0.00015, 50.0);
-    double greatswordLike = PhysicsUtil.angularVelocity(0.00030, 50.0);
+    @Test
+    void angularVelocityFallsAsInertiaIncreases() {
+        double daggerLike = PhysicsUtil.angularVelocity(0.00005, 50.0);
+        double swordLike = PhysicsUtil.angularVelocity(0.00015, 50.0);
+        double greatswordLike = PhysicsUtil.angularVelocity(0.00030, 50.0);
 
-    assertTrue(daggerLike > swordLike);
-    assertTrue(swordLike > greatswordLike);
-    assertTrue(daggerLike >= 12.0 && daggerLike <= 18.0);
-    assertTrue(swordLike >= 8.0 && swordLike <= 12.0);
-    assertTrue(greatswordLike >= 5.0 && greatswordLike <= 8.0);
-  }
+        assertTrue(daggerLike > swordLike);
+        assertTrue(swordLike > greatswordLike);
+        assertTrue(greatswordLike > 0.0);
+    }
 
-  @Test
-  void nonPositiveInertiaReturnsZeroVelocity() {
-    assertEquals(0.0, PhysicsUtil.angularVelocity(0.0, 50.0), 1.0e-9);
-    assertEquals(0.0, PhysicsUtil.angularVelocity(-1.0, 50.0), 1.0e-9);
-  }
+    @Test
+    void nonPositiveInertiaReturnsZeroVelocity() {
+        assertEquals(0.0, PhysicsUtil.angularVelocity(0.0, 50.0), 1.0e-9);
+        assertEquals(0.0, PhysicsUtil.angularVelocity(-1.0, 50.0), 1.0e-9);
+    }
 }

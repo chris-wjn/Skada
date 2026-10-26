@@ -1,9 +1,8 @@
 package com.cwjn.skada.mixin.attack_injectors.mob;
 
 import com.cwjn.skada.data.SkadaData;
-import com.cwjn.skada.data.damage.AccessProjectileData;
-import com.cwjn.skada.data.damage.DamageInfo;
-import com.cwjn.skada.data.damage.WeaponInfo;
+import com.cwjn.skada.data.damage.ProjectileLaunch;
+import net.minecraft.world.item.ItemStack;
 import com.cwjn.skada.data.registry.AttackType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.horse.Llama;
@@ -27,12 +26,8 @@ public class LlamaSpitUseSkada {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/LlamaSpit;shoot(DDDFF)V")
     )
     private void onLlamaSpitAttack(LivingEntity pTarget, CallbackInfo ci, LlamaSpit llama_spit) {
-        ((AccessProjectileData) llama_spit).setDamageInfo(new DamageInfo(
-                0.0,
-                SkadaData.DEFAULT_PRECISION,
-                false,
-                AttackType.thrust(),
-                WeaponInfo.NO_WEAPON.getSpread().instance()));
+        ProjectileLaunch.resolve(ItemStack.EMPTY, AttackType.thrust(), SkadaData.DEFAULT_PRECISION, ProjectileLaunch.Flight.UNCHANGED)
+                .attach(llama_spit, ItemStack.EMPTY, (Llama) (Object) this);
     }
 
 }

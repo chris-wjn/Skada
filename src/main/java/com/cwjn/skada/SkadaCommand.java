@@ -2,20 +2,25 @@ package com.cwjn.skada;
 
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.armour.ArmourInfo;
-import com.cwjn.skada.data.gen.JsonUtil;
-import com.cwjn.skada.data.gen.armour.ArmourConstructionInfo;
-import com.cwjn.skada.data.gen.armour.ArmourItemMapping;
-import com.cwjn.skada.data.gen.armour.ArmourPieceInfo;
-import com.cwjn.skada.data.gen.attack.ElementSpread;
-import com.cwjn.skada.data.gen.weapon.MaterialInfo;
-import com.cwjn.skada.data.gen.weapon.WeaponAssembly;
-import com.cwjn.skada.data.gen.weapon.util.GeometryUtil.Vec3;
-import com.cwjn.skada.data.gen.weapon.util.PhysicsUtil;
-import com.cwjn.skada.data.gen.weapon.util.WeaponAxis;
+import com.cwjn.skada.generation.GenJsonLoader;
+import com.cwjn.skada.generation.armour.ArmourConstructionInfo;
+import com.cwjn.skada.generation.armour.ArmourItemMapping;
+import com.cwjn.skada.generation.armour.ArmourPieceInfo;
+import com.cwjn.skada.generation.attack.ElementSpread;
+import com.cwjn.skada.generation.weapon.MaterialInfo;
+import com.cwjn.skada.generation.weapon.WeaponAssembly;
+import com.cwjn.skada.generation.weapon.WeaponGenerator;
+import com.cwjn.skada.generation.weapon.util.GeometryUtil.Vec3;
+import com.cwjn.skada.generation.weapon.util.PhysicsUtil;
+import com.cwjn.skada.generation.weapon.util.WeaponAxis;
 import com.cwjn.skada.data.damage.ManualWeaponInfos;
 import com.cwjn.skada.data.damage.WeaponInfo;
+import com.cwjn.skada.data.mob.BestiaryEntryView;
+import com.cwjn.skada.data.mob.BestiaryUnlockSavedData;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
+import com.cwjn.skada.network.SkadaNetwork;
+import com.cwjn.skada.network.server_to_client.S2CSyncBestiaryUnlocks;
 import com.cwjn.skada.util.Util;
 import com.cwjn.skada.util.UtilData;
 import com.google.common.collect.ArrayListMultimap;
@@ -24,12 +29,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.synchronization.SuggestionProviders;
@@ -44,6 +51,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -60,6 +68,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.cwjn.skada.Skada.LOGGER;
 import static com.cwjn.skada.data.SkadaData.DEBUG_ENABLED;
@@ -68,7 +77,6 @@ import static net.minecraft.commands.Commands.literal;
 public class SkadaCommand {
 
   private static final String GENERATION_TAG_NAMESPACE = "skada";
-  private static final String WEAPON_PROFILE_TAG_PATH = "generator/weapon_profile/";
   private static final String ARMOUR_PIECE_TAG_PATH = "generator/armour/piece/";
   private static final String ARMOUR_MATERIAL_TAG_PATH = "generator/armour/material/";
   private static final String ARMOUR_CONSTRUCTION_TAG_PATH = "generator/armour/construction/";
@@ -104,8 +112,9 @@ public class SkadaCommand {
                             )
                     )
                     .then(literal("armour")
-                           .then(Commands.argument("item", ResourceLocationArgument.id())
-                             .executes(stack -> generateArmourInfoForItem(stack.getSource(), ResourceLocationArgument.getId(stack, "item")))
+                            .then(Commands.literal("item"))
+                                  .then(Commands.argument("item", ResourceLocationArgument.id())
+                                    .executes(stack -> generateArmourInfoForItem(stack.getSource(), ResourceLocationArgument.getId(stack, "item")))
                             )
                             .then(Commands.argument("namespace", ModIdArgument.modIdArgument())
                                     .executes(stack -> generateArmourInfoForNamespace(stack.getSource(), stack.getArgument("namespace", String.class)))
@@ -126,6 +135,14 @@ public class SkadaCommand {
                             )
                     )
             )
+                                  .then(literal("bestiary")
+                                    .then(literal("unlockAll")
+                                      .executes(stack -> unlockAllBestiaryEntriesForSelf(stack.getSource()))
+                                      .then(Commands.argument("targets", EntityArgument.players())
+                                        .executes(stack -> unlockAllBestiaryEntries(stack.getSource(),
+                                          EntityArgument.getPlayers(stack, "targets"))))
+                                    )
+                                  )
             .then(literal("debug").executes(stack -> toggleDebug(stack.getSource())))
             //.then(literal("test").executes(stack -> testCommand(stack.getSource())))
     );
@@ -133,7 +150,6 @@ public class SkadaCommand {
 
   // private int testCommand(CommandSourceStack source) {
   //   try {
-  //     System.out.println("Test command");
   //   } catch (IOException e) {
   //     e.printStackTrace();
   //   }
@@ -151,35 +167,37 @@ public class SkadaCommand {
     if (player == null) {
       return 0;
     }
-    Map<String, WeaponAssembly> profileMap = new HashMap<>(JsonUtil.loadWeaponAssemblies(source.getServer().getResourceManager(), player));
-    Map<String, MaterialInfo> tierMap = new HashMap<>(JsonUtil.loadMaterialInfo(source.getServer().getResourceManager(), player));
+    Map<String, WeaponAssembly> profileMap = new HashMap<>(GenJsonLoader.loadWeaponAssemblies(source.getServer().getResourceManager(), player));
+    Map<String, MaterialInfo> tierMap = new HashMap<>(GenJsonLoader.loadMaterialInfo(source.getServer().getResourceManager(), player));
     
     Item held = player.getMainHandItem().getItem();
-    System.out.println("Held item: " + held);
-    WeaponAssembly profile = resolveWeaponProfile(held, profileMap);
-    System.out.println("Using profile: " + profile);
+    LOGGER.debug("Held item: {}", held);
+    WeaponGenerator generator = new WeaponGenerator(tierMap, profileMap, Map.of(), false, 1.0);
+    WeaponGenerator.ItemInput input = WeaponGenerator.ItemInput.fromItem(held);
+    WeaponAssembly profile = generator.resolveAssembly(input);
+    LOGGER.debug("Using profile: {}", profile);
     if (profile == null) {
       player.displayClientMessage(Component.translatable("skada.command_get_physics.error.not_tiered"), false);
       return 0;
     }
     if (held instanceof TieredItem) {
-      MaterialInfo tier = resolveWeaponMaterialInfo(tierMap, Util.getItemNamespace(held), held);
+      MaterialInfo tier = generator.resolveMaterial(input);
       if (tier == null) {
         player.displayClientMessage(Component.translatable("skada.command_get_physics.error.not_tiered"), false);
         return 0;
       }
       profile = profile.withMaterialWoodenHandle(tier);
-      System.out.println("Using tier: " + tier);
+      LOGGER.debug("Using tier: {}", tier);
       double volume = profile.volume(WeaponAssembly.LARGE_SAMPLE_SIZE);
-      System.out.println("volume: " + volume);
+      LOGGER.debug("volume: {}", volume);
       double mass = profile.mass(WeaponAssembly.LARGE_SAMPLE_SIZE);
-      System.out.println("mass: " + mass);
+      LOGGER.debug("mass: {}", mass);
       double PoB = profile.pointOfBalance(WeaponAssembly.LARGE_SAMPLE_SIZE);
-      System.out.println("PoB: " + PoB);
+      LOGGER.debug("PoB: {}", PoB);
       Vec3 CoM = profile.centerOfMass(WeaponAssembly.LARGE_SAMPLE_SIZE);
-      System.out.println("CoM: " + CoM);
+      LOGGER.debug("CoM: {}", CoM);
       double inertia = PhysicsUtil.toKgM2(profile.momentOfInertiaAboutBase(WeaponAxis.Z, WeaponAssembly.LARGE_SAMPLE_SIZE));
-      System.out.println("inertia: " + inertia);
+      LOGGER.debug("inertia: {}", inertia);
       player.displayClientMessage(Component.translatable("skada.command_get_physics", volume, mass, PoB, CoM, inertia), false);
     }
     else {
@@ -195,6 +213,39 @@ public class SkadaCommand {
     }
     DEBUG_ENABLED = !DEBUG_ENABLED;
     player.sendSystemMessage(Component.translatable("skada.command_debug.toggle", DEBUG_ENABLED ? "enabled" : "disabled"));
+    return 1;
+  }
+
+  private int unlockAllBestiaryEntriesForSelf(CommandSourceStack source) throws CommandSyntaxException {
+    return unlockAllBestiaryEntries(source, List.of(source.getPlayerOrException()));
+  }
+
+  private int unlockAllBestiaryEntries(CommandSourceStack source, Collection<ServerPlayer> targets) {
+    Set<ResourceLocation> allEntryIds = SkadaData.BESTIARY_ENTRY_VIEWS.values().stream()
+        .map(BestiaryEntryView::entityId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+    if (allEntryIds.isEmpty()) {
+      source.sendFailure(Component.translatable("skada.command_bestiary.unlock_all.error.no_entries"));
+      return 0;
+    }
+
+    int newlyUnlockedCount = 0;
+    for (ServerPlayer target : targets) {
+      BestiaryUnlockSavedData unlockData = BestiaryUnlockSavedData.get(target.serverLevel());
+      Set<ResourceLocation> newlyUnlockedEntries = unlockData.unlockAll(target.getUUID(), allEntryIds);
+      newlyUnlockedCount += newlyUnlockedEntries.size();
+      SkadaNetwork.serverToPlayer(
+          new S2CSyncBestiaryUnlocks(unlockData.unlockedEntries(target.getUUID()), newlyUnlockedEntries),
+          target
+      );
+    }
+
+    int unlockedEntriesTotal = newlyUnlockedCount;
+    int targetCount = targets.size();
+    int trackedEntryCount = allEntryIds.size();
+    source.sendSuccess(() -> Component.translatable("skada.command_bestiary.unlock_all.success",
+        unlockedEntriesTotal, targetCount, trackedEntryCount), true);
     return 1;
   }
 
@@ -230,6 +281,13 @@ public class SkadaCommand {
       return 0;
     }
     StringBuilder attributes = new StringBuilder("Attributes for " + type.getDescriptionId() + ":\n");
+    attributes.append("attackType: ")
+      .append(data.damageInfo().attackType().name())
+      .append("\nlethality: ")
+      .append(data.damageInfo().lethality())
+      .append("\nprecision: ")
+      .append(data.damageInfo().precision())
+      .append("\n");
     for (Map.Entry<Attribute, AttributeModifier> entry : data.extraModifiers().entries()) {
       attributes.append(entry.getKey().getDescriptionId())
               .append(": ")
@@ -278,37 +336,12 @@ public class SkadaCommand {
     }
     player.displayClientMessage(Component.translatable("skada.generate_weapon_info.start", namespace), false);
     TreeMap<String, WeaponInfo> map = new TreeMap<>();
-    map.putAll(ManualWeaponInfos.byNamespace(namespace)); //preset manual infos
-    HashMap<String, MaterialInfo> tierMap = new HashMap<>(JsonUtil.loadMaterialInfo(source.getServer().getResourceManager(), player));
-    HashMap<String, WeaponAssembly> profileMap = new HashMap<>(JsonUtil.loadWeaponAssemblies(source.getServer().getResourceManager(), player));
+    HashMap<String, MaterialInfo> tierMap = new HashMap<>(GenJsonLoader.loadMaterialInfo(source.getServer().getResourceManager(), player));
+    HashMap<String, WeaponAssembly> profileMap = new HashMap<>(GenJsonLoader.loadWeaponAssemblies(source.getServer().getResourceManager(), player));
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    for (Item item : ForgeRegistries.ITEMS.getValues()) {
-      if (!item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND).isEmpty() ||
-              !item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty()) {
-        if (Util.getItemNamespace(item).equals(namespace)) {
-          boolean ignoreAttributes = item instanceof ProjectileWeaponItem;
-          String path = Util.getItemPath(item);
-          WeaponInfo info = null;
-          WeaponAssembly profile = resolveWeaponProfile(item, profileMap);
-          if (profile == null) {
-            LOGGER.error("No weapon profile found for {}. Tag it with skada:{}<profile> or use a supported suffix.",
-                path,
-                WEAPON_PROFILE_TAG_PATH);
-            continue;
-          }
-          double attackSpeed = Util.getAttackSpeedForItem(item);
-          double damageModifier = Util.getDamageModifierForItem(item);
-          MaterialInfo materialInfo = resolveWeaponMaterialInfo(tierMap, namespace, item);
-          if (materialInfo != null) {
-            info = WeaponInfo.generate(materialInfo, profile, ignoreAttributes, attackSpeed, damageModifier);
-          } else {
-            LOGGER.error("No tier info found for {}. Generating on name only.", path);
-            info = WeaponInfo.generate(profile, ignoreAttributes, attackSpeed, damageModifier);
-          }
-          map.put(path, info);
-        }
-      }
-    }
+    WeaponGenerator.Result result = generateWeaponInfos(namespace, tierMap, profileMap, null);
+    result.diagnostics().forEach((id, message) -> LOGGER.warn("{}: {}", id, message));
+    map.putAll(result.weapons());
     if (map.isEmpty()) {
       player.displayClientMessage(Component.translatable("skada.generate_weapon_info.error.no_items", namespace), false);
       return 0;
@@ -337,18 +370,11 @@ public class SkadaCommand {
       player.displayClientMessage(Component.literal("No item found for id: " + itemId), false);
       return 0;
     }
-    if (item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.MAINHAND).isEmpty() &&
-            item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty() &&
-            !(item instanceof ProjectileWeaponItem)) {
-      player.displayClientMessage(Component.literal("Item is not a weapon: " + itemId), false);
-      return 0;
-    }
-
     String namespace = itemId.getNamespace();
     player.displayClientMessage(Component.translatable("skada.generate_weapon_info.start", itemId), false);
 
-    HashMap<String, MaterialInfo> tierMap = new HashMap<>(JsonUtil.loadMaterialInfo(source.getServer().getResourceManager(), player));
-    HashMap<String, WeaponAssembly> profileMap = new HashMap<>(JsonUtil.loadWeaponAssemblies(source.getServer().getResourceManager(), player));
+    HashMap<String, MaterialInfo> tierMap = new HashMap<>(GenJsonLoader.loadMaterialInfo(source.getServer().getResourceManager(), player));
+    HashMap<String, WeaponAssembly> profileMap = new HashMap<>(GenJsonLoader.loadWeaponAssemblies(source.getServer().getResourceManager(), player));
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     String path = Util.getItemPath(item);
@@ -366,25 +392,14 @@ public class SkadaCommand {
       }
     }
 
-    boolean ignoreAttributes = item instanceof ProjectileWeaponItem;
-    WeaponAssembly profile = resolveWeaponProfile(item, profileMap);
-    double attackSpeed = Util.getAttackSpeedForItem(item);
-    double damageModifier = Util.getDamageModifierForItem(item);
-    if (profile == null) {
-      player.displayClientMessage(Component.literal("No weapon profile found for: " + itemId), false);
+    WeaponGenerator.Result result = generateWeaponInfos(namespace, tierMap, profileMap, path);
+    result.diagnostics().forEach((id, message) -> LOGGER.warn("{}: {}", id, message));
+    if (result.weapons().isEmpty()) {
+      player.displayClientMessage(Component.literal(result.diagnostics().getOrDefault(itemId,
+          "No weapon info generated") + ": " + itemId), false);
       return 0;
     }
-
-    WeaponInfo info;
-    MaterialInfo materialInfo = resolveWeaponMaterialInfo(tierMap, namespace, item);
-    if (materialInfo != null) {
-      info = WeaponInfo.generate(materialInfo, profile, ignoreAttributes, attackSpeed, damageModifier);
-    } else {
-      LOGGER.error("No tier info found for {}. Generating on name only.", path);
-      info = WeaponInfo.generate(profile, ignoreAttributes, attackSpeed, damageModifier);
-    }
-
-    map.put(path, info);
+    map.putAll(result.weapons());
     WeaponInfo.STRING_MAP_CODEC.encodeStart(JsonOps.INSTANCE, map).result().ifPresent(jsonElement -> {
       String json = gson.toJson(jsonElement);
       try {
@@ -397,6 +412,18 @@ public class SkadaCommand {
     return 1;
   }
 
+  /** Supplies loaded definitions, current item facts and settings to the weapon generation module. */
+  private WeaponGenerator.Result generateWeaponInfos(String namespace, Map<String, MaterialInfo> materials,
+      Map<String, WeaponAssembly> assemblies, String onlyPath) {
+    List<WeaponGenerator.ItemInput> items = ForgeRegistries.ITEMS.getValues().stream()
+        .filter(item -> Util.getItemNamespace(item).equals(namespace))
+        .map(WeaponGenerator.ItemInput::fromItem)
+        .toList();
+    return new WeaponGenerator(materials, assemblies, ManualWeaponInfos.byNamespace(namespace),
+        CommonConfig.SQUEEZE_DAMAGE_VALUES.get(), CommonConfig.DAMAGE_DIFFERENCE_AMOUNT.get())
+        .generate(namespace, items, onlyPath);
+  }
+
   private int generateArmourInfoForNamespace(@NotNull CommandSourceStack source, String namespace) {
     ServerPlayer player = source.getPlayer();
     if (player == null) {
@@ -405,9 +432,9 @@ public class SkadaCommand {
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     player.displayClientMessage(Component.translatable("skada.generate_armour_info.start", namespace), false);
     ResourceManager resourceManager = source.getServer().getResourceManager();
-    Map<String, ArmourPieceInfo> armourPieceNameMap = JsonUtil.loadArmourPieceInfo(resourceManager, player);
-    Map<String, ArmourConstructionInfo> constructionInfoMap = JsonUtil.loadArmourConstructionInfo(resourceManager, player);
-    Map<String, MaterialInfo> sharedMaterials = JsonUtil.loadMaterialInfo(resourceManager, player);
+    Map<String, ArmourPieceInfo> armourPieceNameMap = GenJsonLoader.loadArmourPieceInfo(resourceManager, player);
+    Map<String, ArmourConstructionInfo> constructionInfoMap = GenJsonLoader.loadArmourConstructionInfo(resourceManager, player);
+    Map<String, MaterialInfo> sharedMaterials = GenJsonLoader.loadMaterialInfo(resourceManager, player);
     TreeMap<String, ArmourInfo> map = new TreeMap<>();
     for (Item item : ForgeRegistries.ITEMS.getValues()) {
       if (!item.getDefaultInstance().getAttributeModifiers(EquipmentSlot.HEAD).isEmpty() ||
@@ -424,11 +451,15 @@ public class SkadaCommand {
           ArmourPieceInfo pieceInfo = mapping.resolvePiece(armourPieceNameMap);
           MaterialInfo materialInfo = resolveSharedMaterial(sharedMaterials, namespace, mapping.material(), item);
           ArmourConstructionInfo constructionInfo = resolveArmourConstruction(constructionInfoMap, namespace, mapping.construction());
+          double baseArmour = item.getDefaultAttributeModifiers(LivingEntity.getEquipmentSlotForItem(item.getDefaultInstance())).get(Attributes.ARMOR).stream()
+          .filter(m -> m.getOperation().equals(Operation.ADDITION)).mapToDouble(m ->m.getAmount()).sum();
+          double baseToughness = item.getDefaultAttributeModifiers(LivingEntity.getEquipmentSlotForItem(item.getDefaultInstance())).get(Attributes.ARMOR_TOUGHNESS).stream()
+          .filter(m -> m.getOperation().equals(Operation.ADDITION)).mapToDouble(m ->m.getAmount()).sum();
           if (materialInfo == null || constructionInfo == null) {
             LOGGER.error("Failed to resolve material or construction for {} using {}", path, mapping);
             continue;
           }
-          map.put(path, ArmourInfo.generate(pieceInfo, materialInfo, constructionInfo));
+          map.put(path, ArmourInfo.generate(pieceInfo, materialInfo, constructionInfo, baseArmour, baseToughness));
         }
       }
     }
@@ -474,9 +505,9 @@ public class SkadaCommand {
     player.displayClientMessage(Component.translatable("skada.generate_armour_info.start", itemId), false);
 
     ResourceManager resourceManager = source.getServer().getResourceManager();
-    Map<String, ArmourPieceInfo> armourPieceNameMap = JsonUtil.loadArmourPieceInfo(resourceManager, player);
-    Map<String, ArmourConstructionInfo> constructionInfoMap = JsonUtil.loadArmourConstructionInfo(resourceManager, player);
-    Map<String, MaterialInfo> sharedMaterials = JsonUtil.loadMaterialInfo(resourceManager, player);
+    Map<String, ArmourPieceInfo> armourPieceNameMap = GenJsonLoader.loadArmourPieceInfo(resourceManager, player);
+    Map<String, ArmourConstructionInfo> constructionInfoMap = GenJsonLoader.loadArmourConstructionInfo(resourceManager, player);
+    Map<String, MaterialInfo> sharedMaterials = GenJsonLoader.loadMaterialInfo(resourceManager, player);
 
     String path = Util.getItemPath(item);
     ArmourItemMapping mapping = resolveArmourItemMapping(item, armourPieceNameMap, constructionInfoMap, sharedMaterials);
@@ -506,7 +537,16 @@ public class SkadaCommand {
       }
     }
 
-    map.put(path, ArmourInfo.generate(pieceInfo, materialInfo, constructionInfo));
+    double baseArmour = item
+        .getDefaultAttributeModifiers(LivingEntity.getEquipmentSlotForItem(item.getDefaultInstance()))
+        .get(Attributes.ARMOR).stream()
+        .filter(m -> m.getOperation().equals(Operation.ADDITION)).mapToDouble(m -> m.getAmount()).sum();
+    double baseToughness = item
+        .getDefaultAttributeModifiers(LivingEntity.getEquipmentSlotForItem(item.getDefaultInstance()))
+        .get(Attributes.ARMOR_TOUGHNESS).stream()
+        .filter(m -> m.getOperation().equals(Operation.ADDITION)).mapToDouble(m -> m.getAmount()).sum();
+
+    map.put(path, ArmourInfo.generate(pieceInfo, materialInfo, constructionInfo, baseArmour, baseToughness));
     ArmourInfo.STRING_MAP_CODEC.encodeStart(JsonOps.INSTANCE, map).result().ifPresent(jsonElement -> {
       String json = gson.toJson(jsonElement);
       try {
@@ -517,35 +557,6 @@ public class SkadaCommand {
     });
     player.displayClientMessage(Component.translatable("skada.generate_weapon_info.finish", 1), false);
     return 1;
-  }
-
-  /**
-   * Resolve the weapon assembly used for generation.
-   *
-   * The resolver first checks item tags under the Skada generation tag namespace.
-   * If no tag is present, it falls back to normalized item-name matching.
-   *
-   * @param item The item to resolve the weapon assembly for.
-   * @param assemblyMap A map of available weapon assemblies.
-   * @return The resolved weapon assembly, or null if no assembly can be found.
-   */
-  private WeaponAssembly resolveWeaponProfile(Item item, Map<String, WeaponAssembly> assemblyMap) {
-    //first try to get name from tag
-    String assemblyName = resolveTaggedGenerationName(item, WEAPON_PROFILE_TAG_PATH, assemblyMap.keySet());
-
-    if (assemblyName == null) {
-      //fallback to name-based resolution
-      assemblyName = Util.findClosestMatch(new ArrayList<>(assemblyMap.keySet()), Util.getItemPath(item));
-    }
-
-    return assemblyName == null ? null : assemblyMap.get(assemblyName);
-  }
-
-  private MaterialInfo resolveWeaponMaterialInfo(Map<String, MaterialInfo> materialMap, String namespace, Item item) {
-    if (!(item instanceof TieredItem tieredItem)) {
-      return null;
-    }
-    return resolveSharedMaterial(materialMap, namespace, tieredItem.getTier().toString().toLowerCase(Locale.ROOT), item);
   }
 
   /**
@@ -701,13 +712,9 @@ public class SkadaCommand {
       return null;
     }
     return switch (simpleGenerationName(materialId)) {
-      case "chain", "chainmail" -> "mail_basic";
-      case "leather" -> "leather_basic";
-      case "turtle" -> "scale_basic";
-      case "gold" -> "plate_gilded";
-      case "diamond" -> "plate_refined";
-      case "netherite" -> "plate_heavy";
-      default -> "plate_basic";
+      case "leather" -> "gambeson";
+      case "turtle" -> "scale";
+      default -> "plate";
     };
   }
 
@@ -796,7 +803,7 @@ public class SkadaCommand {
       if (type.create(player.level()) instanceof LivingEntity && !(type.create(player.level()) instanceof Projectile)) {
         if (Util.getEntityNamespace(type).equals(namespace)) {
           Multimap<Attribute, AttributeModifier> multimap = ArrayListMultimap.create();
-          map.put(Util.getEntityPath(type), new MobData(null, AttackType.strike(), multimap));
+          map.put(Util.getEntityPath(type), new MobData(null, MobData.defaultDamageInfo(AttackType.strike()), multimap));
         }
       }
     }
@@ -852,7 +859,7 @@ public class SkadaCommand {
 
     player.displayClientMessage(Component.translatable("skada.generate_mob_info.start", entityId), false);
     Multimap<Attribute, AttributeModifier> multimap = ArrayListMultimap.create();
-    map.put(Util.getEntityPath(type), new MobData(null, AttackType.strike(), multimap));
+    map.put(Util.getEntityPath(type), new MobData(null, MobData.defaultDamageInfo(AttackType.strike()), multimap));
 
     MobData.STRING_MAP_CODEC.encodeStart(JsonOps.INSTANCE, map).result().ifPresent(jsonElement -> {
       String json = gson.toJson(jsonElement);

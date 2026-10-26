@@ -1,315 +1,285 @@
 {
-  "leather_helmet": {
-    "elemental_resists": {
-      "skada:heat": 0.05,
-      "skada:cold": 0.06
-    },
-    "attack_type_resists": {
-      "skada:slash": 0.21,
-      "skada:thrust": 0.27,
-      "skada:strike": 0.14
-    },
-    "armour_bonus": 0.94,
-    "armour_toughness_bonus": 0.74,
-    "burden": 0.07
-  },
-  "leather_chestplate": {
-    "elemental_resists": {
-      "skada:heat": 0.09,
-      "skada:cold": 0.1
-    },
-    "attack_type_resists": {
-      "skada:slash": 0.37,
-      "skada:thrust": 0.47,
-      "skada:strike": 0.25
-    },
-    "armour_bonus": 1.65,
-    "armour_toughness_bonus": 1.3,
-    "burden": 0.19
-  },
-  "leather_leggings": {
-    "elemental_resists": {
-      "skada:heat": 0.07,
-      "skada:cold": 0.09
-    },
-    "attack_type_resists": {
-      "skada:slash": 0.31,
-      "skada:thrust": 0.39,
-      "skada:strike": 0.21
-    },
-    "armour_bonus": 1.36,
-    "armour_toughness_bonus": 1.08,
-    "burden": 0.14
-  },
-  "leather_boots": {
-    "elemental_resists": {
-      "skada:heat": 0.04,
-      "skada:cold": 0.05
-    },
-    "attack_type_resists": {
-      "skada:slash": 0.17,
-      "skada:thrust": 0.22,
-      "skada:strike": 0.12
-    },
-    "armour_bonus": 0.75,
-    "armour_toughness_bonus": 0.59,
-    "burden": 0.07
-  },
-  "chainmail_helmet": {
+  "chainmail_boots": {
+    "armour": 0.52,
+    "armour_toughness": 1.34,
+    "burden": 0.16,
     "elemental_resists": {},
     "attack_type_resists": {
-      "skada:slash": 0.28,
-      "skada:thrust": 0.3,
-      "skada:strike": 0.24
-    },
-    "armour_bonus": 1.31,
-    "armour_toughness_bonus": 0.93,
-    "burden": 0.16
+      "skada:strike": 8.0,
+      "skada:thrust": 14.0,
+      "skada:slash": 16.0
+    }
   },
   "chainmail_chestplate": {
+    "armour": 5.72,
+    "armour_toughness": 2.93,
+    "burden": 0.43,
     "elemental_resists": {},
     "attack_type_resists": {
-      "skada:slash": 0.49,
-      "skada:thrust": 0.53,
-      "skada:strike": 0.42
-    },
-    "armour_bonus": 2.29,
-    "armour_toughness_bonus": 1.63,
-    "burden": 0.43
+      "skada:strike": 17.0,
+      "skada:thrust": 31.0,
+      "skada:slash": 35.0
+    }
+  },
+  "chainmail_helmet": {
+    "armour": 1.31,
+    "armour_toughness": 1.67,
+    "burden": 0.16,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 10.0,
+      "skada:thrust": 17.0,
+      "skada:slash": 20.0
+    }
   },
   "chainmail_leggings": {
+    "armour": 3.79,
+    "armour_toughness": 2.43,
+    "burden": 0.32,
     "elemental_resists": {},
     "attack_type_resists": {
-      "skada:slash": 0.4,
-      "skada:thrust": 0.44,
-      "skada:strike": 0.35
-    },
-    "armour_bonus": 1.89,
-    "armour_toughness_bonus": 1.35,
-    "burden": 0.32
-  },
-  "chainmail_boots": {
-    "elemental_resists": {},
-    "attack_type_resists": {
-      "skada:slash": 0.22,
-      "skada:thrust": 0.24,
-      "skada:strike": 0.19
-    },
-    "armour_bonus": 1.05,
-    "armour_toughness_bonus": 0.75,
-    "burden": 0.16
-  },
-  "iron_helmet": {
-    "elemental_resists": {},
-    "attack_type_resists": {
-      "skada:slash": 0.32,
-      "skada:thrust": 0.36,
-      "skada:strike": 0.29
-    },
-    "armour_bonus": 1.42,
-    "armour_toughness_bonus": 1.12,
-    "burden": 0.26
-  },
-  "iron_chestplate": {
-    "elemental_resists": {},
-    "attack_type_resists": {
-      "skada:slash": 0.57,
-      "skada:thrust": 0.63,
-      "skada:strike": 0.5
-    },
-    "armour_bonus": 2.49,
-    "armour_toughness_bonus": 1.96,
-    "burden": 0.69
-  },
-  "iron_leggings": {
-    "elemental_resists": {},
-    "attack_type_resists": {
-      "skada:slash": 0.47,
-      "skada:thrust": 0.52,
-      "skada:strike": 0.42
-    },
-    "armour_bonus": 2.06,
-    "armour_toughness_bonus": 1.62,
-    "burden": 0.52
-  },
-  "iron_boots": {
-    "elemental_resists": {},
-    "attack_type_resists": {
-      "skada:slash": 0.26,
-      "skada:thrust": 0.29,
-      "skada:strike": 0.23
-    },
-    "armour_bonus": 1.14,
-    "armour_toughness_bonus": 0.9,
-    "burden": 0.26
-  },
-  "golden_helmet": {
-    "elemental_resists": {
-      "skada:ender": 0.08
-    },
-    "attack_type_resists": {
-      "skada:slash": 0.3,
-      "skada:thrust": 0.29,
-      "skada:strike": 0.31
-    },
-    "armour_bonus": 1.43,
-    "armour_toughness_bonus": 0.85,
-    "burden": 0.19
-  },
-  "golden_chestplate": {
-    "elemental_resists": {
-      "skada:ender": 0.14
-    },
-    "attack_type_resists": {
-      "skada:slash": 0.52,
-      "skada:thrust": 0.5,
-      "skada:strike": 0.54
-    },
-    "armour_bonus": 2.5,
-    "armour_toughness_bonus": 1.49,
-    "burden": 0.51
-  },
-  "golden_leggings": {
-    "elemental_resists": {
-      "skada:ender": 0.11
-    },
-    "attack_type_resists": {
-      "skada:slash": 0.43,
-      "skada:thrust": 0.42,
-      "skada:strike": 0.45
-    },
-    "armour_bonus": 2.07,
-    "armour_toughness_bonus": 1.23,
-    "burden": 0.38
-  },
-  "golden_boots": {
-    "elemental_resists": {
-      "skada:ender": 0.06
-    },
-    "attack_type_resists": {
-      "skada:slash": 0.24,
-      "skada:thrust": 0.23,
-      "skada:strike": 0.25
-    },
-    "armour_bonus": 1.14,
-    "armour_toughness_bonus": 0.68,
-    "burden": 0.19
-  },
-  "diamond_helmet": {
-    "elemental_resists": {},
-    "attack_type_resists": {
-      "skada:slash": 0.47,
-      "skada:thrust": 0.31,
-      "skada:strike": 0.25
-    },
-    "armour_bonus": 1.45,
-    "armour_toughness_bonus": 0.91,
-    "burden": 0.17
-  },
-  "diamond_chestplate": {
-    "elemental_resists": {},
-    "attack_type_resists": {
-      "skada:slash": 0.82,
-      "skada:thrust": 0.54,
-      "skada:strike": 0.43
-    },
-    "armour_bonus": 2.54,
-    "armour_toughness_bonus": 1.6,
-    "burden": 0.46
-  },
-  "diamond_leggings": {
-    "elemental_resists": {},
-    "attack_type_resists": {
-      "skada:slash": 0.68,
-      "skada:thrust": 0.45,
-      "skada:strike": 0.36
-    },
-    "armour_bonus": 2.1,
-    "armour_toughness_bonus": 1.32,
-    "burden": 0.35
+      "skada:strike": 14.0,
+      "skada:thrust": 25.0,
+      "skada:slash": 29.0
+    }
   },
   "diamond_boots": {
+    "armour": 1.74,
+    "armour_toughness": 1.76,
+    "burden": 0.17,
     "elemental_resists": {},
     "attack_type_resists": {
-      "skada:slash": 0.37,
-      "skada:thrust": 0.25,
-      "skada:strike": 0.2
-    },
-    "armour_bonus": 1.16,
-    "armour_toughness_bonus": 0.73,
-    "burden": 0.17
+      "skada:strike": 8.0,
+      "skada:thrust": 14.0,
+      "skada:slash": 16.0
+    }
   },
-  "netherite_helmet": {
-    "elemental_resists": {
-      "skada:heat": 0.04,
-      "skada:wither": 0.03,
-      "skada:cold": 0.02
-    },
+  "diamond_chestplate": {
+    "armour": 10.15,
+    "armour_toughness": 3.86,
+    "burden": 0.46,
+    "elemental_resists": {},
     "attack_type_resists": {
-      "skada:slash": 0.43,
-      "skada:thrust": 0.41,
-      "skada:strike": 0.32
-    },
-    "armour_bonus": 1.64,
-    "armour_toughness_bonus": 1.28,
-    "burden": 0.34
+      "skada:strike": 17.0,
+      "skada:thrust": 31.0,
+      "skada:slash": 35.0
+    }
   },
-  "netherite_chestplate": {
-    "elemental_resists": {
-      "skada:heat": 0.07,
-      "skada:wither": 0.05,
-      "skada:cold": 0.03
-    },
+  "diamond_helmet": {
+    "armour": 2.18,
+    "armour_toughness": 2.21,
+    "burden": 0.17,
+    "elemental_resists": {},
     "attack_type_resists": {
-      "skada:slash": 0.76,
-      "skada:thrust": 0.71,
-      "skada:strike": 0.57
-    },
-    "armour_bonus": 2.88,
-    "armour_toughness_bonus": 2.23,
-    "burden": 0.91
+      "skada:strike": 10.0,
+      "skada:thrust": 17.0,
+      "skada:slash": 20.0
+    }
   },
-  "netherite_leggings": {
-    "elemental_resists": {
-      "skada:heat": 0.05,
-      "skada:wither": 0.04,
-      "skada:cold": 0.02
-    },
+  "diamond_leggings": {
+    "armour": 6.31,
+    "armour_toughness": 3.2,
+    "burden": 0.35,
+    "elemental_resists": {},
     "attack_type_resists": {
-      "skada:slash": 0.63,
-      "skada:thrust": 0.59,
-      "skada:strike": 0.47
-    },
-    "armour_bonus": 2.38,
-    "armour_toughness_bonus": 1.85,
-    "burden": 0.68
+      "skada:strike": 14.0,
+      "skada:thrust": 25.0,
+      "skada:slash": 29.0
+    }
+  },
+  "golden_boots": {
+    "armour": 0.57,
+    "armour_toughness": 1.42,
+    "burden": 0.19,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 8.0,
+      "skada:thrust": 14.0,
+      "skada:slash": 16.0
+    }
+  },
+  "golden_chestplate": {
+    "armour": 6.2,
+    "armour_toughness": 3.1,
+    "burden": 0.51,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 17.0,
+      "skada:thrust": 31.0,
+      "skada:slash": 35.0
+    }
+  },
+  "golden_helmet": {
+    "armour": 1.42,
+    "armour_toughness": 1.77,
+    "burden": 0.19,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 10.0,
+      "skada:thrust": 17.0,
+      "skada:slash": 20.0
+    }
+  },
+  "golden_leggings": {
+    "armour": 3.08,
+    "armour_toughness": 2.57,
+    "burden": 0.38,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 14.0,
+      "skada:thrust": 25.0,
+      "skada:slash": 29.0
+    }
+  },
+  "iron_boots": {
+    "armour": 1.14,
+    "armour_toughness": 1.6,
+    "burden": 0.26,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 8.0,
+      "skada:thrust": 14.0,
+      "skada:slash": 16.0
+    }
+  },
+  "iron_chestplate": {
+    "armour": 7.46,
+    "armour_toughness": 3.5,
+    "burden": 0.69,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 17.0,
+      "skada:thrust": 31.0,
+      "skada:slash": 35.0
+    }
+  },
+  "iron_helmet": {
+    "armour": 1.42,
+    "armour_toughness": 2.0,
+    "burden": 0.26,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 10.0,
+      "skada:thrust": 17.0,
+      "skada:slash": 20.0
+    }
+  },
+  "iron_leggings": {
+    "armour": 5.15,
+    "armour_toughness": 2.9,
+    "burden": 0.52,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 14.0,
+      "skada:thrust": 25.0,
+      "skada:slash": 29.0
+    }
+  },
+  "leather_boots": {
+    "armour": 0.38,
+    "armour_toughness": 0.86,
+    "burden": 0.07,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 8.0,
+      "skada:thrust": 14.0,
+      "skada:slash": 16.0
+    }
+  },
+  "leather_chestplate": {
+    "armour": 2.47,
+    "armour_toughness": 1.88,
+    "burden": 0.19,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 17.0,
+      "skada:thrust": 30.0,
+      "skada:slash": 35.0
+    }
+  },
+  "leather_helmet": {
+    "armour": 0.47,
+    "armour_toughness": 1.07,
+    "burden": 0.07,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 10.0,
+      "skada:thrust": 17.0,
+      "skada:slash": 20.0
+    }
+  },
+  "leather_leggings": {
+    "armour": 1.36,
+    "armour_toughness": 1.55,
+    "burden": 0.14,
+    "elemental_resists": {},
+    "attack_type_resists": {
+      "skada:strike": 14.0,
+      "skada:thrust": 25.0,
+      "skada:slash": 29.0
+    }
   },
   "netherite_boots": {
+    "armour": 1.97,
+    "armour_toughness": 2.05,
+    "burden": 0.34,
     "elemental_resists": {
-      "skada:heat": 0.03,
-      "skada:wither": 0.02,
-      "skada:cold": 0.01
+      "skada:heat": 2.95
     },
     "attack_type_resists": {
-      "skada:slash": 0.35,
-      "skada:thrust": 0.32,
-      "skada:strike": 0.26
+      "skada:strike": 8.0,
+      "skada:thrust": 14.0,
+      "skada:slash": 16.0
+    }
+  },
+  "netherite_chestplate": {
+    "armour": 11.51,
+    "armour_toughness": 4.48,
+    "burden": 0.91,
+    "elemental_resists": {
+      "skada:heat": 8.85
     },
-    "armour_bonus": 1.32,
-    "armour_toughness_bonus": 1.02,
-    "burden": 0.34
+    "attack_type_resists": {
+      "skada:strike": 18.0,
+      "skada:thrust": 31.0,
+      "skada:slash": 35.0
+    }
+  },
+  "netherite_helmet": {
+    "armour": 2.47,
+    "armour_toughness": 2.56,
+    "burden": 0.34,
+    "elemental_resists": {
+      "skada:heat": 3.79
+    },
+    "attack_type_resists": {
+      "skada:strike": 10.0,
+      "skada:thrust": 17.0,
+      "skada:slash": 20.0
+    }
+  },
+  "netherite_leggings": {
+    "armour": 7.15,
+    "armour_toughness": 3.71,
+    "burden": 0.68,
+    "elemental_resists": {
+      "skada:heat": 5.48
+    },
+    "attack_type_resists": {
+      "skada:strike": 14.0,
+      "skada:thrust": 25.0,
+      "skada:slash": 29.0
+    }
   },
   "turtle_helmet": {
-    "elemental_resists": {
-      "skada:cold": 0.04
-    },
+    "armour": 1.16,
+    "armour_toughness": 1.71,
+    "burden": 0.13,
+    "elemental_resists": {},
     "attack_type_resists": {
-      "skada:slash": 0.31,
-      "skada:thrust": 0.32,
-      "skada:strike": 0.17
-    },
-    "armour_bonus": 1.16,
-    "armour_toughness_bonus": 0.97,
-    "burden": 0.13
+      "skada:strike": 10.0,
+      "skada:thrust": 17.0,
+      "skada:slash": 20.0
+    }
   }
 }

@@ -22,6 +22,7 @@ build
 
 # other
 eclipse
+plans
 run
 run-data
 runServer
@@ -39,6 +40,24 @@ external-sources
 
 # github
 .github
+.git.backup
+
+# opencode
+.opencode
+opencode.json
+
+# Local documentation, working notes, and assistant configuration
+/*.md
+/docs/
+/.scratch/
+/.codex/
+/.agents/
+/.claude/
+AGENTS.md
+CLAUDE.md
+
+# Unused authoring assets retained locally
+/local-assets/
 
 # Files from Forge MDK
 forge*changelog.txt

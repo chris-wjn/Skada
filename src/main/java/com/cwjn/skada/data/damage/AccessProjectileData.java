@@ -6,4 +6,8 @@ public interface AccessProjectileData {
     void setDamageInfo(DamageInfo data);
     boolean hasDamageInfo();
 
+    /** Transient flight context; consumed by the first shoot call and never reconstructed from the owner. */
+    ProjectileLaunch getPendingLaunch();
+    void setPendingLaunch(ProjectileLaunch launch);
+
 }

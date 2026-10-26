@@ -34,6 +34,11 @@ public class Animation {
     }
   }
 
+  @Override
+  public String toString() {
+    return frames[0].getPath().toString();
+  }
+
   public ResourceLocation getCurrentFrame() {
     if (startTime == -1) {
       startTime = System.currentTimeMillis() + delay;

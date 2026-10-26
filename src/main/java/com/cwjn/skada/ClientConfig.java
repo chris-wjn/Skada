@@ -24,7 +24,7 @@ public class ClientConfig {
         BUILDER.pop();
         BUILDER.comment("Reticle Settings").push("reticles");
         ENABLE_CUSTOM_RETICLES = BUILDER.comment("Enable custom reticles. This should match the setting in skada-mixin-config.json! (This file is also in config folder)")
-                .define("enableCustomReticles", false);
+                .define("enableCustomReticles", true);
         BUILDER.pop();
         BUILDER.comment("HUD settings").push("hud");
         ENABLE_MOB_HEALTHBARS = BUILDER.comment("Enable mob healthbars")
