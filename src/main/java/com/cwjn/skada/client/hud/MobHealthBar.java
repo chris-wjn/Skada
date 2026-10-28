@@ -35,6 +35,11 @@ public class MobHealthBar {
         renderables.put(entity, alpha);
     }
 
+    /** Drops pending frame data when healthbars are disabled or the client leaves its world. */
+    public static void clear() {
+        renderables.clear();
+    }
+
     public static void renderBars(float pTick, PoseStack stack, Camera cam) {
 
         if (cam == null) {
@@ -55,6 +60,7 @@ public class MobHealthBar {
                 GL11.GL_ZERO);
 
         for (LivingEntity entity : renderables.keySet()) {
+            if (!entity.isAlive() || entity.isRemoved() || entity.level() != client.level) continue;
             float alpha = renderables.get(entity);
             if (alpha <= 0.05) continue;
             float scaleToGui = 0.025f;

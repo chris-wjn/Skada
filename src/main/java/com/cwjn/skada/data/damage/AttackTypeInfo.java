@@ -37,6 +37,8 @@ public record AttackTypeInfo(
   // Default AttackTypeInfo that represents an unarmed attack.
   public static final AttackTypeInfo FIST = new AttackTypeInfo(0.0, 8.0, 0.0, 3.0, 4.0, 1.0, 0.0, List.of("punch"));
   public static final AttackTypeInfo ITEM = new AttackTypeInfo(0.0, 4.0, 0.0, 0.0, 3.0, 1.0, 0.0, List.of("strike_default"));
+  /** Held blocks keep generic-item combat statistics while sharing the fist's square footprint. */
+  public static final AttackTypeInfo BLOCK = new AttackTypeInfo(0.0, 4.0, 0.0, 0.0, 3.0, 1.0, 0.0, FIST.reticleShapes());
 
   /**
    * Creates an attack info instance for tests and simple call sites without

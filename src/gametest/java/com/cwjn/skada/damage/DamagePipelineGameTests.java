@@ -7,6 +7,7 @@ import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.event.custom.PostMitigationEvent;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -14,6 +15,7 @@ import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -21,12 +23,15 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
@@ -34,6 +39,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /** Exercises the real damage hooks, player override and base-only elemental attacks. */
@@ -43,6 +49,88 @@ public final class DamagePipelineGameTests {
     private static final String TEMPLATE = "damage_handler_5x4x5";
 
     private DamagePipelineGameTests() {}
+
+    /** Falling no longer supplies an automatic crit, but the ordinary critical hook remains neutral. */
+    @GameTest(templateNamespace = Skada.MODID, template = TEMPLATE)
+    public static void fallingMeleeAttacksDoNotGainVanillaCriticals(GameTestHelper helper) {
+        withDeterministicCombat(() -> {
+            Player attacker = player(helper);
+            setAttribute(attacker, Attributes.ATTACK_DAMAGE, 6.0);
+            setAttribute(attacker, Attributes.ATTACK_SPEED, 1024.0);
+            LivingEntity target = target(helper);
+            List<CriticalHitEvent> criticals = new ArrayList<>();
+            Consumer<CriticalHitEvent> observe = event -> {
+                if (event.getEntity() == attacker) criticals.add(event);
+            };
+            MinecraftForge.EVENT_BUS.addListener(observe);
+            try {
+                attacker.setOnGround(true);
+                attacker.fallDistance = 0;
+                attacker.attack(target);
+                float groundedDamage = 100.0F - target.getHealth();
+                assertAmount(helper, groundedDamage, 6.0, "Ordinary melee damage must remain unchanged");
+                target.setHealth(100.0F);
+                target.invulnerableTime = 0;
+                attacker.setOnGround(false);
+                attacker.fallDistance = 1.0F;
+                helper.assertTrue(attacker.getAttackStrengthScale(0.5F) > 0.9F && !attacker.isSprinting(), "Falling comparison must use full-strength, nonsprinting attacks");
+                attacker.attack(target);
+                assertAmount(helper, 100.0F - target.getHealth(), groundedDamage, "Falling must not add the vanilla 1.5x multiplier");
+                helper.assertTrue(criticals.size() == 2 && criticals.stream().noneMatch(CriticalHitEvent::isVanillaCritical), "Neither grounded nor falling attacks may supply an automatic vanilla crit trigger");
+                helper.assertTrue(criticals.stream().allMatch(event -> event.getResult() == Event.Result.DEFAULT
+                        && event.getOldDamageModifier() == 1.0F), "The critical hook must remain neutral for future implementations");
+                Arrow arrow = new Arrow(helper.getLevel(), attacker);
+                arrow.setCritArrow(true);
+                helper.assertTrue(!arrow.isCritArrow(), "Existing arrow critical suppression must remain effective");
+            } finally {
+                MinecraftForge.EVENT_BUS.unregister(observe);
+            }
+        });
+        helper.succeed();
+    }
+
+    /** An explicit critical rule still reaches vanilla's multiplier and critical-feedback callback. */
+    @GameTest(templateNamespace = Skada.MODID, template = TEMPLATE)
+    public static void customCriticalRulesRetainDamageAndFeedback(GameTestHelper helper) {
+        withDeterministicCombat(() -> {
+            int[] feedback = {0};
+            Player attacker = new Player(helper.getLevel(), BlockPos.ZERO, 0.0F,
+                    new GameProfile(UUID.randomUUID(), "critical-test-player")) {
+                @Override public boolean isSpectator() { return false; }
+                @Override public boolean isCreative() { return true; }
+                @Override public void crit(Entity target) { feedback[0]++; }
+            };
+            BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
+            attacker.setPos(pos.getX(), pos.getY(), pos.getZ());
+            prepareEntity(attacker);
+            setAttribute(attacker, Attributes.ATTACK_DAMAGE, 6.0);
+            setAttribute(attacker, Attributes.ATTACK_SPEED, 1024.0);
+            LivingEntity target = target(helper);
+            List<CriticalHitEvent> criticals = new ArrayList<>();
+            Consumer<CriticalHitEvent> customRule = event -> {
+                if (event.getEntity() != attacker) return;
+                criticals.add(event);
+                event.setDamageModifier(2.0F);
+                event.setResult(Event.Result.ALLOW);
+            };
+            MinecraftForge.EVENT_BUS.addListener(customRule);
+            try {
+                for (boolean grounded : List.of(true, false)) {
+                    target.setHealth(100.0F);
+                    target.invulnerableTime = 0;
+                    attacker.setOnGround(grounded);
+                    attacker.fallDistance = grounded ? 0.0F : 1.0F;
+                    attacker.attack(target);
+                    assertAmount(helper, 100.0F - target.getHealth(), 12.0, "An explicit rule must still produce its configured critical multiplier");
+                }
+                helper.assertTrue(criticals.size() == 2 && criticals.stream().noneMatch(CriticalHitEvent::isVanillaCritical), "Custom crits must be independent of the removed jump trigger");
+                helper.assertTrue(feedback[0] == 2, "Explicit crits must still execute the vanilla critical-feedback callback");
+            } finally {
+                MinecraftForge.EVENT_BUS.unregister(customRule);
+            }
+        });
+        helper.succeed();
+    }
 
     /** A real player swing can deal multiple base-only elements without physical attack damage. */
     @GameTest(templateNamespace = Skada.MODID, template = TEMPLATE)

@@ -9,6 +9,7 @@ import com.cwjn.skada.client.gui.tooltip.ClientArmourTooltipComponent;
 import com.cwjn.skada.client.gui.tooltip.ClientWeaponTooltipComponent;
 import com.cwjn.skada.client.gui.tooltip.WeaponTooltipComponent;
 import com.cwjn.skada.client.hud.MobHealthBar;
+import com.cwjn.skada.client.hud.MobHealthBarTracker;
 import com.cwjn.skada.client.hud.ReticleCoordinate;
 import com.cwjn.skada.client.hud.ReticleShape;
 import com.cwjn.skada.client.hud.ReticleViewportScaler;
@@ -55,7 +56,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
@@ -68,7 +72,7 @@ import static com.cwjn.skada.data.SkadaData.*;
 @OnlyIn(Dist.CLIENT)
 public class ClientEvent {
 
-  private static final HashMap<Mob, Integer> displayHealthbarTicksForMob = new HashMap<>();
+  private static final MobHealthBarTracker healthbarTracker = new MobHealthBarTracker();
   private static final float CUSTOM_RETICLE_OUTLINE_THICKNESS_SCALE = 2.0F / 3.0F;
   private static final int VANILLA_CROSSHAIR_SIZE = 15;
   private static final int VANILLA_DEBUG_CROSSHAIR_LINE_LENGTH = 10;
@@ -321,6 +325,42 @@ public class ClientEvent {
     @SubscribeEvent
     public static void onClientLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
       ClientBestiaryCache.clear();
+      healthbarTracker.clear();
+      MobHealthBar.clear();
+    }
+
+    /** Observes vanilla-synchronized damage on each client mob, regardless of who caused it. */
+    @SubscribeEvent
+    public static void trackMobHealthbarDamage(LivingEvent.LivingTickEvent event) {
+      if (event.getEntity() instanceof Mob mob && mob.level().isClientSide()
+          && ClientConfig.ENABLE_MOB_HEALTHBARS.get() && ClientConfig.HEALTHBAR_ONLY_ON_DAMAGE.get()) {
+        healthbarTracker.tick(mob, ClientConfig.HEALTHBAR_ON_DAMAGE_DISPLAY_TIME.get());
+      }
+    }
+
+    /** Clears damage samples when their client entities leave tracking range or the world. */
+    @SubscribeEvent
+    public static void onHealthbarEntityRemoved(EntityLeaveLevelEvent event) {
+      if (event.getLevel().isClientSide() && event.getEntity() instanceof Mob mob) healthbarTracker.remove(mob);
+    }
+
+    /** Prevents old-world entities and queued bars from surviving a dimension/world transition. */
+    @SubscribeEvent
+    public static void onHealthbarLevelUnload(LevelEvent.Unload event) {
+      if (event.getLevel().isClientSide()) {
+        healthbarTracker.clear();
+        MobHealthBar.clear();
+      }
+    }
+
+    /** Discards inactive timers without counting render frames or advancing while paused. */
+    @SubscribeEvent
+    public static void clearInactiveHealthbarTracking(ClientTickEvent event) {
+      if (event.phase == ClientTickEvent.Phase.END && (Minecraft.getInstance().level == null
+          || !ClientConfig.ENABLE_MOB_HEALTHBARS.get() || !ClientConfig.HEALTHBAR_ONLY_ON_DAMAGE.get())) {
+        healthbarTracker.clear();
+        MobHealthBar.clear();
+      }
     }
 
     /**
@@ -862,20 +902,21 @@ public class ClientEvent {
       if (!ClientConfig.ENABLE_MOB_HEALTHBARS.get())
         return;
       if (event.getEntity() instanceof Mob entity) {
-        if (entity.isInvisible())
+        if (!entity.isAlive() || entity.isRemoved() || entity.isInvisible())
           return;
         if (entity.isVehicle())
           return;
         if (ClientConfig.BLACKLISTED_HEALTHBAR_ENTITIES.get().contains(Util.getEntityRegistryName(entity.getType())))
           return;
         if (ClientConfig.HEALTHBAR_ONLY_ON_DAMAGE.get()) {
-          if (displayHealthbarTicksForMob.containsKey(entity)) {
+          int remainingTicks = healthbarTracker.remainingTicks(entity);
+          if (remainingTicks > 0) {
             int unpackedLight = Math.max(LightTexture.sky(event.getPackedLight()) - ClientHandler.skyDarken,
                 LightTexture.block(event.getPackedLight()));
             @SuppressWarnings("null")
             float distance = entity.distanceTo(Minecraft.getInstance().player) - unpackedLight + 15;
             float minAlpha = distance < 30 * 0.5 ? 1 : (1 - (distance / 30));
-            float alpha = (float) Math.min(minAlpha, ((float) displayHealthbarTicksForMob.get(entity)
+            float alpha = (float) Math.min(minAlpha, ((float) remainingTicks
                 / (ClientConfig.HEALTHBAR_ON_DAMAGE_DISPLAY_TIME.get() * 0.5)));
             MobHealthBar.prepare(entity, alpha);
           }

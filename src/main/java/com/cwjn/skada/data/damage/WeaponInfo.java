@@ -25,6 +25,7 @@ public class WeaponInfo {
     private final WeaponStatApplicability applicability;
     public static final WeaponInfo FIST = createDefaultWeaponInfo(AttackTypeInfo.FIST);
     public static final WeaponInfo RANDOM_ITEM = createDefaultWeaponInfo(AttackTypeInfo.ITEM);
+    public static final WeaponInfo BLOCK = createDefaultWeaponInfo(AttackTypeInfo.BLOCK);
 
     /**
      * Create a default weapon info singleton without failing class initialization in lightweight test environments.

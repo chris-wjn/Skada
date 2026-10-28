@@ -40,6 +40,33 @@ public final class WeaponAttackGameTests {
     private static final String TEMPLATE = "damage_handler_5x4x5";
     private WeaponAttackGameTests() {}
 
+    /** Blocks share the fist footprint while retaining generic-item combat stats and override precedence. */
+    @GameTest(templateNamespace = Skada.MODID, template = TEMPLATE)
+    public static void heldBlocksUseSquareFallbackWithoutChangingTheirStats(GameTestHelper helper) {
+        AttackSelection fist = AttackSelection.melee(ItemStack.EMPTY);
+        ItemStack block = new ItemStack(Items.COBBLESTONE);
+        AttackSelection selected = AttackSelection.melee(block);
+        AttackTypeInfo generic = AttackTypeInfo.ITEM;
+        helper.assertTrue(!selected.configured() && !block.hasTag(), "A block fallback must not create authored stack data");
+        helper.assertTrue(selected.stats().reticleShapes().equals(fist.stats().reticleShapes()), "Block rendering and targeting must resolve the fist's square geometry");
+        helper.assertTrue(selected.weapon().getAttackTypes().get(AttackType.strike()).equals(selected.stats()), "Fallback profile and selected stats must agree");
+        helper.assertTrue(selected.stats().lethality() == generic.lethality()
+                && selected.stats().precision() == generic.precision()
+                && selected.stats().minReach() == generic.minReach()
+                && selected.stats().maxReach() == generic.maxReach()
+                && selected.stats().attackSpeed() == generic.attackSpeed()
+                && selected.stats().damage() == generic.damage()
+                && selected.stats().failChance() == generic.failChance(), "A geometry change must preserve every generic-item combat stat");
+        helper.assertTrue(AttackSelection.melee(new ItemStack(Items.APPLE)).stats().reticleShapes().equals(generic.reticleShapes()), "Miscellaneous items must remain circular");
+        WeaponInfo authored = new WeaponInfo(Map.of(AttackType.strike(), generic), new ElementSpread(), WeaponStatApplicability.MELEE);
+        block.getOrCreateTag().put(SkadaData.WEAPON_INFO_TAG_KEY, authored.toCompoundTag());
+        AttackSelection overridden = AttackSelection.melee(block);
+        helper.assertTrue(overridden.configured() && overridden.stats().reticleShapes().equals(generic.reticleShapes()), "An explicitly authored block profile must keep its own shape");
+        ItemStack projectileOnly = weapon(Items.DIRT, WeaponStatApplicability.PROJECTILE);
+        helper.assertTrue(AttackSelection.melee(projectileOnly).stats().reticleShapes().equals(fist.stats().reticleShapes()), "A projectile-only block must still use the square direct-attack fallback");
+        helper.succeed();
+    }
+
     @GameTest(templateNamespace = Skada.MODID, template = TEMPLATE)
     public static void selectionRepairsOrderAndMigratesLegacyIndex(GameTestHelper helper) {
         ItemStack stack = weapon(Items.STICK, WeaponStatApplicability.BOTH);

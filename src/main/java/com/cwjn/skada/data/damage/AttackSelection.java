@@ -5,6 +5,7 @@ import com.cwjn.skada.data.registry.AttackType;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.BlockItem;
 import java.util.*;
 
 /**
@@ -23,7 +24,7 @@ public record AttackSelection(WeaponInfo weapon, AttackType type, AttackTypeInfo
             tag.put(SkadaData.WEAPON_INFO_TAG_KEY, access.skada$getWeaponInfo().toCompoundTag());
         }
         if (tag == null || !tag.contains(SkadaData.WEAPON_INFO_TAG_KEY, Tag.TAG_COMPOUND)) {
-            return fallback(stack.isEmpty());
+            return fallback(stack);
         }
         WeaponInfo info = WeaponInfo.fromCompoundTag(tag.getCompound(SkadaData.WEAPON_INFO_TAG_KEY));
         LinkedHashMap<ResourceLocation, AttackType> supported = new LinkedHashMap<>();
@@ -68,14 +69,16 @@ public record AttackSelection(WeaponInfo weapon, AttackType type, AttackTypeInfo
     /** Resolves direct-attack statistics independently of the attribute replacement setting. */
     public static AttackSelection melee(ItemStack stack) {
         AttackSelection selected = resolve(stack);
-        return selected.weapon.applicability().melee() ? selected : fallback(stack.isEmpty());
+        return selected.weapon.applicability().melee() ? selected : fallback(stack);
     }
 
-    /** Supplies the ordinary fist or generic held-item profile without writing stack NBT. */
-    private static AttackSelection fallback(boolean empty) {
+    /** Supplies fist, held-block or generic-item defaults without writing stack NBT. */
+    private static AttackSelection fallback(ItemStack stack) {
+        boolean empty = stack.isEmpty();
+        boolean block = !empty && stack.getItem() instanceof BlockItem;
         AttackType type = AttackType.strike();
-        return new AttackSelection(empty ? WeaponInfo.FIST : WeaponInfo.RANDOM_ITEM, type,
-                empty ? AttackTypeInfo.FIST : AttackTypeInfo.ITEM, List.of(type), 0, false);
+        return new AttackSelection(empty ? WeaponInfo.FIST : block ? WeaponInfo.BLOCK : WeaponInfo.RANDOM_ITEM, type,
+                empty ? AttackTypeInfo.FIST : block ? AttackTypeInfo.BLOCK : AttackTypeInfo.ITEM, List.of(type), 0, false);
     }
 
     /** Accepts a supported stable ID only; used for authoritative client requests. */

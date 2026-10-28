@@ -24,6 +24,7 @@
     "vanilla_rework.ClientboundSetEntityMotionPacketRemoveVelocityClamp",
     "vanilla_rework.RemoveKnockback",
     "vanilla_rework.RemoveSweepAttack",
+    "vanilla_rework.RemoveJumpCritical",
     "vanilla_rework.DamagePipeline$MixinForgeHooks",
     "vanilla_rework.DamagePipeline$MixinLivingEntity",
     "vanilla_rework.DamagePipeline$MixinPlayer"
