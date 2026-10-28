@@ -33,6 +33,9 @@ configurations {
     gametestRuntimeOnly.extendsFrom runtimeOnly
 }
 
+// Bundle MixinExtras inside the release jar so players need no separate download.
+jarJar.enable()
+
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
 
@@ -132,6 +135,10 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.11.0'
     minecraft "net.neoforged:forge:${minecraft_version}-${neo_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:${mixinextras_version}")) {
+        jarJar.ranged(it, "[${mixinextras_version},)")
+    }
     implementation fg.deobf("maven.modrinth:spark:1.10.53-forge")
     implementation fg.deobf("maven.modrinth:simply-swords:1.54.0-1.20.1-forge")
     implementation fg.deobf("maven.modrinth:architectury-api:9.2.14+forge")
@@ -181,6 +188,8 @@ tasks.named('processResources', ProcessResources).configure {
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar).configure {
+    archiveClassifier = 'slim'
+
     manifest {
         attributes([
                 'Specification-Title'     : mod_id,
@@ -200,6 +209,12 @@ tasks.named('jar', Jar).configure {
     finalizedBy 'reobfJar'
 }
 
+// Keep the usual release filename for the bundled, reobfuscated artifact.
+tasks.named('jarJar').configure {
+    archiveClassifier = ''
+    finalizedBy 'reobfJarJar'
+}
+
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing:
 // tasks.named('publish').configure {
 //     dependsOn 'reobfJar'
@@ -209,7 +224,9 @@ tasks.named('jar', Jar).configure {
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            artifact jar
+            artifact(tasks.named('jarJar')) {
+                builtBy 'reobfJarJar'
+            }
         }
     }
     repositories {
@@ -225,9 +242,9 @@ tasks.withType(JavaCompile).configureEach {
 
 // Copies the built mod jar into the run/mods folder so the dev client loads the latest build
 tasks.register('installMod') {
-    dependsOn 'jar'
+    dependsOn 'reobfJarJar'
     doLast {
-        def built = tasks.named('jar').get().archiveFile.get().asFile
+        def built = tasks.named('jarJar').get().archiveFile.get().asFile
         def outDir = file('run/mods')
         outDir.mkdirs()
         copy {

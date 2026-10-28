@@ -24,9 +24,11 @@ public class S2CSendReticles {
         }
     }
 
+    /** Reads the single list header before decoding its declared reticle entries. */
     public static S2CSendReticles decode(FriendlyByteBuf buf) {
+        int count = buf.readInt();
         List<ReticleShape> retList = new ArrayList<>();
-        for (int i = 0; i < buf.readInt(); i++) {
+        for (int i = 0; i < count; i++) {
             retList.add(buf.readJsonWithCodec(ReticleShape.CODEC));
         }
         return new S2CSendReticles(retList);

@@ -2,14 +2,21 @@ package com.cwjn.skada.mixin.attack_injectors.player;
 
 import com.cwjn.skada.CommonConfig;
 import com.cwjn.skada.damage.SkadaDamageSource;
+import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.AttackSelection;
 import com.cwjn.skada.data.damage.DamageInfo;
+import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.UtilCombat;
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,6 +28,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = Player.class, priority = 1100)
 public class PlayerAttackUseSkada {
+
+  /** Lets base-only elemental attacks enter vanilla combat without inventing physical damage. */
+  @Definition(id = "damage", local = @Local(type = float.class, ordinal = 0))
+  @Expression("damage > 0.0")
+  @ModifyExpressionValue(method = "attack", at = @At("MIXINEXTRAS:EXPRESSION"), require = 1, allow = 1)
+  private boolean allowBaseElementalAttack(boolean original, Entity target) {
+    if (original) return true;
+    if (!(target instanceof LivingEntity)) return false;
+    for (Element element : SkadaData.REGISTRY_ELEMENT.get().getValues()) {
+      if (thisPlayer().getAttributeValue(element.baseDamage()) > 0.0) return true;
+    }
+    return false;
+  }
 
   @SuppressWarnings("all")
   private Player thisPlayer() {

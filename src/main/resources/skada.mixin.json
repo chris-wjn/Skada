@@ -24,10 +24,14 @@
     "vanilla_rework.ClientboundSetEntityMotionPacketRemoveVelocityClamp",
     "vanilla_rework.RemoveKnockback",
     "vanilla_rework.RemoveSweepAttack",
-    "vanilla_rework.RemoveVanillaDamageHandling$MixinLivingEntity",
-    "vanilla_rework.RemoveVanillaDamageHandling$MixinPlayer"
+    "vanilla_rework.DamagePipeline$MixinForgeHooks",
+    "vanilla_rework.DamagePipeline$MixinLivingEntity",
+    "vanilla_rework.DamagePipeline$MixinPlayer"
   ],
   "minVersion": "0.8",
+  "mixinextras": {
+    "minVersion": "0.5.5"
+  },
   "injectors": {
     "defaultRequire": 1
   },

@@ -52,7 +52,7 @@ public class SkadaDamageSource extends DamageSource {
     }
 
     public SkadaDamageSource(DamageSource source, DamageInfo damageInfo) {
-        super(source.typeHolder(), source.getEntity(), source.getDirectEntity(), source.getSourcePosition());
+        super(source.typeHolder(), source.getDirectEntity(), source.getEntity(), source.getSourcePosition());
         this.damageInfo = damageInfo;
     }
 
@@ -68,7 +68,7 @@ public class SkadaDamageSource extends DamageSource {
             ratios.put(Element.physical(), 1.0);
         }
         ElementSpreadInstance spread = new ElementSpreadInstance(ratios);
-        return new SkadaDamageSource(source.typeHolder(), source.getEntity(), source.getDirectEntity(), source.getSourcePosition(), DamageInfo.environmental(spread));
+        return new SkadaDamageSource(source.typeHolder(), source.getDirectEntity(), source.getEntity(), source.getSourcePosition(), DamageInfo.environmental(spread));
     }
 
 }
