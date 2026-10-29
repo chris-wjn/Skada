@@ -21,7 +21,8 @@ import java.util.*;
 /**
  * Data-driven combat and attribute snapshot for a mob entry.
  */
-public record MobData(List<String> parents, DamageInfo damageInfo, Multimap<Attribute, AttributeModifier> extraModifiers) {
+public record MobData(List<String> parents, DamageInfo damageInfo, Multimap<Attribute, AttributeModifier> extraModifiers,
+                      Double referenceWeightKg) {
 
     private static final Codec<List<AttributeModifier>> ATTRIBUTE_MODIFIER_LIST_CODEC = Codec.list(Util.ATTRIBUTE_MODIFIER_CODEC);
     private static final Codec<Map<String, Double>> ELEMENT_SPREAD_CODEC = Codec.unboundedMap(Codec.STRING, Codec.DOUBLE);
@@ -38,17 +39,27 @@ public record MobData(List<String> parents, DamageInfo damageInfo, Multimap<Attr
         Codec.STRING.optionalFieldOf("attackType").forGetter(mobData -> Optional.empty()),
         DAMAGE_INFO_CODEC.optionalFieldOf("damageInfo").forGetter(mobData -> Optional.ofNullable(mobData.damageInfo)),
             Codec.unboundedMap(ForgeRegistries.ATTRIBUTES.getCodec(), ATTRIBUTE_MODIFIER_LIST_CODEC)
-            .optionalFieldOf("extraModifiers", Map.of()).forGetter(mobData -> convertToMap(mobData.extraModifiers))
-    ).apply(instance, (parents, attackType, damageInfo, extraModifiers) -> new MobData(
+            .optionalFieldOf("extraModifiers", Map.of()).forGetter(mobData -> convertToMap(mobData.extraModifiers)),
+        Codec.DOUBLE.optionalFieldOf("weight").forGetter(mobData -> Optional.ofNullable(mobData.referenceWeightKg))
+    ).apply(instance, (parents, attackType, damageInfo, extraModifiers, referenceWeightKg) -> new MobData(
         parents.orElse(null),
         damageInfo.orElseGet(() -> defaultDamageInfo(resolveAttackType(attackType.orElse(null), AttackType.strike()))),
-        convertToMultimap(extraModifiers))));
+        convertToMultimap(extraModifiers), referenceWeightKg.orElse(null))));
+
+    public MobData {
+        referenceWeightKg = BodyWeightUtil.normalizeReferenceWeight(referenceWeightKg);
+    }
+
+    /** Compatibility constructor for data and call sites created before body weight was authored. */
+    public MobData(List<String> parents, DamageInfo damageInfo, Multimap<Attribute, AttributeModifier> extraModifiers) {
+        this(parents, damageInfo, extraModifiers, null);
+    }
 
     /**
      * Compatibility constructor for legacy call sites that still pass only an attack type.
      */
     public MobData(List<String> parents, AttackType attackType, Multimap<Attribute, AttributeModifier> extraModifiers) {
-    this(parents, defaultDamageInfo(attackType), extraModifiers);
+    this(parents, defaultDamageInfo(attackType), extraModifiers, null);
     }
 
     /**
