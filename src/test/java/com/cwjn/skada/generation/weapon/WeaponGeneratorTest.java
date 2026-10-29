@@ -19,6 +19,9 @@ import com.cwjn.skada.generation.weapon.generation_algo.AttackSpeedGenerationUti
 import com.cwjn.skada.generation.weapon.generation_algo.CriticalFailGenerationUtil;
 import com.cwjn.skada.generation.weapon.generation_algo.LethalityGenerationUtil;
 import com.cwjn.skada.generation.weapon.generation_algo.KnockbackGenerationUtil;
+import com.cwjn.skada.generation.weapon.generation_algo.context.AssemblyPhysicsSnapshot;
+import com.cwjn.skada.generation.weapon.generation_algo.context.AttackDeliverySnapshot;
+import com.cwjn.skada.generation.weapon.generation_algo.context.AttackGenerationContextFactory;
 import com.cwjn.skada.generation.weapon.generation_algo.PrecisionGenerationUtil;
 import com.cwjn.skada.generation.weapon.generation_algo.context.AttackGenerationContextFactory;
 import com.cwjn.skada.generation.weapon.attack_capability.SlashCapable;
@@ -473,6 +476,44 @@ class WeaponGeneratorTest {
                             case "strike" -> contexts.verify(() -> AttackGenerationContextFactory.buildStrikeContext(assembly), times(1));
                         }
                     }
+                }
+            }
+        }
+    }
+
+    @Test
+    void writesReproducibleKnockbackCalibrationInputs() throws IOException {
+        Map<String, JsonObject> parts = new HashMap<>();
+        try (var files = Files.list(Path.of("src/main/resources/data/skada/generator_data/weapon/part"))) {
+            for (Path file : files.filter(file -> file.toString().endsWith(".json")).toList()) {
+                String id = "skada:" + file.getFileName().toString().replace(".json", "");
+                parts.put(id, GenJsonLoader.normalizeWeaponPartDefinitionJson(
+                        JsonParser.parseString(Files.readString(file)).getAsJsonObject()));
+            }
+        }
+        List<Map.Entry<String, MaterialInfo>> materials = List.of(
+                Map.entry("wood", new MaterialInfo(0.71, 1.5, 4.0, 5.0, spread(1))),
+                Map.entry("iron", new MaterialInfo(7.874, 4.0, 8.0, 4.5, spread(1))),
+                Map.entry("netherite", new MaterialInfo(9.0, 8.5, 8.0, 3.0, spread(1))));
+        System.out.println("CALIBRATION,assembly,material,attack,assembly_mass_kg,effective_mass_kg,contact_speed_mps,rotational_thrust,transfer,impulse_ns,attack_knockback");
+        for (String name : List.of("sword", "mace", "pickaxe", "trident")) {
+            Path path = Path.of("src/main/resources/data/skada/generator_data/weapon/weapon_assembly/" + name + ".json");
+            JsonObject resolved = GenJsonLoader.resolveWeaponAssemblyPartReferences(
+                    JsonParser.parseString(Files.readString(path)).getAsJsonObject(), "skada", parts);
+            WeaponAssembly template = WeaponAssembly.CODEC.parse(JsonOps.INSTANCE, resolved)
+                    .result().orElseThrow(() -> new AssertionError(name + ": assembly decode failed"));
+            for (Map.Entry<String, MaterialInfo> material : materials) {
+                WeaponAssembly assembly = template.withMaterialWoodenHandle(material.getValue());
+                AssemblyPhysicsSnapshot assemblyPhysics = AttackGenerationContextFactory.buildAssemblyPhysicsSnapshot(assembly);
+                for (AttackType type : assembly.getAttackTypes().keySet()) {
+                    KnockbackGenerationUtil.Estimate estimate = KnockbackGenerationUtil.estimate(assembly, type);
+                    AttackDeliverySnapshot delivery = AttackGenerationContextFactory.buildDeliverySnapshot(
+                            assembly, assemblyPhysics, type);
+                    assertTrue(Double.isFinite(estimate.attackKnockback()));
+                    System.out.printf(Locale.ROOT, "CALIBRATION,%s,%s,%s,%.9f,%.9f,%.9f,%s,%.9f,%.9f,%.9f%n",
+                            name, material.getKey(), type.name(), assembly.mass(WeaponAssembly.LARGE_SAMPLE_SIZE) / 1000.0,
+                            estimate.effectiveMassKg(), estimate.contactSpeedMps(), delivery.rotationalThrust(), estimate.transferFactor(),
+                            estimate.transferredImpulseNs(), estimate.attackKnockback());
                 }
             }
         }
