@@ -3,7 +3,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 0.25
   },
   "axolotl": {
     "damageInfo": {
@@ -22,19 +23,22 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 1.0
   },
   "bat": {
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 0.03
   },
   "bee": {
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 0.01
   },
   "blaze": {
     "damageInfo": {
@@ -65,7 +69,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 35.0
   },
   "camel": {
     "damageInfo": {
@@ -84,13 +89,15 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 500.0
   },
   "cat": {
     "damageInfo": {
       "attackType": "skada:slash"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 4.0
   },
   "cave_spider": {
     "damageInfo": {
@@ -127,13 +134,15 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 20.0
   },
   "chicken": {
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 2.0
   },
   "cod": {
     "parents": [
@@ -142,7 +151,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 1.0
   },
   "cow": {
     "parents": [
@@ -151,7 +161,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 600.0
   },
   "creeper": {
     "damageInfo": {
@@ -170,7 +181,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 75.0
   },
   "dolphin": {
     "parents": [
@@ -179,7 +191,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 150.0
   },
   "donkey": {
     "parents": [
@@ -188,7 +201,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 200.0
   },
   "drowned": {
     "parents": [
@@ -198,7 +212,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 70.0
   },
   "elder_guardian": {
     "damageInfo": {
@@ -229,7 +244,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 1200.0
   },
   "ender_dragon": {
     "damageInfo": {
@@ -284,7 +300,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 8000.0
   },
   "enderman": {
     "damageInfo": {
@@ -309,7 +326,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 80.0
   },
   "endermite": {
     "damageInfo": {
@@ -328,7 +346,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 0.02
   },
   "evoker": {
     "parents": [
@@ -337,13 +356,15 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 75.0
   },
   "fox": {
     "damageInfo": {
       "attackType": "skada:slash"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 6.0
   },
   "frog": {
     "parents": [
@@ -352,7 +373,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 0.3
   },
   "ghast": {
     "damageInfo": {
@@ -365,13 +387,15 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 1000.0
   },
   "giant": {
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 6000.0
   },
   "glow_squid": {
     "parents": [
@@ -380,7 +404,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 3.0
   },
   "goat": {
     "damageInfo": {
@@ -393,7 +418,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 70.0
   },
   "guardian": {
     "damageInfo": {
@@ -424,7 +450,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 30.0
   },
   "hoglin": {
     "parents": [
@@ -440,7 +467,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 300.0
   },
   "horse": {
     "parents": [
@@ -449,7 +477,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 500.0
   },
   "husk": {
     "parents": [
@@ -458,7 +487,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 70.0
   },
   "illusioner": {
     "parents": [
@@ -467,7 +497,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 75.0
   },
   "llama": {
     "parents": [
@@ -476,7 +507,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 160.0
   },
   "iron_golem": {
     "parents": [
@@ -485,7 +517,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 400.0
   },
   "magma_cube": {
     "parents": [
@@ -507,7 +540,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 1.0
   },
   "mooshroom": {
     "parents": [
@@ -516,7 +550,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 600.0
   },
   "mule": {
     "parents": [
@@ -525,13 +560,15 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 250.0
   },
   "ocelot": {
     "damageInfo": {
       "attackType": "skada:slash"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 5.0
   },
   "panda": {
     "parents": [
@@ -540,13 +577,15 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 100.0
   },
   "parrot": {
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 0.4
   },
   "phantom": {
     "damageInfo": {
@@ -565,7 +604,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 50.0
   },
   "pig": {
     "parents": [
@@ -581,7 +621,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 100.0
   },
   "piglin": {
     "damageInfo": {
@@ -606,7 +647,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 80.0
   },
   "piglin_brute": {
     "parents": [
@@ -628,7 +670,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 90.0
   },
   "pillager": {
     "damageInfo": {
@@ -647,7 +690,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 75.0
   },
   "polar_bear": {
     "parents": [
@@ -663,7 +707,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 500.0
   },
   "pufferfish": {
     "parents": [
@@ -672,13 +717,15 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 1.0
   },
   "rabbit": {
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 2.0
   },
   "ravager": {
     "damageInfo": {
@@ -697,7 +744,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 1000.0
   },
   "salmon": {
     "parents": [
@@ -706,7 +754,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 2.0
   },
   "sheep": {
     "parents": [
@@ -715,7 +764,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 80.0
   },
   "shulker": {
     "parents": [
@@ -724,13 +774,15 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 100.0
   },
   "silverfish": {
     "damageInfo": {
       "attackType": "skada:thrust"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 0.05
   },
   "skeleton": {
     "damageInfo": {
@@ -761,7 +813,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 30.0
   },
   "skeleton_horse": {
     "parents": [
@@ -771,7 +824,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 300.0
   },
   "slime": {
     "damageInfo": {
@@ -796,7 +850,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 1.0
   },
   "sniffer": {
     "parents": [
@@ -805,27 +860,29 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 1000.0
   },
-    "snow_golem": {
-      "damageInfo": {
-        "attackType": "skada:strike"
-      },
-      "extraModifiers": {
-        "skada:element.heat_resist": [
-          {
-            "amount": -5,
-            "operation": 0
-          }
-        ],
-        "skada:element.cold_resist": [
-          {
-            "amount": 5,
-            "operation": 0
-          }
-        ]
-      }
+  "snow_golem": {
+    "damageInfo": {
+      "attackType": "skada:strike"
     },
+    "extraModifiers": {
+      "skada:element.heat_resist": [
+        {
+          "amount": -5,
+          "operation": 0
+        }
+      ],
+      "skada:element.cold_resist": [
+        {
+          "amount": 5,
+          "operation": 0
+        }
+      ]
+    },
+    "weight": 100.0
+  },
   "spider": {
     "parents": [
       "minecraft:cave_spider"
@@ -840,7 +897,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 25.0
   },
   "squid": {
     "parents": [
@@ -849,7 +907,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 15.0
   },
   "stray": {
     "parents": [
@@ -871,7 +930,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 30.0
   },
   "strider": {
     "parents": [
@@ -893,13 +953,15 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 250.0
   },
   "tadpole": {
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 0.01
   },
   "trader_llama": {
     "parents": [
@@ -908,7 +970,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 160.0
   },
   "tropical_fish": {
     "parents": [
@@ -917,7 +980,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 0.2
   },
   "turtle": {
     "parents": [
@@ -927,7 +991,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 150.0
   },
   "vex": {
     "parents": [
@@ -936,7 +1001,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 10.0
   },
   "vindicator": {
     "parents": [
@@ -958,7 +1024,8 @@
           "operation": 2
         }
       ]
-    }
+    },
+    "weight": 80.0
   },
   "villager": {
     "damageInfo": {
@@ -971,7 +1038,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 75.0
   },
   "wandering_trader": {
     "parents": [
@@ -980,7 +1048,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 75.0
   },
   "warden": {
     "damageInfo": {
@@ -1029,7 +1098,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 1200.0
   },
   "witch": {
     "parents": [
@@ -1038,7 +1108,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 75.0
   },
   "wither": {
     "damageInfo": {
@@ -1075,7 +1146,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 9000.0
   },
   "wither_skeleton": {
     "parents": [
@@ -1103,7 +1175,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 40.0
   },
   "wolf": {
     "parents": [
@@ -1112,7 +1185,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 45.0
   },
   "zoglin": {
     "parents": [
@@ -1122,7 +1196,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 300.0
   },
   "zombie": {
     "damageInfo": {
@@ -1153,7 +1228,8 @@
           "operation": 0
         }
       ]
-    }
+    },
+    "weight": 70.0
   },
   "zombie_horse": {
     "parents": [
@@ -1163,7 +1239,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 300.0
   },
   "zombie_villager": {
     "parents": [
@@ -1172,7 +1249,8 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 70.0
   },
   "zombified_piglin": {
     "parents": [
@@ -1182,6 +1260,10 @@
     "damageInfo": {
       "attackType": "skada:strike"
     },
-    "extraModifiers": {}
+    "extraModifiers": {},
+    "weight": 80.0
+  },
+  "player": {
+    "weight": 70.0
   }
 }
