@@ -237,6 +237,8 @@
   "skada.tooltip.info.defence.vulnerability_percent": "%s%% vulnerability",
   "skada.tooltip.info.toughness": "§iToughness:§r §e%s",
   "skada.tooltip.info.burden": "§iBurden:§r §e%s",
+  "skada.tooltip.info.weight_kg": "§iEquipment weight:§r §e%s kg",
+  "skada.tooltip.info.equipped_weight_total": "Equipped: §e%s kg",
 
   "skada.icon.armour": "\u000D",
   "skada.icon.toughness": "\u006D",

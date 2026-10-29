@@ -5,6 +5,7 @@ import com.cwjn.skada.data.registry.Element;
 import com.cwjn.skada.util.Util;
 import com.cwjn.skada.util.UtilDefenseDisplay;
 import com.cwjn.skada.util.UtilText;
+import com.cwjn.skada.util.EquipmentWeightUtil;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
@@ -59,6 +60,7 @@ public class ClientArmourTooltipComponent implements ClientTooltipComponent {
     this.otherSlots = Arrays.stream(slots).filter((x) -> !item.getAttributeModifiers(x).isEmpty()).toList();
     lines.addAll(armourComponents());
     lines.add(toughnessComponent(mainAttributes));
+    lines.add(weightComponent(item));
     lines.add(burdenComponent(mainAttributes));
     lines.addAll(elementComponents(mainAttributes));
     lines.addAll(damageClassComponent(mainAttributes));
@@ -108,7 +110,6 @@ public class ClientArmourTooltipComponent implements ClientTooltipComponent {
 
   private Component burdenComponent(Multimap<Attribute, AttributeModifier> mainAttributes) {
     MutableComponent comp = Component.empty();
-    comp.append(Component.translatable("skada.icon.weight").withStyle(ICONS));
     double burdenAggregate = mainAttributes.get(Attributes.ATTACK_SPEED).stream()
         .filter((x) -> Arrays.stream(SKADA_ARMOUR_BURDEN_MOD_UUID).anyMatch(uuid -> uuid.equals(x.getId())))
         .mapToDouble(AttributeModifier::getAmount)
@@ -118,6 +119,19 @@ public class ClientArmourTooltipComponent implements ClientTooltipComponent {
     comp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.burden",
         df.format(Math.abs(burdenAggregate / 0.12)))));
     return comp;
+  }
+
+  private Component weightComponent(ItemStack stack) {
+    MutableComponent line = Component.empty()
+        .append(Component.translatable("skada.icon.weight").withStyle(ICONS))
+        .append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.weight_kg",
+            df.format(EquipmentWeightUtil.getStackWeightKg(stack)))));
+    if (player != null) {
+      line.append(UtilText.pixelFontComponent("  "))
+          .append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.equipped_weight_total",
+              df.format(EquipmentWeightUtil.getTotalEquippedWeightKg(player)))));
+    }
+    return line;
   }
 
   private List<Component> elementComponents(Multimap<Attribute, AttributeModifier> mainAttributes) {

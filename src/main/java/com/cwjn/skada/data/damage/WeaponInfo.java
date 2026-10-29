@@ -23,6 +23,8 @@ public class WeaponInfo {
     private final Map<AttackType, AttackTypeInfo> attackTypes;
     private final ElementSpread spread;
     private final WeaponStatApplicability applicability;
+    private final double weightKg;
+    private final boolean weightConfigured;
     public static final WeaponInfo FIST = createDefaultWeaponInfo(AttackTypeInfo.FIST);
     public static final WeaponInfo RANDOM_ITEM = createDefaultWeaponInfo(AttackTypeInfo.ITEM);
     public static final WeaponInfo BLOCK = createDefaultWeaponInfo(AttackTypeInfo.BLOCK);
@@ -57,7 +59,9 @@ public class WeaponInfo {
             ElementSpread.CODEC.fieldOf("spread").forGetter(WeaponInfo::getSpread),
             // Read legacy data, but omit this obsolete setting from every new write.
             Codec.BOOL.optionalFieldOf("ignore_attributes", false).forGetter(info -> false),
-            APPLICABILITY_FIELD.forGetter(info -> Optional.of(info.applicability()))
+            APPLICABILITY_FIELD.forGetter(info -> Optional.of(info.applicability())),
+            Codec.DOUBLE.optionalFieldOf("weight_kg").forGetter(info -> info.weightConfigured
+                    ? Optional.of(info.weightKg) : Optional.empty())
     ).apply(instance, WeaponInfo::fromStringMap));
 
     private Map<String, AttackTypeInfo> attackTypeStringMap() {
@@ -69,12 +73,13 @@ public class WeaponInfo {
     }
 
     private static WeaponInfo fromStringMap(Map<String, AttackTypeInfo> map, ElementSpread spread, boolean ignoreAttributes,
-                                            Optional<WeaponStatApplicability> applicability) {
+                                            Optional<WeaponStatApplicability> applicability, Optional<Double> weightKg) {
         Map<AttackType, AttackTypeInfo> retMap = new TreeMap<>();
         for (Map.Entry<String, AttackTypeInfo> a : map.entrySet()) {
             retMap.put(SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation(a.getKey())), a.getValue());
         }
-        return new WeaponInfo(retMap, spread, applicability.orElse(WeaponStatApplicability.legacy(ignoreAttributes)));
+        return new WeaponInfo(retMap, spread, applicability.orElse(WeaponStatApplicability.legacy(ignoreAttributes)),
+                weightKg.orElse(0.0), weightKg.isPresent());
     }
 
     public static Codec<Map<String, WeaponInfo>> STRING_MAP_CODEC = Codec.unboundedMap(Codec.STRING, CODEC);
@@ -82,13 +87,30 @@ public class WeaponInfo {
 
     /** Creates a profile whose applicability also determines melee attribute replacement. */
     public WeaponInfo(Map<AttackType, AttackTypeInfo> attackType, ElementSpread spread, WeaponStatApplicability applicability) {
+        this(attackType, spread, applicability, 0.0, false);
+    }
+
+    /** Creates a profile with a manually authored physical equipment mass in kilograms. */
+    public WeaponInfo(Map<AttackType, AttackTypeInfo> attackType, ElementSpread spread,
+                      WeaponStatApplicability applicability, double weightKg) {
+        this(attackType, spread, applicability, weightKg, true);
+    }
+
+    private WeaponInfo(Map<AttackType, AttackTypeInfo> attackType, ElementSpread spread,
+                       WeaponStatApplicability applicability, double weightKg, boolean weightConfigured) {
         this.attackTypes = attackType;
         this.spread = spread;
         this.applicability = Objects.requireNonNull(applicability);
+        this.weightKg = validWeight(weightKg);
+        this.weightConfigured = weightConfigured;
     }
 
     public WeaponInfo() {
         this(Collections.emptyMap(), new ElementSpread(), WeaponStatApplicability.BOTH);
+    }
+
+    private static double validWeight(double value) {
+        return Double.isFinite(value) && value >= 0.0 ? value : 0.0;
     }
 
     public Map<AttackType, AttackTypeInfo> getAttackTypes() {
@@ -101,6 +123,18 @@ public class WeaponInfo {
 
     /** Returns the uses allowed to consume this profile. */
     public WeaponStatApplicability applicability() { return applicability; }
+
+    /** Returns physical mass in kilograms. */
+    public double weightKg() { return weightKg; }
+
+    /** Distinguishes an explicit zero from a legacy profile without this field. */
+    public boolean weightConfigured() { return weightConfigured; }
+
+    /** Adds a current default mass only to legacy profiles missing the field. */
+    public WeaponInfo withWeightDefault(WeaponInfo defaults) {
+        if (weightConfigured || !defaults.weightConfigured) return this;
+        return new WeaponInfo(attackTypes, spread, applicability, defaults.weightKg, true);
+    }
 
     public Supplier<Component> toTextComponent() {
         MutableComponent attackType = Component.translatable("skada.weapon_info.attack_types");
@@ -123,6 +157,7 @@ public class WeaponInfo {
     public CompoundTag toCompoundTag() {
         CompoundTag tag = new CompoundTag();
         tag.putString("applicability", applicability.serializedName());
+        if (weightConfigured) tag.putDouble("weight_kg", weightKg);
         tag.put("spread", spread.toCompoundTag());
         CompoundTag attackTypes = new CompoundTag();
         for (Map.Entry<AttackType, AttackTypeInfo> entry : this.attackTypes.entrySet()) {
@@ -147,7 +182,9 @@ public class WeaponInfo {
             applicability = WeaponStatApplicability.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, tag.get("applicability"))
                     .result().orElse(applicability);
         }
-        return new WeaponInfo(attackTypeMap, spread, applicability);
+        boolean weightConfigured = tag.contains("weight_kg", net.minecraft.nbt.Tag.TAG_ANY_NUMERIC);
+        return new WeaponInfo(attackTypeMap, spread, applicability,
+                weightConfigured ? tag.getDouble("weight_kg") : 0.0, weightConfigured);
     }
 
 }

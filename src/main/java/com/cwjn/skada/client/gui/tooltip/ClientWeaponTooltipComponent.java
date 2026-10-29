@@ -9,6 +9,7 @@ import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.event.CommonEvent;
 import com.cwjn.skada.util.Util;
 import com.cwjn.skada.util.UtilText;
+import com.cwjn.skada.util.EquipmentWeightUtil;
 import com.google.common.collect.HashMultimap;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.ChatFormatting;
@@ -73,6 +74,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
     info = selected.weapon();
     attackTypes = selected.order().toArray(AttackType[]::new);
     AttackTypeInfo currentInfo = selected.stats();
+    lines.add(weightComponent(itemstack));
     lines.add(attackTypesComponent(selected.type()));
     if (info.applicability().melee())
       lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.REACH));
@@ -114,6 +116,19 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
      * lines.add(Util.pixelFontComponent(Component.translatable(
      * "skada.tooltip.test_swedish_characters"), false));
      */
+  }
+
+  private Component weightComponent(ItemStack stack) {
+    MutableComponent line = Component.empty()
+        .append(Component.translatable("skada.icon.weight").withStyle(ICONS))
+        .append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.weight_kg",
+            df.format(EquipmentWeightUtil.getStackWeightKg(stack)))));
+    if (player != null) {
+      line.append(UtilText.pixelFontComponent("  "))
+          .append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.equipped_weight_total",
+              df.format(EquipmentWeightUtil.getTotalEquippedWeightKg(player)))));
+    }
+    return line;
   }
 
   @SuppressWarnings("null")
