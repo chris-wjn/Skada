@@ -25,7 +25,12 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
                          Map<AttackType, Double> attackResists,
                          double armour,
                          double armourToughness,
-                         double burden) {
+                         double burden,
+                         double weightKg) {
+
+    public ArmourInfo {
+        weightKg = Double.isFinite(weightKg) && weightKg >= 0.0 ? weightKg : 0.0;
+    }
 
     private static final double ELEMENTAL_RESISTANCE_RATING_SCALE = 100.0;
     private static final double ATTACK_RESISTANCE_RATING_SCALE = 250.0;
@@ -35,7 +40,8 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
             Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).fieldOf("attack_type_resists").forGetter(ArmourInfo::getAttackResistsAsStringMap),
             Codec.DOUBLE.fieldOf("armour").forGetter(ArmourInfo::armour),
             Codec.DOUBLE.fieldOf("armour_toughness").forGetter(ArmourInfo::armourToughness),
-            Codec.DOUBLE.optionalFieldOf("burden", 0.0).forGetter(ArmourInfo::burden)
+            Codec.DOUBLE.optionalFieldOf("burden", 0.0).forGetter(ArmourInfo::burden),
+            Codec.DOUBLE.optionalFieldOf("weight_kg", 0.0).forGetter(ArmourInfo::weightKg)
     ).apply(instance, ArmourInfo::fromStringMap));
 
     public static ArmourInfo generate(ArmourPieceInfo info, MaterialInfo material, ArmourConstructionInfo construction, double baseArmour, double baseToughness) {
@@ -89,13 +95,15 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
         double toughness = Math.max(0.0, 0.75 + (4.8 * materialProtection) + (2.8 * constructionProtection))
             * info.armourToughnessRatio();
         double burden = context.constructionResponse().burdenFactor() * info.burdenRatio();
+        double weightKg = info.estimateWeightKg(material, construction);
 
         return new ArmourInfo(
                 elementResists,
                 attackResists,
                 Util.round(armour, 2),
                 Util.round(toughness, 2),
-                Util.round(burden, 2));
+                Util.round(burden, 2),
+                Util.round(weightKg, 3));
     }
 
     public CompoundTag toCompoundTag() {
@@ -111,6 +119,7 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
         tag.putDouble("armour", armour);
         tag.putDouble("armour_toughness", armourToughness);
         tag.putDouble("burden", burden);
+        tag.putDouble("weight_kg", weightKg);
         tag.put("elemental_resists", elementTag);
         tag.put("attack_resists", attackTag);
         return tag;
@@ -127,7 +136,8 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
         for (String key : attackTag.getAllKeys()) {
             attackMap.put(SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation(key)), attackTag.getDouble(key));
         }
-        return new ArmourInfo(elementMap, attackMap, tag.getDouble("armour"), tag.getDouble("armour_toughness"), tag.getDouble("burden"));
+        return new ArmourInfo(elementMap, attackMap, tag.getDouble("armour"), tag.getDouble("armour_toughness"),
+                tag.getDouble("burden"), tag.getDouble("weight_kg"));
     }
 
     private Map<String, Double> getAttackResistsAsStringMap() {
@@ -146,7 +156,8 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
         }
         return retMap;
     }
-    private static ArmourInfo fromStringMap(Map<String, Double> elementalResists, Map<String, Double> attackResists, double armourBonus, double armourToughnessBonus, double burden) {
+    private static ArmourInfo fromStringMap(Map<String, Double> elementalResists, Map<String, Double> attackResists,
+                                            double armourBonus, double armourToughnessBonus, double burden, double weightKg) {
         //convert the maps of String, Double to maps of Element/AttackType, Double
         Map<Element, Double> elementMap = new HashMap<>();
         Map<AttackType, Double> attackMap = new HashMap<>();
@@ -156,10 +167,10 @@ public record ArmourInfo(Map<Element, Double> elementalResists,
         for (Map.Entry<String, Double> a : attackResists.entrySet()) {
             attackMap.put(SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(new ResourceLocation(a.getKey())), a.getValue());
         }
-        return new ArmourInfo(elementMap, attackMap, armourBonus, armourToughnessBonus, burden);
+        return new ArmourInfo(elementMap, attackMap, armourBonus, armourToughnessBonus, burden, weightKg);
     }
     public static Codec<Map<String, ArmourInfo>> STRING_MAP_CODEC = Codec.unboundedMap(Codec.STRING, CODEC);
     public static Codec<Map<String, Map<String, ArmourInfo>>> STRING_STRING_MAP_CODEC = Codec.unboundedMap(Codec.STRING, STRING_MAP_CODEC);
 
-    public static ArmourInfo DEFAULT = new ArmourInfo(Map.of(), Map.of(), 0, 0, 0);
+    public static ArmourInfo DEFAULT = new ArmourInfo(Map.of(), Map.of(), 0, 0, 0, 0);
 }
