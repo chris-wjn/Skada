@@ -25,6 +25,7 @@ class KnockbackCalibrationCandidateTest {
         assertEquals(0.0, weightResistance(0.0), 1.0e-12);
         assertEquals(0.0, weightResistance(-1.0), 1.0e-12);
         assertEquals(0.0, weightResistance(Double.NaN), 1.0e-12);
+        assertEquals(0.0, weightResistance(Double.NEGATIVE_INFINITY), 1.0e-12);
         assertEquals(0.0, weightResistance(Double.POSITIVE_INFINITY), 1.0e-12);
         assertEquals(0.225, weightResistance(70.0), 1.0e-12);
         assertEquals(0.45, weightResistance(1.0e12), 1.0e-9);
@@ -50,6 +51,20 @@ class KnockbackCalibrationCandidateTest {
                         .attackKnockback(), 1.0e-12);
     }
 
+    @Test
+    void combinedPostBonusValueAppliesChargeAndReachBeforeTheFourPointCap() {
+        double generated = 1.078842480;
+        assertEquals(0.0, combinedOrdinary(generated, 1.0, 0.0, 0.0, 0.5), 1.0e-9);
+        assertEquals(0.431536992, combinedOrdinary(generated, 1.0, 0.0, 0.0, 0.7), 1.0e-9);
+        assertEquals(4.0, combinedOrdinary(generated, 1.0, 1.0, 2.0, 1.0), 1.0e-12,
+                "generated + charged sprint + Knockback II reaches and is clamped to 4");
+        assertEquals(3.670958232, combinedOrdinary(generated, 1.0, 1.0, 2.0, 0.95), 1.0e-9);
+        assertEquals(3.269710620, combinedOrdinary(generated, 0.25, 1.0, 2.0, 1.0), 1.0e-9,
+                "minimum reach scales only generated knockback before separate bonuses");
+        assertEquals(4.0, combinedOrdinary(2.0, 1.0, 1.0, 3.0, 1.0), 1.0e-12,
+                "command-authored Knockback III stress stack remains bounded");
+    }
+
     /** Candidate additive modifier: asymptotes to 0.45 around a 70 kg reference mass. */
     private static double weightResistance(double totalWeightKg) {
         if (!Double.isFinite(totalWeightKg) || totalWeightKg <= 0.0) return 0.0;
@@ -60,5 +75,14 @@ class KnockbackCalibrationCandidateTest {
     private static double combineResistance(double base, double additive, double multiplyBase, double multiplyTotal) {
         double value = (base + additive) * (1.0 + multiplyBase) * (1.0 + multiplyTotal);
         return Math.max(0.0, Math.min(1.0, value));
+    }
+
+    /** Candidate charge, generated-component reach scale, bonuses, and final combined cap. */
+    private static double combinedOrdinary(double generated, double reachFactor, double sprintBonus,
+                                           double enchantmentBonus, double charge) {
+        double chargeFactor = charge <= 0.5 ? 0.0 : (charge - 0.5) / 0.5;
+        double combined = Math.max(0.0, generated) * Math.max(0.0, reachFactor)
+                + Math.max(0.0, sprintBonus) + Math.max(0.0, enchantmentBonus);
+        return Math.min(4.0, combined * chargeFactor);
     }
 }
