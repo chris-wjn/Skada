@@ -45,5 +45,7 @@ class BodyWeightUtilTest {
   void invalidDimensionsReturnFiniteZero() {
     assertEquals(0.0, BodyWeightUtil.estimateReferenceWeightKg(0.0, 1.8));
     assertEquals(0.0, BodyWeightUtil.scaleByBodyVolume(58.32, 0.6, 1.8, Double.NaN, 0.9));
+    assertEquals(0.0, BodyWeightUtil.estimateReferenceWeightKg(Double.MAX_VALUE, Double.MAX_VALUE));
+    assertEquals(0.0, BodyWeightUtil.scaleByBodyVolume(58.32, 0.6, 1.8, Double.MAX_VALUE, Double.MAX_VALUE));
   }
 }

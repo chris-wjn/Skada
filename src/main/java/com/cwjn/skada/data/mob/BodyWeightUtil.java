@@ -26,7 +26,8 @@ public final class BodyWeightUtil {
     if (!isPositiveFinite(widthMeters) || !isPositiveFinite(heightMeters)) {
       return 0.0;
     }
-    return FALLBACK_BULK_DENSITY_KG_PER_M3 * widthMeters * widthMeters * heightMeters;
+    double estimate = FALLBACK_BULK_DENSITY_KG_PER_M3 * widthMeters * widthMeters * heightMeters;
+    return Double.isFinite(estimate) ? estimate : 0.0;
   }
 
   /**
@@ -45,12 +46,14 @@ public final class BodyWeightUtil {
         || !isNonNegativeFinite(currentHeightMeters)) {
       return 0.0;
     }
-    double referenceVolume = referenceWidthMeters * referenceWidthMeters * referenceHeightMeters;
-    double currentVolume = currentWidthMeters * currentWidthMeters * currentHeightMeters;
-    if (!isPositiveFinite(referenceVolume) || !Double.isFinite(currentVolume)) {
+    double widthRatio = currentWidthMeters / referenceWidthMeters;
+    double heightRatio = currentHeightMeters / referenceHeightMeters;
+    double volumeRatio = widthRatio * widthRatio * heightRatio;
+    double resolvedWeightKg = referenceWeightKg * volumeRatio;
+    if (!Double.isFinite(resolvedWeightKg)) {
       return 0.0;
     }
-    return referenceWeightKg * currentVolume / referenceVolume;
+    return resolvedWeightKg;
   }
 
   /**
