@@ -78,6 +78,10 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
       lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.REACH));
     lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.LETHALITY));
     lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.PRECISION));
+    if (info.applicability().melee()) {
+      lines.add(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.knockback_preview",
+          currentInfo.knockback())));
+    }
     lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.CRITICAL_FAIL));
     if (info.applicability().melee())
       lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.ATTACK_SPEED));

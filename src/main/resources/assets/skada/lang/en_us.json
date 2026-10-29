@@ -217,6 +217,7 @@
   "skada.tooltip.info.reach": "§iReach:§r §e%sm§r - §e%sm",
   "skada.tooltip.info.lethality": "§iLethality:§r §e%s",
   "skada.tooltip.info.precision": "§iPrecision:§r §e%s",
+  "skada.tooltip.info.knockback_preview": "§iKnockback (preview):§r §e%s",
   "skada.tooltip.info.velocity": "§iVelocity:§r §e%sm/s",
   "skada.tooltip.info.ranged_damage_velocity": "Ranged damage increases projectile velocity.",
   "skada.tooltip.info.critical_fail": "§iCrit. Fail:§r §e%s%%",

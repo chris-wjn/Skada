@@ -6,6 +6,7 @@ import com.cwjn.skada.data.damage.WeaponStatApplicability;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.generation.attack.AttackTypeJsonInfo;
 import com.cwjn.skada.generation.attack.ElementSpread;
+import com.cwjn.skada.generation.weapon.generation_algo.KnockbackGenerationUtil;
 import com.cwjn.skada.util.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -222,6 +223,8 @@ public final class WeaponGenerator {
         Map<AttackType, AttackTypeInfo> retMap = new HashMap<>();
         for (Map.Entry<AttackType, AttackTypeJsonInfo> entry : assembly.getAttackTypes().entrySet()) {
             var generatedStats = entry.getKey().tierStatFunction().generateAll(assembly);
+            KnockbackGenerationUtil.Estimate knockbackEstimate = KnockbackGenerationUtil.estimate(assembly, entry.getKey());
+            double knockback = resolveKnockback(entry.getValue().knockback(), knockbackEstimate.attackKnockback());
             retMap.put(entry.getKey(), new AttackTypeInfo(
                     Util.round(generatedStats.lethality() * entry.getValue().lethalityModifier(), 2),
                     Util.round(generatedStats.precision() * entry.getValue().precisionModifier(), 2),
@@ -230,9 +233,16 @@ public final class WeaponGenerator {
                     resolveAttackSpeed(baseAttackSpeed, generatedStats.attackSpeed(), entry.getValue().attackSpeed()),
                     Util.round(damageModifier + entry.getValue().damage(), 3),
                     Util.round(generatedStats.criticalFail() * entry.getValue().critFailModifier(), 3),
+                    knockback,
                     entry.getValue().reticleShapes()));
         }
         return new WeaponInfo(retMap, spread, applicability);
+    }
+
+    /** Manual finite non-negative values override the provisional generated estimate, including explicit zero. */
+    private static double resolveKnockback(double configuredKnockback, double generatedKnockback) {
+        if (!Double.isFinite(configuredKnockback) || configuredKnockback < 0.0) return generatedKnockback;
+        return Math.min(KnockbackGenerationUtil.MAX_ATTACK_KNOCKBACK, configuredKnockback);
     }
 
     /** Uses configured speed when present, otherwise soft-caps the generated speed. */
@@ -314,6 +324,7 @@ public final class WeaponGenerator {
                     attackTypeInfo.attackSpeed(),
                     Util.round(attackTypeInfo.damage() + baseDamageDelta, 3),
                     attackTypeInfo.failChance(),
+                    attackTypeInfo.knockback(),
                     attackTypeInfo.reticleShapes()));
         }
         return new WeaponInfo(adjustedAttackTypes, weaponInfo.getSpread(), weaponInfo.applicability());

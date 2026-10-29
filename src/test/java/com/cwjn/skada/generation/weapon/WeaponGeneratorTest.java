@@ -18,6 +18,7 @@ import com.cwjn.skada.generation.weapon.attack_capability.StrikeCapable;
 import com.cwjn.skada.generation.weapon.generation_algo.AttackSpeedGenerationUtil;
 import com.cwjn.skada.generation.weapon.generation_algo.CriticalFailGenerationUtil;
 import com.cwjn.skada.generation.weapon.generation_algo.LethalityGenerationUtil;
+import com.cwjn.skada.generation.weapon.generation_algo.KnockbackGenerationUtil;
 import com.cwjn.skada.generation.weapon.generation_algo.PrecisionGenerationUtil;
 import com.cwjn.skada.generation.weapon.generation_algo.context.AttackGenerationContextFactory;
 import com.cwjn.skada.generation.weapon.attack_capability.SlashCapable;
@@ -369,7 +370,21 @@ class WeaponGeneratorTest {
             assertEquals(29.38, attack.lethality(), EPS, capability.getSimpleName());
             assertEquals(0.125, attack.failChance(), EPS, capability.getSimpleName());
             assertEquals(1.35, attack.attackSpeed(), EPS, capability.getSimpleName());
+            assertEquals(0.0, attack.knockback(), EPS, "An empty assembly has zero physical source impulse");
         }
+    }
+
+    @Test
+    void manualKnockbackOverridesIncludingZeroAreRetained() {
+        WeaponAssembly configured = new WeaponAssembly(List.of(), Map.of(
+                primary, new AttackTypeJsonInfo(0.25, 2.75, Double.NaN, 1, 1, 0, 1, 0.75, List.of()),
+                secondary, new AttackTypeJsonInfo(0.25, 2.75, Double.NaN, 1, 1, 0, 1, 0.0, List.of())));
+
+        WeaponInfo result = generator(Map.of("sword", configured), Map.of(), false, 1)
+                .generate("example", List.of(item("iron_sword", 8)), null).weapons().get("iron_sword");
+
+        assertEquals(0.75, result.getAttackTypes().get(primary).knockback(), EPS);
+        assertEquals(0.0, result.getAttackTypes().get(secondary).knockback(), EPS);
     }
 
     @Test
@@ -405,6 +420,18 @@ class WeaponGeneratorTest {
                     };
                     try (MockedStatic<AttackGenerationContextFactory> contexts = mockStatic(AttackGenerationContextFactory.class, CALLS_REAL_METHODS)) {
                         assertEquals(expected, type.tierStatFunction().generateAll(assembly), name + "/" + type.name());
+                        KnockbackGenerationUtil.Estimate estimate = KnockbackGenerationUtil.estimate(assembly, type);
+                        assertTrue(Double.isFinite(estimate.effectiveMassKg()), name + "/" + type.name());
+                        assertTrue(Double.isFinite(estimate.contactSpeedMps()), name + "/" + type.name());
+                        assertTrue(estimate.transferredImpulseNs() >= 0.0 && estimate.transferredImpulseNs() <= KnockbackGenerationUtil.MAX_ESTIMATED_IMPULSE_NS);
+                        assertTrue(estimate.attackKnockback() >= 0.0 && estimate.attackKnockback() <= KnockbackGenerationUtil.MAX_ATTACK_KNOCKBACK);
+                        assertTrue(estimate.attackKnockback() > 0.0, name + "/" + type.name());
+                        WeaponInfo generated = new WeaponGenerator(Map.of("example.iron", material), Map.of(name, template),
+                                Map.of(), false, 1.0)
+                                .generate("example", List.of(item("iron_" + name, 8.0)), null)
+                                .weapons().get("iron_" + name);
+                        assertEquals(estimate.attackKnockback(), generated.getAttackTypes().get(type).knockback(), EPS,
+                                name + "/" + type.name() + " preview uses the same source estimate");
                         switch (type.name()) {
                             case "slash" -> contexts.verify(() -> AttackGenerationContextFactory.buildSlashContext(assembly), times(1));
                             case "thrust" -> contexts.verify(() -> AttackGenerationContextFactory.buildThrustContext(assembly), times(1));

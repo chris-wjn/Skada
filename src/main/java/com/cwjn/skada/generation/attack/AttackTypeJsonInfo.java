@@ -12,10 +12,18 @@ public record AttackTypeJsonInfo(double minReach,
                                  double precisionModifier,
                                  double damage,
                                  double critFailModifier,
+                                 double knockback,
                                  List<String> reticleShapes) {
 
+  /** Preserves existing authored profile construction while adding optional knockback overrides. */
+  public AttackTypeJsonInfo(double minReach, double maxReach, double attackSpeed, double lethalityModifier,
+      double precisionModifier, double damage, double critFailModifier, List<String> reticleShapes) {
+    this(minReach, maxReach, attackSpeed, lethalityModifier, precisionModifier, damage, critFailModifier,
+        Double.NaN, reticleShapes);
+  }
+
   public static AttackTypeJsonInfo getDefault() {
-                return new AttackTypeJsonInfo(0.0, 3.0, Double.NaN, 1.0, 1.0, 0.0, 1.0, List.of());
+                return new AttackTypeJsonInfo(0.0, 3.0, Double.NaN, 1.0, 1.0, 0.0, 1.0, Double.NaN, List.of());
   }
 
   public static Codec<AttackTypeJsonInfo> CODEC = RecordCodecBuilder.create(
@@ -27,6 +35,7 @@ public record AttackTypeJsonInfo(double minReach,
                   Codec.DOUBLE.optionalFieldOf("precisionModifier", 1.0).forGetter(AttackTypeJsonInfo::precisionModifier),
                   Codec.DOUBLE.optionalFieldOf("damage", 0.0).forGetter(AttackTypeJsonInfo::damage),
                   Codec.DOUBLE.optionalFieldOf("critFailModifier", 1.0).forGetter(AttackTypeJsonInfo::critFailModifier),
+                  Codec.DOUBLE.optionalFieldOf("knockback", Double.NaN).forGetter(AttackTypeJsonInfo::knockback),
                   Codec.list(Codec.STRING).optionalFieldOf("reticleShapes", List.of()).forGetter(AttackTypeJsonInfo::reticleShapes)
           ).apply(instance, AttackTypeJsonInfo::new));
 

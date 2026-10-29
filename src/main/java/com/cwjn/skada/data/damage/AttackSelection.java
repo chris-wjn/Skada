@@ -26,6 +26,7 @@ public record AttackSelection(WeaponInfo weapon, AttackType type, AttackTypeInfo
         if (tag == null || !tag.contains(SkadaData.WEAPON_INFO_TAG_KEY, Tag.TAG_COMPOUND)) {
             return fallback(stack);
         }
+        migrateMissingKnockback(stack, tag.getCompound(SkadaData.WEAPON_INFO_TAG_KEY));
         WeaponInfo info = WeaponInfo.fromCompoundTag(tag.getCompound(SkadaData.WEAPON_INFO_TAG_KEY));
         LinkedHashMap<ResourceLocation, AttackType> supported = new LinkedHashMap<>();
         for (AttackType type : info.getAttackTypes().keySet()) {
@@ -64,6 +65,26 @@ public record AttackSelection(WeaponInfo weapon, AttackType type, AttackTypeInfo
         AttackType type = supported.get(selected);
         return new AttackSelection(info, type, info.getAttackTypes().get(type),
                 orderIds.stream().map(supported::get).toList(), index, true);
+    }
+
+    /** Adds newly introduced attack fields from the current item defaults without replacing authored stats. */
+    private static void migrateMissingKnockback(ItemStack stack, CompoundTag savedInfo) {
+        if (!(stack.getItem() instanceof AccessWeaponInfo access) || !access.skada$hasWeaponInfo()) return;
+        migrateMissingKnockback(savedInfo, access.skada$getWeaponInfo().getAttackTypes());
+    }
+
+    /** Fills only absent values so authored numbers, including zero, remain authoritative. */
+    static void migrateMissingKnockback(CompoundTag savedInfo, Map<AttackType, AttackTypeInfo> defaults) {
+        CompoundTag savedAttacks = savedInfo.getCompound("attack_types");
+        for (String key : savedAttacks.getAllKeys()) {
+            ResourceLocation id = ResourceLocation.tryParse(key);
+            AttackType type = id == null ? null : SkadaData.REGISTRY_ATTACK_TYPE.get().getValue(id);
+            if (type == null) continue;
+            CompoundTag savedAttack = savedAttacks.getCompound(key);
+            if (savedAttack.contains("knockback", Tag.TAG_DOUBLE)) continue;
+            AttackTypeInfo defaultAttack = defaults.get(type);
+            savedAttack.putDouble("knockback", defaultAttack == null ? 0.0 : defaultAttack.knockback());
+        }
     }
 
     /** Resolves direct-attack statistics independently of the attribute replacement setting. */

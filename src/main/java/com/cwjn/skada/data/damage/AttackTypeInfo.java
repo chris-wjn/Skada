@@ -19,7 +19,14 @@ public record AttackTypeInfo(
     double attackSpeed,
     double damage,
     double failChance,
+    double knockback,
     List<String> reticleShapes) {
+
+  /** Preserves source compatibility for profiles created before per-attack knockback existed. */
+  public AttackTypeInfo(double lethality, double precision, double minReach, double maxReach,
+      double attackSpeed, double damage, double failChance, List<String> reticleShapes) {
+    this(lethality, precision, minReach, maxReach, attackSpeed, damage, failChance, 0.0, reticleShapes);
+  }
 
   public static Codec<AttackTypeInfo> CODEC = RecordCodecBuilder.create(
       instance -> instance.group(
@@ -30,15 +37,16 @@ public record AttackTypeInfo(
           Codec.DOUBLE.fieldOf("attackSpeed").forGetter(AttackTypeInfo::attackSpeed),
           Codec.DOUBLE.fieldOf("damage").forGetter(AttackTypeInfo::damage),
           Codec.DOUBLE.fieldOf("failChance").forGetter(AttackTypeInfo::failChance),
+          Codec.DOUBLE.optionalFieldOf("knockback", 0.0).forGetter(AttackTypeInfo::knockback),
           Codec.list(Codec.STRING).optionalFieldOf("reticleShapes", new ArrayList<>())
               .forGetter(AttackTypeInfo::reticleShapes))
           .apply(instance, AttackTypeInfo::new));
 
-  // Default AttackTypeInfo that represents an unarmed attack.
-  public static final AttackTypeInfo FIST = new AttackTypeInfo(0.0, 8.0, 0.0, 3.0, 4.0, 1.0, 0.0, List.of("punch"));
-  public static final AttackTypeInfo ITEM = new AttackTypeInfo(0.0, 4.0, 0.0, 0.0, 3.0, 1.0, 0.0, List.of("strike_default"));
+  // Generic/unarmed defaults deliberately author zero generated knockback until a profile supplies a value.
+  public static final AttackTypeInfo FIST = new AttackTypeInfo(0.0, 8.0, 0.0, 3.0, 4.0, 1.0, 0.0, 0.0, List.of("punch"));
+  public static final AttackTypeInfo ITEM = new AttackTypeInfo(0.0, 4.0, 0.0, 0.0, 3.0, 1.0, 0.0, 0.0, List.of("strike_default"));
   /** Held blocks keep generic-item combat statistics while sharing the fist's square footprint. */
-  public static final AttackTypeInfo BLOCK = new AttackTypeInfo(0.0, 4.0, 0.0, 0.0, 3.0, 1.0, 0.0, FIST.reticleShapes());
+  public static final AttackTypeInfo BLOCK = new AttackTypeInfo(0.0, 4.0, 0.0, 0.0, 3.0, 1.0, 0.0, 0.0, FIST.reticleShapes());
 
   /**
    * Creates an attack info instance for tests and simple call sites without
@@ -60,6 +68,13 @@ public record AttackTypeInfo(
         reticleShapes);
   }
 
+  /** Creates attack data with an explicit vanilla-scale knockback value. */
+  public static AttackTypeInfo of(double lethality, double precision, double minReach, double maxReach,
+      double attackSpeed, double damage, double failChance, double knockback, List<String> reticleShapes) {
+    return new AttackTypeInfo(lethality, precision, minReach, maxReach, attackSpeed, damage, failChance,
+        knockback, reticleShapes);
+  }
+
   public CompoundTag toCompoundTag() {
     CompoundTag tag = new CompoundTag();
     tag.putDouble("lethality", lethality);
@@ -69,6 +84,7 @@ public record AttackTypeInfo(
     tag.putDouble("attackSpeed", attackSpeed);
     tag.putDouble("damage", damage);
     tag.putDouble("failChance", failChance);
+    tag.putDouble("knockback", knockback);
     if (hasReticleShapes()) {
       tag.putInt("numReticleShapes", reticleShapes.size());
       for (int i = 0; i < reticleShapes.size(); i++) {
@@ -96,6 +112,7 @@ public record AttackTypeInfo(
             : tag.contains("attackSpeedOffset") ? tag.getDouble("attackSpeedOffset") : 0.0,
         tag.contains("damage") ? tag.getDouble("damage") : tag.getDouble("damageBonus"),
         tag.getDouble("failChance"),
+        tag.contains("knockback") ? tag.getDouble("knockback") : 0.0,
         reticleShapes);
   }
 
