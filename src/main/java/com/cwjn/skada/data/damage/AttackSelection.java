@@ -28,6 +28,14 @@ public record AttackSelection(WeaponInfo weapon, AttackType type, AttackTypeInfo
         }
         migrateMissingKnockback(stack, tag.getCompound(SkadaData.WEAPON_INFO_TAG_KEY));
         WeaponInfo info = WeaponInfo.fromCompoundTag(tag.getCompound(SkadaData.WEAPON_INFO_TAG_KEY));
+        CompoundTag savedWeaponInfo = tag.getCompound(SkadaData.WEAPON_INFO_TAG_KEY);
+        if (!savedWeaponInfo.contains("weight_kg", Tag.TAG_ANY_NUMERIC)
+                && stack.getItem() instanceof AccessWeaponInfo access && access.skada$hasWeaponInfo()
+                && access.skada$getWeaponInfo().weightConfigured()) {
+            // Migrate only the absent field so all legacy attack statistics and unknown saved fields survive.
+            savedWeaponInfo.putDouble("weight_kg", access.skada$getWeaponInfo().weightKg());
+            info = info.withWeightDefault(access.skada$getWeaponInfo());
+        }
         LinkedHashMap<ResourceLocation, AttackType> supported = new LinkedHashMap<>();
         for (AttackType type : info.getAttackTypes().keySet()) {
             if (type != null && type.rl() != null) supported.put(type.rl(), type);

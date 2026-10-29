@@ -2,6 +2,7 @@ package com.cwjn.skada.util;
 
 import com.cwjn.skada.data.SkadaData;
 import com.cwjn.skada.data.armour.AccessArmourInfo;
+import com.cwjn.skada.data.armour.ArmourInfo;
 import com.cwjn.skada.data.damage.*;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
@@ -18,6 +19,13 @@ public abstract class UtilData {
         if (stack.getItem() instanceof AccessArmourInfo access && access.skada$hasArmourInfo()
                 && stack.getTagElement(SkadaData.ARMOUR_INFO_TAG_KEY) == null) {
             stack.getOrCreateTag().put(SkadaData.ARMOUR_INFO_TAG_KEY, access.skada$getArmourInfo().toCompoundTag());
+        } else if (stack.getItem() instanceof AccessArmourInfo access && access.skada$hasArmourInfo()) {
+            net.minecraft.nbt.CompoundTag saved = stack.getTagElement(SkadaData.ARMOUR_INFO_TAG_KEY);
+            ArmourInfo defaults = access.skada$getArmourInfo();
+            if (saved != null && !saved.contains("weight_kg", net.minecraft.nbt.Tag.TAG_ANY_NUMERIC)) {
+                // Add only the new field; keep the legacy armour values and any future fields intact.
+                saved.putDouble("weight_kg", defaults.weightKg());
+            }
         }
     }
 

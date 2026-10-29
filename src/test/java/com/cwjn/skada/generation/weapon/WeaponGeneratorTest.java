@@ -23,6 +23,8 @@ import com.cwjn.skada.generation.weapon.generation_algo.PrecisionGenerationUtil;
 import com.cwjn.skada.generation.weapon.generation_algo.context.AttackGenerationContextFactory;
 import com.cwjn.skada.generation.weapon.attack_capability.SlashCapable;
 import com.cwjn.skada.generation.weapon.attack_capability.ThrustCapable;
+import com.cwjn.skada.generation.weapon.parts.HandlePart;
+import com.cwjn.skada.generation.weapon.parts.WeaponPartEntry;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.resources.ResourceLocation;
@@ -116,6 +118,39 @@ class WeaponGeneratorTest {
         assertEquals(2.75, attack.maxReach(), EPS);
         assertEquals(List.of("test_reticle"), attack.reticleShapes());
         assertEquals(1.876, all.weapons().get("iron_sword").getAttackTypes().get(secondary).attackSpeed(), EPS);
+        assertEquals(0.0, all.weapons().get("iron_sword").weightKg(), EPS);
+    }
+
+    @Test
+    void generatedWeaponMassConvertsAssemblyGramsToKilograms() {
+        WeaponAssembly weightedAssembly = new WeaponAssembly(List.of(new WeaponPartEntry(
+                new HandlePart(1.0, 1.0), material(0.0), null, null)), Map.of(primary,
+                new AttackTypeJsonInfo(1, 1, Double.NaN, 0, 1, 0, 1, List.of())));
+        WeaponInfo generated = generator(Map.of("sword", weightedAssembly), Map.of(), false, 1.0)
+                .generate("example", List.of(item("iron_sword", 0)), null).weapons().get("iron_sword");
+        assertEquals(Math.PI * 1.0 * 1.0 * 0.71 / 1000.0, generated.weightKg(), EPS);
+    }
+
+    @Test
+    void savedEquipmentMassPreservesExplicitZeroAndMigratesOnlyLegacyMissingMass() {
+        AttackTypeInfo attack = new AttackTypeInfo(4, 5, 0, 2, 1, 3, 0.1, List.of("test_reticle"));
+        WeaponInfo legacy = new WeaponInfo(Map.of(primary, attack), spread(1), WeaponStatApplicability.MELEE);
+        WeaponInfo currentDefault = new WeaponInfo(Map.of(primary, attack), spread(1),
+                WeaponStatApplicability.MELEE, 1.75);
+
+        WeaponInfo restoredLegacy = WeaponInfo.fromCompoundTag(legacy.toCompoundTag());
+        assertFalse(restoredLegacy.weightConfigured());
+        WeaponInfo migrated = restoredLegacy.withWeightDefault(currentDefault);
+        assertTrue(migrated.weightConfigured());
+        assertEquals(1.75, migrated.weightKg(), EPS);
+        assertEquals(attack, migrated.getAttackTypes().get(primary));
+
+        WeaponInfo explicitZero = new WeaponInfo(Map.of(primary, attack), spread(1),
+                WeaponStatApplicability.MELEE, 0.0);
+        WeaponInfo restoredZero = WeaponInfo.fromCompoundTag(explicitZero.toCompoundTag())
+                .withWeightDefault(currentDefault);
+        assertTrue(restoredZero.weightConfigured());
+        assertEquals(0.0, restoredZero.weightKg(), EPS);
     }
 
     @Test

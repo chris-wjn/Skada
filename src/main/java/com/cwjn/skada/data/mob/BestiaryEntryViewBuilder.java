@@ -65,6 +65,14 @@ public final class BestiaryEntryViewBuilder {
     addStatRow(rows, entityType, mobData, Attributes.MAX_HEALTH, true, baseValueResolver);
     addStatRow(rows, entityType, mobData, Attributes.ARMOR, false, baseValueResolver);
     addStatRow(rows, entityType, mobData, Attributes.ARMOR_TOUGHNESS, false, baseValueResolver);
+    double width = entityType.getDimensions().width;
+    double height = entityType.getDimensions().height;
+    double weightKg = BodyWeightUtil.resolveWeightKg(mobData.referenceWeightKg(), width, height, width, height);
+    rows.add(new BestiaryEntryView.StatRow("skada.journal.bestiary.body_weight_reference", weightKg,
+        formatValue(weightKg) + " kg"));
+    rows.add(new BestiaryEntryView.StatRow("skada.journal.bestiary.body_size_scale", 1.0, "1.0x"));
+    rows.add(new BestiaryEntryView.StatRow("skada.journal.bestiary.body_weight_resolved", weightKg,
+        formatValue(weightKg) + " kg"));
     return rows;
   }
 

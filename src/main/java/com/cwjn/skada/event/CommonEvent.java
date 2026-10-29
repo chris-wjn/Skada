@@ -9,6 +9,7 @@ import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.mob.BestiaryEntryView;
 import com.cwjn.skada.data.mob.BestiarySyncPayloads;
 import com.cwjn.skada.data.mob.BestiaryUnlockSavedData;
+import com.cwjn.skada.data.mob.BodyWeightUtil;
 import com.cwjn.skada.data.mob.MobData;
 import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.data.registry.Element;
@@ -31,6 +32,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -102,6 +104,7 @@ public class CommonEvent {
 
     static final float BURDEN_EXHAUSTION_RATE_PER_TICK = 0.0005f;
     static final float BURDEN_JUMP_EXHAUSTION_RATE = 0.02f;
+    private static final String PLAYER_BODY_WEIGHT_SYNC_KEY = "skada_body_weight_sync_kg";
 
     /** Initializes equipment data when attribute modifiers are first requested on either logical side. */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -279,6 +282,7 @@ public class CommonEvent {
         SkadaNetwork.serverToPlayer(new S2CSendReticles(RETICLES.values().stream().toList()), event.getPlayer());
         SkadaNetwork.serverToPlayer(new S2CSendBestiaryEntries(bestiaryEntries), event.getPlayer());
         syncBestiaryUnlockState(event.getPlayer(), Set.of());
+        syncPlayerBodyWeight(event.getPlayer(), true);
       }
       // If the player is null, it means the reload command was run, so we send the
       // maps to all players.
@@ -289,6 +293,7 @@ public class CommonEvent {
         SkadaNetwork.serverToAll(new S2CSendBestiaryEntries(bestiaryEntries));
         for (ServerPlayer player : event.getPlayerList().getPlayers()) {
           syncBestiaryUnlockState(player, Set.of());
+          syncPlayerBodyWeight(player, true);
         }
       }
     }
@@ -399,9 +404,33 @@ public class CommonEvent {
         return;
       if (e.player.level().isClientSide())
         return;
+      if (e.player instanceof ServerPlayer serverPlayer) {
+        syncPlayerBodyWeight(serverPlayer, false);
+      }
       double totalBurden = getTotalEquippedBurden(e.player);
       if (totalBurden > 0)
         e.player.causeFoodExhaustion((float) (totalBurden * BURDEN_EXHAUSTION_RATE_PER_TICK));
+    }
+
+    /** Sends the server-resolved player body weight when data or normal-pose size changes. */
+    private static void syncPlayerBodyWeight(ServerPlayer player, boolean force) {
+      double weightKg = resolveBodyWeightKg(player);
+      CompoundTag persistentData = player.getPersistentData();
+      if (force || !persistentData.contains(PLAYER_BODY_WEIGHT_SYNC_KEY)
+          || Math.abs(persistentData.getDouble(PLAYER_BODY_WEIGHT_SYNC_KEY) - weightKg) > 1.0e-6) {
+        persistentData.putDouble(PLAYER_BODY_WEIGHT_SYNC_KEY, weightKg);
+        SkadaNetwork.serverToPlayer(new S2CSyncPlayerBodyWeight(weightKg), player);
+      }
+    }
+
+    private static double resolveBodyWeightKg(LivingEntity entity) {
+      MobData mobData = MOB_DATA.get(entity.getType());
+      Double referenceWeightKg = mobData == null ? null : mobData.referenceWeightKg();
+      double referenceWidth = entity.getType().getDimensions().width;
+      double referenceHeight = entity.getType().getDimensions().height;
+      var normalDimensions = entity.getDimensions(Pose.STANDING);
+      return BodyWeightUtil.resolveWeightKg(referenceWeightKg,
+          referenceWidth, referenceHeight, normalDimensions.width, normalDimensions.height);
     }
 
     @SubscribeEvent

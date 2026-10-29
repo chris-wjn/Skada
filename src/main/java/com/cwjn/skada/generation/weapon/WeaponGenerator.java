@@ -7,6 +7,7 @@ import com.cwjn.skada.data.registry.AttackType;
 import com.cwjn.skada.generation.attack.AttackTypeJsonInfo;
 import com.cwjn.skada.generation.attack.ElementSpread;
 import com.cwjn.skada.generation.weapon.generation_algo.KnockbackGenerationUtil;
+import com.cwjn.skada.generation.weapon.util.PhysicsUtil;
 import com.cwjn.skada.util.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -236,7 +237,7 @@ public final class WeaponGenerator {
                     knockback,
                     entry.getValue().reticleShapes()));
         }
-        return new WeaponInfo(retMap, spread, applicability);
+        return new WeaponInfo(retMap, spread, applicability, PhysicsUtil.toKg(assembly.mass(256)));
     }
 
     /** Manual finite non-negative values override the provisional generated estimate, including explicit zero. */
@@ -327,7 +328,7 @@ public final class WeaponGenerator {
                     attackTypeInfo.knockback(),
                     attackTypeInfo.reticleShapes()));
         }
-        return new WeaponInfo(adjustedAttackTypes, weaponInfo.getSpread(), weaponInfo.applicability());
+        return new WeaponInfo(adjustedAttackTypes, weaponInfo.getSpread(), weaponInfo.applicability(), weaponInfo.weightKg());
     }
 
 }
