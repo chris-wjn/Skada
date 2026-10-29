@@ -121,6 +121,7 @@ public class ClientArmourTooltipComponent implements ClientTooltipComponent {
     return comp;
   }
 
+  /** Renders this armour piece's mass and, when available, the player's total equipped mass. */
   private Component weightComponent(ItemStack stack) {
     MutableComponent line = Component.empty()
         .append(Component.translatable("skada.icon.weight").withStyle(ICONS))

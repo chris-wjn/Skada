@@ -122,6 +122,7 @@ public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
      */
   }
 
+  /** Renders this weapon's mass and, when available, the player's total equipped mass. */
   private Component weightComponent(ItemStack stack) {
     MutableComponent line = Component.empty()
         .append(Component.translatable("skada.icon.weight").withStyle(ICONS))
