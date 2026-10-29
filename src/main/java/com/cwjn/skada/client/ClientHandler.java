@@ -35,6 +35,7 @@ public class ClientHandler {
 
     public static HitResult[] hitResults;
     public static int skyDarken;
+    public static double playerBodyWeightKg = Double.NaN;
 
     public static void updateWeaponInfos(Map<String, Map<String, WeaponInfo>> map) {
         LOGGER.info("Syncing {} weapon info maps from server.", map.size());
@@ -115,6 +116,13 @@ public class ClientHandler {
     public static void updateBestiaryEntries(List<BestiaryEntryView> entries) {
         LOGGER.info("Received {} bestiary entries from server.", entries.size());
         ClientBestiaryCache.replaceEntries(entries);
+    }
+
+    /** Stores the latest server-authoritative weight for the local player journal. */
+    public static void updatePlayerBodyWeight(double weightKg) {
+        if (Double.isFinite(weightKg) && weightKg >= 0.0) {
+            playerBodyWeightKg = weightKg;
+        }
     }
 
     public static void updateBestiaryUnlocks(Collection<ResourceLocation> unlockedEntryIds,

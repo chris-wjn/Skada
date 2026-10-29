@@ -8,6 +8,7 @@ import com.cwjn.skada.data.damage.AccessWeaponInfo;
 import com.cwjn.skada.data.damage.WeaponInfo;
 import com.cwjn.skada.data.mob.BestiaryEntryViewBuilder;
 import com.cwjn.skada.data.mob.BestiaryInfo;
+import com.cwjn.skada.data.mob.BodyWeightUtil;
 import com.cwjn.skada.data.mob.MobData;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -139,7 +140,8 @@ public abstract class JsonLoader {
 							Skada.LOGGER.info("----------> " + key);
 							@SuppressWarnings("null")
 							ResourceLocation iRL = new ResourceLocation(modId, key);
-							EntityType<?> iEntity = getMobEntityType(iRL);
+							EntityType<?> iEntity = iRL.equals(new ResourceLocation("minecraft", "player"))
+									? EntityType.PLAYER : getMobEntityType(iRL);
 							if (iEntity != null) {
 								MOB_DATA.put(iEntity, value);
 							}
@@ -203,6 +205,9 @@ public abstract class JsonLoader {
 	public static void rebuildBestiaryEntryViews() {
 		BESTIARY_ENTRY_VIEWS.clear();
 		MOB_DATA.forEach((entityType, mobData) -> {
+			if (entityType == net.minecraft.world.entity.EntityType.PLAYER) {
+				return;
+			}
 			try {
 				BESTIARY_ENTRY_VIEWS.put(entityType,
 						BestiaryEntryViewBuilder.build(entityType, mobData, BESTIARY_INFO.get(entityType)));
@@ -225,6 +230,7 @@ public abstract class JsonLoader {
 		}
 		@SuppressWarnings("null")
 		Multimap<Attribute, AttributeModifier> flattenedModifiers = ArrayListMultimap.create(mobData.extraModifiers());
+		java.util.ArrayList<Double> parentWeightsKg = new java.util.ArrayList<>();
 
 		try {
 			for (String parentPath : mobData.parents()) {
@@ -247,12 +253,14 @@ public abstract class JsonLoader {
 							flattenedParentData.extraModifiers().entries().forEach(entry -> {
 								flattenedModifiers.put(entry.getKey(), entry.getValue());
 							});
+							parentWeightsKg.add(flattenedParentData.referenceWeightKg());
 						}
 					}
 				}
 			}
 
-			MOB_DATA.put(type, new MobData(null, mobData.damageInfo(), flattenedModifiers));
+			MOB_DATA.put(type, new MobData(null, mobData.damageInfo(), flattenedModifiers,
+					BodyWeightUtil.inheritReferenceWeight(mobData.referenceWeightKg(), parentWeightsKg)));
 		} finally {
 			flatteningChain.remove(type);
 		}

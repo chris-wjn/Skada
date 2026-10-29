@@ -14,6 +14,7 @@ import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 import com.cwjn.skada.SkadaRegistry;
+import com.cwjn.skada.client.ClientHandler;
 import com.cwjn.skada.client.gui.screen.JournalPage;
 import com.cwjn.skada.client.gui.screen.StatScreen;
 import com.cwjn.skada.data.registry.Element;
@@ -181,6 +182,10 @@ public class PlayerPage extends JournalPage {
     drawPlayerStatline(pGuiGraphics, coreColumnX, statRowY + coreRow++ * STAT_ROW_SPACING, MOVESPEED_ICON,
       Component.translatable("skada.journal.player.core.move_speed.compact"),
       Util.getPlayerSpeedInBlocksPerSecond(currentPlayer.getAttributeValue(Attributes.MOVEMENT_SPEED)));
+    if (Double.isFinite(ClientHandler.playerBodyWeightKg)) {
+      drawPlayerWeightStatline(pGuiGraphics, coreColumnX, statRowY + coreRow++ * STAT_ROW_SPACING,
+          ClientHandler.playerBodyWeightKg);
+    }
     drawPlayerDefenceStatline(pGuiGraphics, coreColumnX, statRowY + coreRow++ * STAT_ROW_SPACING, SLASH_ICON,
       Component.translatable("skada.journal.player.core.slash.compact"), currentPlayer.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute()),
       UtilDefenseDisplay.attackTypeMitigationPercent(currentPlayer.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute())));
@@ -190,6 +195,18 @@ public class PlayerPage extends JournalPage {
     drawPlayerDefenceStatline(pGuiGraphics, coreColumnX, statRowY + coreRow++ * STAT_ROW_SPACING, STRIKE_ICON,
       Component.translatable("skada.journal.player.core.strike.compact"), currentPlayer.getAttributeValue(SkadaRegistry.STRIKE.get().resistAttribute()),
       UtilDefenseDisplay.attackTypeMitigationPercent(currentPlayer.getAttributeValue(SkadaRegistry.STRIKE.get().resistAttribute())));
+  }
+
+  /** Draws the server-authoritative body weight preview without conflating it with burden. */
+  private void drawPlayerWeightStatline(GuiGraphics graphics, int x, int y, double weightKg) {
+    drawStatlineUnderline(graphics, x, y, STATLINE_WIDTH);
+    Font currentFont = Minecraft.getInstance().font;
+    Component label = UtilText.compassNineFontComponent(
+        Component.translatable("skada.journal.player.core.weight.compact"));
+    Component value = UtilText.pixelFontComponent(Util.roundToString(weightKg, 1) + " kg", true, false, false);
+    UtilText.drawStringScaled(graphics, currentFont, label, x + 4, y + STAT_TEXT_Y_OFFSET, 0.5f,
+        UI_TEXT_COLOUR, false);
+    UtilText.drawStringScaled(graphics, currentFont, value, x + 48, y + STAT_NUMBER_Y_OFFSET, 0.75f, LIGHT, false);
   }
 
   /**

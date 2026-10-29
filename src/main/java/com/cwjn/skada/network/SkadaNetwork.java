@@ -79,6 +79,11 @@ public class SkadaNetwork {
                 S2CSyncBestiaryUnlocks::encode,
                 S2CSyncBestiaryUnlocks::decode,
                 S2CSyncBestiaryUnlocks::handle);
+        INSTANCE.registerMessage(id++,
+                S2CSyncPlayerBodyWeight.class,
+                S2CSyncPlayerBodyWeight::encode,
+                S2CSyncPlayerBodyWeight::decode,
+                S2CSyncPlayerBodyWeight::handle);
     }
 
     public static void serverToPlayer(Object packet, ServerPlayer player) {
