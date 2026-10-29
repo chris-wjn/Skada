@@ -66,6 +66,7 @@ public final class KnockbackGenerationUtil {
     return new Estimate(mass, speed, transfer, impulse, knockback);
   }
 
+  /** Estimates the bounded momentum-transfer tendency from the selected attack's contact geometry. */
   private static double contactTransferFactor(WeaponAssembly weapon, AttackType attackType) {
     WeaponPartEntry primary = weapon.primaryPartForAttackType(attackType).orElse(null);
     if (primary == null) return 0.55;
@@ -91,10 +92,12 @@ public final class KnockbackGenerationUtil {
     return Mth.clamp(factor, MIN_TRANSFER_FACTOR, MAX_TRANSFER_FACTOR);
   }
 
+  /** Returns whether the registered attack type is built for the requested geometry capability. */
   private static boolean capable(AttackType attackType, Class<?> capability) {
     return attackType.capableInterface() != null && capability.isAssignableFrom(attackType.capableInterface());
   }
 
+  /** Converts invalid or negative physics inputs to zero before applying the estimate. */
   private static double finiteNonNegative(double value) {
     return Double.isFinite(value) ? Math.max(0.0, value) : 0.0;
   }
