@@ -39,6 +39,17 @@ class KnockbackCalibrationCandidateTest {
     }
 
     @Test
+    void targetWeightReducesTheSameSourceOnlyThroughResistance() {
+        double sourceKnockback = 1.0;
+        double lightTargetResult = sourceKnockback * (1.0 - weightResistance(2.0));
+        double referenceTargetResult = sourceKnockback * (1.0 - weightResistance(70.0));
+
+        assertEquals(0.9875, lightTargetResult, 1.0e-12);
+        assertEquals(0.775, referenceTargetResult, 1.0e-12);
+        assertTrue(referenceTargetResult < lightTargetResult);
+    }
+
+    @Test
     void sourceImpulseKeepsSiUnitsZeroAndFiniteCap() {
         KnockbackGenerationUtil.Estimate oneKilogramAtOneMetrePerSecond =
                 KnockbackGenerationUtil.fromPhysicalInputs(1.0, 1.0, 0.5);
