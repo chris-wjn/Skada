@@ -23,6 +23,9 @@ class KnockbackCalibrationCandidateTest {
             previous = resistance;
         }
         assertEquals(0.0, weightResistance(0.0), 1.0e-12);
+        assertEquals(0.0, weightResistance(-1.0), 1.0e-12);
+        assertEquals(0.0, weightResistance(Double.NaN), 1.0e-12);
+        assertEquals(0.0, weightResistance(Double.POSITIVE_INFINITY), 1.0e-12);
         assertEquals(0.225, weightResistance(70.0), 1.0e-12);
         assertEquals(0.45, weightResistance(1.0e12), 1.0e-9);
     }
