@@ -59,5 +59,10 @@ CLAUDE.md
 # Unused authoring assets retained locally
 /local-assets/
 
+# Texture and font assets can't be uploaded because
+# most of them are bought from itch.io and have non-distribution licensing
+**/assets/skada/textures/
+**/assets/skada/font/
+
 # Files from Forge MDK
 forge*changelog.txt
