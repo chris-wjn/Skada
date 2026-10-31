@@ -29,6 +29,7 @@ public class C2SAddWeaponTag {
     public static void handle(C2SAddWeaponTag msg, Supplier<NetworkEvent.Context> ctxSupplier) {
         NetworkEvent.Context ctx = ctxSupplier.get();
         ctxSupplier.get().enqueueWork(() -> {
+            if (ctx.getSender() != null && com.cwjn.skada.event.Onboarding.isProtected(ctx.getSender())) return;
             if (ctx.getSender() != null && msg.containerID == ctx.getSender().containerMenu.containerId
                     && msg.slot >= 0 && msg.slot < ctx.getSender().containerMenu.slots.size()
                     && ctx.getSender().containerMenu.stillValid(ctx.getSender())) {

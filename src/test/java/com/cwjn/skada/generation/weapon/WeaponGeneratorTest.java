@@ -125,13 +125,16 @@ class WeaponGeneratorTest {
     }
 
     @Test
-    void generatedWeaponMassConvertsAssemblyGramsToKilograms() {
-        WeaponAssembly weightedAssembly = new WeaponAssembly(List.of(new WeaponPartEntry(
-                new HandlePart(1.0, 1.0), material(0.0), null, null)), Map.of(primary,
-                new AttackTypeJsonInfo(1, 1, Double.NaN, 0, 1, 0, 1, List.of())));
-        WeaponInfo generated = generator(Map.of("sword", weightedAssembly), Map.of(), false, 1.0)
-                .generate("example", List.of(item("iron_sword", 0)), null).weapons().get("iron_sword");
-        assertEquals(Math.PI * 1.0 * 1.0 * 0.71 / 1000.0, generated.weightKg(), EPS);
+    void generatedWeaponMassConvertsGramsToKilogramsAndRoundsToHundredths() {
+        // Wooden cylinders weigh pi * radius^2 * length * 0.71 grams: cover zero, round down and round up.
+        for (var sample : Map.of(1.0, 0.0, 100.0, 0.22, 160.0, 0.36).entrySet()) {
+            WeaponAssembly weightedAssembly = new WeaponAssembly(List.of(new WeaponPartEntry(
+                    new HandlePart(sample.getKey(), 1.0), material(0.0), null, null)), Map.of(primary,
+                    new AttackTypeJsonInfo(1, 1, Double.NaN, 0, 1, 0, 1, List.of())));
+            WeaponInfo generated = generator(Map.of("sword", weightedAssembly), Map.of(), false, 1.0)
+                    .generate("example", List.of(item("iron_sword", 0)), null).weapons().get("iron_sword");
+            assertEquals(sample.getValue(), generated.weightKg(), EPS, "Handle length: " + sample.getKey());
+        }
     }
 
     @Test
@@ -468,8 +471,9 @@ class WeaponGeneratorTest {
                                 Map.of(), false, 1.0)
                                 .generate("example", List.of(item("iron_" + name, 8.0)), null)
                                 .weapons().get("iron_" + name);
-                        assertEquals(estimate.attackKnockback(), generated.getAttackTypes().get(type).knockback(), EPS,
-                                name + "/" + type.name() + " preview uses the same source estimate");
+                        double roundedKnockback = Math.round(estimate.attackKnockback() * 100.0) / 100.0;
+                        assertEquals(roundedKnockback, generated.getAttackTypes().get(type).knockback(), EPS,
+                                name + "/" + type.name() + " preview rounds the source estimate to hundredths");
                         switch (type.name()) {
                             case "slash" -> contexts.verify(() -> AttackGenerationContextFactory.buildSlashContext(assembly), times(1));
                             case "thrust" -> contexts.verify(() -> AttackGenerationContextFactory.buildThrustContext(assembly), times(1));

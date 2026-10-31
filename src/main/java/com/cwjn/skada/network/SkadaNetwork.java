@@ -14,7 +14,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public class SkadaNetwork {
 
-    private static final String VERSION = "0.0.2";
+    private static final String VERSION = "0.0.4";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             Util.rl("main"),
             () -> VERSION,
@@ -79,6 +79,13 @@ public class SkadaNetwork {
                 S2CSyncBestiaryUnlocks::encode,
                 S2CSyncBestiaryUnlocks::decode,
                 S2CSyncBestiaryUnlocks::handle);
+        INSTANCE.registerMessage(id++, S2CTutorial.class, S2CTutorial::encode, S2CTutorial::decode, S2CTutorial::handle,
+                java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_CLIENT));
+        INSTANCE.registerMessage(id++, com.cwjn.skada.network.client_to_server.C2STutorial.class,
+                com.cwjn.skada.network.client_to_server.C2STutorial::encode,
+                com.cwjn.skada.network.client_to_server.C2STutorial::decode,
+                com.cwjn.skada.network.client_to_server.C2STutorial::handle,
+                java.util.Optional.of(net.minecraftforge.network.NetworkDirection.PLAY_TO_SERVER));
         INSTANCE.registerMessage(id++,
                 S2CSyncPlayerBodyWeight.class,
                 S2CSyncPlayerBodyWeight::encode,

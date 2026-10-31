@@ -186,6 +186,23 @@ public class DamageInfoPage extends JournalPage {
             }
         }
         screen.disableScissor();
+        for (ElementInfoButton button : elementInfoButtons) {
+            if (!button.visible) continue;
+            int top = Math.max(scrollBoxTop, button.getY());
+            int bottom = Math.min(scrollBoxBot, button.getY() + 44);
+            if (bottom <= top) continue;
+            var element = button.getElement();
+            var player = Minecraft.getInstance().player;
+            if (player == null) continue;
+            screen.offerTooltip(button.getX(), top, 171, bottom - top, pMouseX, pMouseY,
+                com.cwjn.skada.client.gui.StatHelp.lines("element_damage", null));
+            int defenceTop = Math.max(top, button.getY() + 22);
+            if (bottom <= defenceTop) continue;
+            screen.offerTooltip(button.getX() + 100, defenceTop, 71, bottom - defenceTop, pMouseX, pMouseY,
+                com.cwjn.skada.client.gui.StatHelp.lines(element.equals(Element.physical()) ? "physical_resist" : "element_resist",
+                    player.getAttributeValue(element.resist())));
+        }
+        if (currentInfoWidget != null) currentInfoWidget.offerHelp(pMouseX, pMouseY);
     }
 
     private int scrollbarTrackX() {

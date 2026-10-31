@@ -105,6 +105,9 @@ public record MobData(List<String> parents, DamageInfo damageInfo, Multimap<Attr
     }
 
     private static AttackType resolveAttackType(String attackTypeId, AttackType fallback) {
+        if (attackTypeId == null) {
+            return fallback;
+        }
         ResourceLocation resourceLocation = ResourceLocation.tryParse(attackTypeId);
         if (resourceLocation == null) {
             return fallback;

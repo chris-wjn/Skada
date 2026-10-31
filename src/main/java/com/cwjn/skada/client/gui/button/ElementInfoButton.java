@@ -22,7 +22,7 @@ public class ElementInfoButton extends Button {
     private static final ResourceLocation DAMAGE_ICON = Util.rl("textures/gui/book_page_icons/damage_page_icon.png");
     private static final ResourceLocation ARMOUR_ICON = Util.rl("textures/gui/book_page_icons/armour_icon.png");
     private static final Minecraft minecraft = Minecraft.getInstance();
-    private static final Player player = minecraft.player;
+
 
     private final Element element;
     private ElementInfoPanel widget;
@@ -40,6 +40,8 @@ public class ElementInfoButton extends Button {
     }
 
     public void renderCustom(GuiGraphics pGuiGraphics) {
+        Player player = minecraft.player;
+        if (player == null) return;
         int TEXTURE_WIDTH = 171, TEXTURE_HEIGHT = 88;
         if (this.isHovered) {
             // Same texture but border is highlighted white

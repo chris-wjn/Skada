@@ -124,8 +124,10 @@ public class SkadaCommand {
                             )
                     )
                     .then(literal("mobs")
-                            .then(Commands.argument("entity", ResourceLocationArgument.id())
-                             .executes(stack -> generateMobInfoForEntity(stack.getSource(), ResourceLocationArgument.getId(stack, "entity")))
+                            .then(literal("entity")
+                                    .then(Commands.argument("entity", ResourceLocationArgument.id())
+                                            .executes(stack -> generateMobInfoForEntity(stack.getSource(), ResourceLocationArgument.getId(stack, "entity")))
+                                    )
                             )
                             .then(Commands.argument("namespace", ModIdArgument.modIdArgument())
                                     .executes(stack -> generateMobInfoForNamespace(stack.getSource(), stack.getArgument("namespace", String.class)))
@@ -831,6 +833,11 @@ public class SkadaCommand {
       return 0;
     }
 
+    // This registry defaults unknown IDs to pig, so a null check alone cannot validate an ID.
+    if (!ForgeRegistries.ENTITY_TYPES.containsKey(entityId)) {
+      player.displayClientMessage(Component.literal("No entity found for id: " + entityId), false);
+      return 0;
+    }
     EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(entityId);
     if (type == null) {
       player.displayClientMessage(Component.literal("No entity found for id: " + entityId), false);

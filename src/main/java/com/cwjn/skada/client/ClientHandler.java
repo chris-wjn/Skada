@@ -35,7 +35,9 @@ public class ClientHandler {
 
     public static HitResult[] hitResults;
     public static int skyDarken;
+    //storing as NaN is fine because we check isFinite later
     public static double playerBodyWeightKg = Double.NaN;
+    public static double playerTotalWeightKg = Double.NaN;
 
     public static void updateWeaponInfos(Map<String, Map<String, WeaponInfo>> map) {
         LOGGER.info("Syncing {} weapon info maps from server.", map.size());
@@ -119,12 +121,10 @@ public class ClientHandler {
     }
 
     /** Stores the latest server-authoritative weight for the local player journal. */
-    public static void updatePlayerBodyWeight(double weightKg) {
-        if (Double.isFinite(weightKg) && weightKg >= 0.0) {
-            playerBodyWeightKg = weightKg;
-        }
+    public static void updatePlayerWeights(double bodyWeightKg, double totalWeightKg) {
+        if (Double.isFinite(bodyWeightKg) && bodyWeightKg >= 0.0) playerBodyWeightKg = bodyWeightKg;
+        if (Double.isFinite(totalWeightKg) && totalWeightKg >= 0.0) playerTotalWeightKg = totalWeightKg;
     }
-
     public static void updateBestiaryUnlocks(Collection<ResourceLocation> unlockedEntryIds,
                                              Collection<ResourceLocation> newlyUnlockedEntryIds) {
         LOGGER.info("Received bestiary unlock state from server: {} unlocked, {} newly unlocked.",

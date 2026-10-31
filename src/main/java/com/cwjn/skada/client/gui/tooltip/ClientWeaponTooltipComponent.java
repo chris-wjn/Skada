@@ -1,28 +1,19 @@
 package com.cwjn.skada.client.gui.tooltip;
 
+import com.cwjn.skada.client.gui.StatHelp;
 import com.cwjn.skada.data.SkadaData;
-import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.data.damage.AttackSelection;
-import com.cwjn.skada.data.damage.WeaponInfo;
+import com.cwjn.skada.data.damage.AttackTypeInfo;
 import com.cwjn.skada.generation.attack.ElementSpread;
-import com.cwjn.skada.data.registry.AttackType;
-import com.cwjn.skada.event.CommonEvent;
 import com.cwjn.skada.util.Util;
-import com.cwjn.skada.util.UtilText;
-import com.cwjn.skada.util.EquipmentWeightUtil;
 import com.google.common.collect.HashMultimap;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.ChatFormatting;
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.network.chat.*;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -32,306 +23,97 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TridentItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeMod;
 
-import org.joml.Matrix4f;
-
-import java.text.DecimalFormat;
-import java.util.*;
-
-import static com.cwjn.skada.data.SkadaData.*;
-import static com.cwjn.skada.util.UtilText.getOtherSlotAttributesAsList;
-import static com.cwjn.skada.util.UtilText.otherAttributesComponent;
-
+/** Weapon handling, damage breakdown and input hints in the shared equipment layout. */
 @OnlyIn(Dist.CLIENT)
-public class ClientWeaponTooltipComponent implements ClientTooltipComponent {
-
-  private final List<Component> lines = new ArrayList<>();
-  private final HashMultimap<Attribute, AttributeModifier> mainAttributes;
-  private final List<EquipmentSlot> otherSlots;
-  private final Player player = Minecraft.getInstance().player;
-  private final WeaponInfo info;
-  private final AttackType[] attackTypes;
-  private int arrowXCoord = 0; // the coordinate to draw the selector arrow at
-
-  private static final Style ICONS = Style.EMPTY.withFont(Util.rl("icons"));
-  private static final ResourceLocation SPRITES = Util.rl("textures/gui/spritesheet.png");
-  private static final DecimalFormat df = new DecimalFormat("#.#");
+public class ClientWeaponTooltipComponent extends EquipmentTooltipComponent {
+  private static final DecimalFormat DF = new DecimalFormat("#.#");
   private static final double BOW_BASE_VELOCITY = 3.0;
   private static final double CROSSBOW_BASE_VELOCITY = 3.15;
-  private static final double TRIDENT_BASE_VELOCITY = 2.5;
+  private final HashMultimap<Attribute, AttributeModifier> mainAttributes;
+  private final Player player = Minecraft.getInstance().player;
 
-  public ClientWeaponTooltipComponent(ItemStack itemstack) {
-    EquipmentSlot[] slots = Arrays.stream(EquipmentSlot.values())
-        .filter(s -> !s.equals(LivingEntity.getEquipmentSlotForItem(itemstack))).toArray(EquipmentSlot[]::new);
-    this.mainAttributes = HashMultimap
-        .create(itemstack.getAttributeModifiers(LivingEntity.getEquipmentSlotForItem(itemstack)));
-    this.otherSlots = Arrays.stream(slots).filter((x) -> !itemstack.getAttributeModifiers(x).isEmpty()).toList();
-    AttackSelection selected = AttackSelection.resolve(itemstack);
-    info = selected.weapon();
-    attackTypes = selected.order().toArray(AttackType[]::new);
-    AttackTypeInfo currentInfo = selected.stats();
-    lines.add(weightComponent(itemstack));
-    lines.add(attackTypesComponent(selected.type()));
-    if (info.applicability().melee())
-      lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.REACH));
-    lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.LETHALITY));
-    lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.PRECISION));
-    if (info.applicability().melee()) {
-      lines.add(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.knockback_preview",
-          currentInfo.knockback())));
+  /** Captures the selected attack without changing any equipment or combat calculations. */
+  public ClientWeaponTooltipComponent(ItemStack stack) {
+    super(stack);
+    EquipmentSlot mainSlot = LivingEntity.getEquipmentSlotForItem(stack);
+    mainAttributes = HashMultimap.create(stack.getAttributeModifiers(mainSlot));
+    List<EquipmentSlot> otherSlots = Arrays.stream(EquipmentSlot.values())
+        .filter(slot -> slot != mainSlot && !stack.getAttributeModifiers(slot).isEmpty()).toList();
+    AttackSelection selected = AttackSelection.resolve(stack);
+    AttackTypeInfo stats = selected.stats();
+    boolean melee = selected.weapon().applicability().melee();
+    if (melee) {
+      mainAttributes.get(ForgeMod.ENTITY_REACH.get())
+          .removeIf(modifier -> modifier.getId().equals(SkadaData.SKADA_ATTACK_TYPE_REACH_UUID));
+      weaponStat("reach", Component.translatable("skada.tooltip.value.reach",
+          DF.format(stats.minReach()), DF.format(stats.maxReach())));
     }
-    lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.CRITICAL_FAIL));
-    if (info.applicability().melee())
-      lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.ATTACK_SPEED));
-    if (info.applicability().projectile() && itemstack.getItem() instanceof CrossbowItem) {
-      lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.VELOCITY_CROSSBOW));
-      lines.addAll(attackDamageComponent(info.getSpread(), false));
-    } else if (info.applicability().projectile() && itemstack.getItem() instanceof BowItem) {
-      lines.add(attackInfoComponent(currentInfo, WEAPON_INFO_COMPONENT_TYPE.VELOCITY_BOW));
-      lines.addAll(attackDamageComponent(info.getSpread(), false));
-    } else if (itemstack.getItem() instanceof TridentItem) {
-      lines.addAll(attackDamageComponent(info.getSpread(), true));
-    } else {
-      lines.addAll(attackDamageComponent(info.getSpread(), true));
+    weaponStat("lethality", Component.literal(DF.format(stats.lethality())));
+    weaponStat("precision", Component.literal(DF.format(stats.precision())));
+    if (melee) {
+      mainAttributes.get(Attributes.ATTACK_KNOCKBACK)
+          .removeIf(modifier -> modifier.getId().equals(SkadaData.SKADA_ATTACK_TYPE_KNOCKBACK_UUID));
+      MutableComponent category = Component.translatable(StatHelp.knockbackCategoryKey(stats.knockback()));
+      weaponStat("knockback", Screen.hasShiftDown()
+          ? Component.translatable("skada.tooltip.value.knockback_detailed", category, Double.toString(stats.knockback()))
+          : category);
     }
-    if (!this.mainAttributes.isEmpty()) {
-      lines.add(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.shift_for_other_attributes")));
-      if (Screen.hasShiftDown()) {
-        lines.addAll(otherAttributesComponent(mainAttributes));
+    weaponStat("critical_fail", Component.translatable("skada.tooltip.value.percent", DF.format(stats.failChance() * 100)));
+    if (melee) {
+      mainAttributes.get(Attributes.ATTACK_SPEED)
+          .removeIf(modifier -> modifier.getId().equals(SkadaData.SKADA_ATTACK_TYPE_SPEED_UUID));
+      weaponStat("attack_speed", Component.literal(DF.format(Util.round(stats.attackSpeed(), 1))));
+    }
+    boolean rangedDamage = false;
+    if (selected.weapon().applicability().projectile()) {
+      if (stack.getItem() instanceof CrossbowItem) {
+        weaponStat("velocity", Component.translatable("skada.tooltip.value.velocity",
+            DF.format(stats.damage() + CROSSBOW_BASE_VELOCITY)));
+        rangedDamage = true;
+      } else if (stack.getItem() instanceof BowItem) {
+        weaponStat("velocity", Component.translatable("skada.tooltip.value.velocity",
+            DF.format(stats.damage() + BOW_BASE_VELOCITY)));
+        rangedDamage = true;
       }
     }
-    if (!otherSlots.isEmpty()) {
-      lines.add(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.alt_for_other_slot_attributes")));
-      if (Screen.hasAltDown()) {
-        for (EquipmentSlot slot : otherSlots) {
-          lines.addAll(getOtherSlotAttributesAsList(slot, itemstack.getAttributeModifiers(slot)));
-        }
-      }
-    }
-    /*
-     * lines.add(Util.pixelFontComponent(Component.translatable(
-     * "skada.tooltip.shift_for_weapon_info"), false));
-     * lines.add(Util.pixelFontComponent(Component.translatable(
-     * "skada.tooltip.test_numbers",120495), true));
-     * lines.add(Util.pixelFontComponent(Component.translatable(
-     * "skada.tooltip.test_swedish_characters"), false));
-     */
+    section();
+    attackDamage(selected.weapon().getSpread(), !rangedDamage);
+    attributeDetails(stack, mainAttributes, otherSlots);
+    if (melee || !mainAttributes.isEmpty()) hint("skada.tooltip.hint.shift_details");
+    if (!otherSlots.isEmpty()) hint("skada.tooltip.hint.alt_attributes");
   }
 
-  /** Renders this weapon's mass and, when available, the player's total equipped mass. */
-  private Component weightComponent(ItemStack stack) {
-    MutableComponent line = Component.empty()
-        .append(Component.translatable("skada.icon.weight").withStyle(ICONS))
-        .append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.weight_kg",
-            df.format(EquipmentWeightUtil.getStackWeightKg(stack)))));
-    if (player != null) {
-      line.append(UtilText.pixelFontComponent("  "))
-          .append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.equipped_weight_total",
-              df.format(EquipmentWeightUtil.getTotalEquippedWeightKg(player)))));
-    }
-    return line;
+  /** Adds a localized weapon label and the existing stat icon. */
+  private void weaponStat(String name, MutableComponent value) {
+    stat("skada.icon." + name, Component.translatable("skada.tooltip.label." + name), value);
   }
 
-  @SuppressWarnings("null")
-  private List<Component> attackDamageComponent(ElementSpread spread, boolean showFinalDamage) {
+  /** Keeps the current damage calculation and element colours while aligning each breakdown value. */
+  private void attackDamage(ElementSpread spread, boolean showFinalDamage) {
     double damage = mainAttributes.get(Attributes.ATTACK_DAMAGE).stream()
-        .filter(m -> m.getOperation() == AttributeModifier.Operation.ADDITION).mapToDouble(AttributeModifier::getAmount)
-        .sum() + player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
-    this.mainAttributes.get(Attributes.ATTACK_DAMAGE)
-        .removeIf(m -> m.getOperation() == AttributeModifier.Operation.ADDITION);
-    List<Component> list = new ArrayList<>();
-    MutableComponent comp = Component.empty();
-    comp.append(Component.translatable("skada.icon.attack_damage").withStyle(ICONS));
-    if (showFinalDamage)
-      comp.append(UtilText.pixelFontComponent(
-          Component.translatable("skada.tooltip.info.attack_damage", df.format(damage * spread.getPowerBudget()))));
-    else
-      comp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_damage_no_sum")));
-    list.add(comp);
+        .filter(modifier -> modifier.getOperation() == AttributeModifier.Operation.ADDITION)
+        .mapToDouble(AttributeModifier::getAmount).sum()
+        + (player == null ? 1.0 : player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE));
+    mainAttributes.get(Attributes.ATTACK_DAMAGE)
+        .removeIf(modifier -> modifier.getOperation() == AttributeModifier.Operation.ADDITION);
     if (showFinalDamage) {
-      spread.getRatios().keySet().forEach(key -> list.add(Component.literal("   ")
-          .append(Component.translatable("skada.icon.element." + key.name()).withStyle(ICONS))
-          .append(UtilText.pixelFontComponent(
-              Component.translatable("skada.tooltip.info.element." + key.name(),
-                  (int) (spread.getRatios().get(key) * 100 / spread.getPowerBudget()),
-                  Util.round(spread.getRatios().get(key) * damage, 1)))
-              .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(key.colour() & 0xFFFFFF))))));
+      weaponStat("attack_damage", Component.literal(DF.format(damage * spread.getPowerBudget())));
     } else {
-      spread.getRatios().keySet().forEach(key -> list.add(Component.literal("   ")
-          .append(Component.translatable("skada.icon.element." + key.name()).withStyle(ICONS))
-          .append(UtilText.pixelFontComponent(
-              Component.translatable("skada.tooltip.info.element." + key.name() + "_no_sum",
-                  (int) (spread.getRatios().get(key) * 100 / spread.getPowerBudget())))
-              .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(key.colour() & 0xFFFFFF))))));
+      line(text(Component.translatable("skada.tooltip.label.element_split"), LABEL));
     }
-    return list;
-  }
-
-  /*
-   * The height of the tooltip is calculated by multiplying the number of lines by
-   * the line height of the font, then
-   * adding 2 pixels for each line to account for the padding between lines. If
-   * there are multiple attack types,
-   * we add 4 pixels to the height to account for the extra space needed for the
-   * attack type selector arrow.
-   */
-  @Override
-  public int getHeight() {
-    int baseSize = lines.size() * (Minecraft.getInstance().font.lineHeight + 2);
-    int selectorArrowHeight = attackTypes.length > 1 ? 4 : 0;
-    return baseSize + selectorArrowHeight;
-  }
-
-  @Override
-  public int getWidth(Font pFont) {
-    final int[] longest = { 0 };
-    lines.forEach(l -> {
-      if (pFont.width(l) > longest[0]) {
-        longest[0] = pFont.width(l);
-      }
+    spread.getRatios().forEach((element, ratio) -> {
+      int percent = (int) (ratio * 100 / spread.getPowerBudget());
+      MutableComponent value = showFinalDamage
+          ? Component.translatable("skada.tooltip.value.element_damage", percent, Util.round(ratio * damage, 1))
+          : Component.translatable("skada.tooltip.value.percent", percent);
+      branchStat("skada.icon.element." + element.name(),
+          Component.translatable("skada.journal.player.element." + element.name()),
+          value.withStyle(style -> style.withColor(element.colour() & 0xFFFFFF)));
     });
-    return longest[0] + 3;
   }
 
-  @Override
-  public void renderText(Font pFont, int x, int y, Matrix4f pMatrix, MultiBufferSource.BufferSource pBufferSource) {
-    ClientTooltipComponent.super.renderText(pFont, x, y, pMatrix, pBufferSource);
-    if (lines.isEmpty())
-      return;
-    pFont.drawInBatch(lines.remove(0), x, y, 0xFFFFFF, false, pMatrix, pBufferSource, Font.DisplayMode.NORMAL, 0x555555,
-        15728880);
-    if (info.getAttackTypes().size() != 1)
-      y += pFont.lineHeight + 6;
-    else
-      y += pFont.lineHeight + 2;
-    for (Component c : lines) {
-      pFont.drawInBatch(c, x + 2.5f, y, 0xFFFFFF, false, pMatrix, pBufferSource, Font.DisplayMode.NORMAL, 0x555555,
-          15728880);
-      y += pFont.lineHeight + 2;
-    }
-  }
-
-  @Override
-  public void renderImage(Font font, int x, int y, GuiGraphics guiGraphics) {
-    ClientTooltipComponent.super.renderImage(font, x, y, guiGraphics);
-    if (lines.isEmpty())
-      return;
-    // this.drawHorizontalGradient(guiGraphics, x, y+font.lineHeight, x+longest,
-    // y+font.lineHeight+0.5f, 0, 0xFFFFFFFF, 0x00FFFFFF);
-    // guiGraphics.blit(SPRITES, x+arrowXCoord, y+font.lineHeight-10, 1, 0, 5, 4);
-    if (info.getAttackTypes().size() != 1)
-      guiGraphics.blit(SPRITES, x + arrowXCoord, y + font.lineHeight - 1, 1, 4, 5, 4);
-  }
-
-  private Component attackTypesComponent(AttackType attackType) {
-    // start an empty MutableComponent that will be appended to, so we can return a
-    // single component
-    MutableComponent retComp = Component.empty();
-    Font font = Minecraft.getInstance().font;
-
-    /*
-     * we create an array of MutableComponents that will be used to create the final
-     * component.
-     * (attackTypes.length + 2 + attackTypes.length-1) is the area of the array,
-     * where the +2 is for the curly braces
-     * and the +attackTypes.length-1 is for the commas between the attack types
-     */
-    MutableComponent[] attackTypeComponents = new MutableComponent[info.getAttackTypes().size() + 2
-        + info.getAttackTypes().size() - 1];
-    // attackTypeComponents[0] = Component.literal("[");
-    retComp.append(UtilText.pixelFontComponent(Component.literal("[")));
-    // attackTypeComponents[attackTypeComponents.length-1] = Component.literal("]");
-    int countArrow = font.width(retComp);
-
-    // iterate over the attack types and create a MutableComponent for each one. We
-    // start at i = 1 to skip the opening curly brace,
-    // and we set doSlash to false in order to avoid adding a slash before the first
-    // attack type.
-    boolean doSlash = false;
-    int correctAttackIndex = 0;
-    for (int i = 1; i <= attackTypeComponents.length - 2; i++) {
-      MutableComponent thisComp;
-      if (doSlash) {
-        thisComp = UtilText.pixelFontComponent(Component.literal("/"));
-        countArrow += font.width(thisComp);
-        doSlash = false;
-      } else if (attackType.equals(attackTypes[correctAttackIndex])) {
-        thisComp = UtilText.pixelFontComponent(Component.literal(attackTypes[correctAttackIndex].name().toUpperCase()))
-            .withStyle(ChatFormatting.AQUA);
-        correctAttackIndex++;
-        arrowXCoord = countArrow + (font.width(thisComp) / 2) - 2;
-        doSlash = true;
-      } else {
-        thisComp = UtilText.pixelFontComponent(Component.literal(attackTypes[correctAttackIndex].name().toUpperCase()))
-            .withStyle(ChatFormatting.DARK_GRAY);
-        correctAttackIndex++;
-        countArrow += font.width(thisComp);
-        doSlash = true;
-      }
-      // attackTypeComponents[i] = thisComp;
-      retComp.append(thisComp);
-    }
-    retComp.append(UtilText.pixelFontComponent(Component.literal("]")));
-    // return Util.pixelFontComponent(attackTypeComponents);
-    return retComp;
-  }
-
-  @SuppressWarnings("null")
-  private Component attackInfoComponent(AttackTypeInfo attackTypeInfo, WEAPON_INFO_COMPONENT_TYPE componentType) {
-    MutableComponent retComp = Component.empty();
-    retComp.append(Component.translatable("skada.icon." + componentType.toString().toLowerCase()).withStyle(ICONS));
-    switch (componentType) {
-      case REACH:
-        mainAttributes.get(ForgeMod.ENTITY_REACH.get()).removeIf(m -> m.getId().equals(SkadaData.SKADA_ATTACK_TYPE_REACH_UUID));
-        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.reach",
-            df.format(attackTypeInfo.minReach()),
-            df.format(attackTypeInfo.maxReach()))));
-        break;
-      case LETHALITY:
-        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.lethality",
-            df.format(attackTypeInfo.lethality()))));
-        break;
-      case ATTACK_SPEED:
-        mainAttributes.get(Attributes.ATTACK_SPEED).removeIf(m -> m.getId().equals(SkadaData.SKADA_ATTACK_TYPE_SPEED_UUID));
-        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.attack_speed",
-            Util.round(attackTypeInfo.attackSpeed(), 1))));
-        break;
-      case PRECISION:
-        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.precision",
-            df.format(attackTypeInfo.precision()))));
-        break;
-      case VELOCITY_CROSSBOW:
-        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
-            df.format(attackTypeInfo.damage() + CROSSBOW_BASE_VELOCITY))));
-        break;
-      case VELOCITY_BOW:
-        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
-            df.format(attackTypeInfo.damage() + BOW_BASE_VELOCITY))));
-        break;
-      case VELOCITY_TRIDENT:
-        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.velocity",
-            df.format(attackTypeInfo.damage() + TRIDENT_BASE_VELOCITY))));
-        break;
-      case CRITICAL_FAIL:
-        retComp.append(UtilText.pixelFontComponent(Component.translatable("skada.tooltip.info.critical_fail",
-            df.format(attackTypeInfo.failChance() * 100))));
-        break;
-    }
-    return retComp;
-  }
-
-  private enum WEAPON_INFO_COMPONENT_TYPE {
-    REACH,
-    LETHALITY,
-    ATTACK_SPEED,
-    VELOCITY_CROSSBOW,
-    VELOCITY_BOW,
-    VELOCITY_TRIDENT,
-    CRITICAL_FAIL,
-    PRECISION
-  }
 }

@@ -6,23 +6,21 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-/** Synchronizes the server-resolved body weight used by the local player journal preview. */
-public record S2CSyncPlayerBodyWeight(double weightKg) {
+/** Synchronizes server-resolved body and total weight for the local player journal. */
+public record S2CSyncPlayerBodyWeight(double bodyWeightKg, double totalWeightKg) {
 
-  /** Writes the resolved body weight in kilograms to the outgoing packet buffer. */
   public static void encode(S2CSyncPlayerBodyWeight message, FriendlyByteBuf buffer) {
-    buffer.writeDouble(message.weightKg());
+    buffer.writeDouble(message.bodyWeightKg());
+    buffer.writeDouble(message.totalWeightKg());
   }
 
-  /** Reads a resolved body weight in kilograms from the incoming packet buffer. */
   public static S2CSyncPlayerBodyWeight decode(FriendlyByteBuf buffer) {
-    return new S2CSyncPlayerBodyWeight(buffer.readDouble());
+    return new S2CSyncPlayerBodyWeight(buffer.readDouble(), buffer.readDouble());
   }
 
-  /** Applies the server-provided body weight to the client journal cache. */
   public static void handle(S2CSyncPlayerBodyWeight message, Supplier<NetworkEvent.Context> contextSupplier) {
     NetworkEvent.Context context = contextSupplier.get();
-    context.enqueueWork(() -> ClientHandler.updatePlayerBodyWeight(message.weightKg()));
+    context.enqueueWork(() -> ClientHandler.updatePlayerWeights(message.bodyWeightKg(), message.totalWeightKg()));
     context.setPacketHandled(true);
   }
 }

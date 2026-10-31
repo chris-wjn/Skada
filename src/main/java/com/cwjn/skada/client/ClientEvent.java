@@ -7,7 +7,10 @@ import com.cwjn.skada.client.gui.screen.StatScreen;
 import com.cwjn.skada.client.gui.tooltip.ArmourTooltipComponent;
 import com.cwjn.skada.client.gui.tooltip.ClientArmourTooltipComponent;
 import com.cwjn.skada.client.gui.tooltip.ClientWeaponTooltipComponent;
+import com.cwjn.skada.client.gui.tooltip.EquipmentTooltipComponent;
+import com.cwjn.skada.client.gui.tooltip.ItemNameTooltipComponent;
 import com.cwjn.skada.client.gui.tooltip.WeaponTooltipComponent;
+import com.cwjn.skada.client.gui.tooltip.WeightTooltipComponent;
 import com.cwjn.skada.client.hud.MobHealthBar;
 import com.cwjn.skada.client.hud.MobHealthBarTracker;
 import com.cwjn.skada.client.hud.ReticleCoordinate;
@@ -25,6 +28,7 @@ import com.cwjn.skada.util.Util;
 import com.cwjn.skada.util.UtilData;
 import com.cwjn.skada.util.UtilText;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -32,7 +36,6 @@ import com.mojang.datafixers.util.Either;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -45,6 +48,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -203,6 +207,8 @@ public class ClientEvent {
     public static void registerTooltips(RegisterClientTooltipComponentFactoriesEvent e) {
       e.register(WeaponTooltipComponent.class, t -> new ClientWeaponTooltipComponent(t.item));
       e.register(ArmourTooltipComponent.class, t -> new ClientArmourTooltipComponent(t.item));
+      e.register(WeightTooltipComponent.class, t -> t);
+      e.register(ItemNameTooltipComponent.class, t -> t);
     }
 
     @SuppressWarnings("null")
@@ -224,7 +230,46 @@ public class ClientEvent {
         e.getTooltipElements().add(Either.right(new WeaponTooltipComponent(e.getItemStack())));
       } else if (e.getItemStack().hasTag() && e.getItemStack().getTag().contains(ARMOUR_INFO_TAG_KEY)) {
         e.getTooltipElements().add(Either.right(new ArmourTooltipComponent(e.getItemStack())));
+      } else {
+        return;
       }
+      if (!e.getTooltipElements().isEmpty()
+          && e.getTooltipElements().get(0).left().orElse(null) instanceof Component title) {
+        int accent = EquipmentTooltipComponent.accent(e.getItemStack());
+        var following = e.getTooltipElements().get(1).right().orElse(null);
+        boolean dividerFollows = following instanceof WeaponTooltipComponent || following instanceof ArmourTooltipComponent;
+        e.getTooltipElements().set(0, Either.right(new ItemNameTooltipComponent(
+            title.copy().withStyle(style -> style.withColor(accent)), e.getScreenWidth() - 16, dividerFollows)));
+      }
+      e.getTooltipElements().add(Either.right(new WeightTooltipComponent(e.getItemStack())));
+    }
+
+    /** Aligns the centred name, stat columns, section rules and weight to the complete tooltip. */
+    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOWEST)
+    public static void alignEquipmentTooltip(RenderTooltipEvent.Pre e) {
+      int width = e.getComponents().stream().mapToInt(c -> c.getWidth(e.getFont())).max().orElse(0);
+      for (var component : e.getComponents()) {
+        if (component instanceof ItemNameTooltipComponent name) {
+          name.setTooltipWidth(width);
+        }
+        if (component instanceof EquipmentTooltipComponent equipment) {
+          equipment.setTooltipWidth(width);
+        }
+        if (component instanceof WeightTooltipComponent weight) {
+          weight.setTooltipWidth(width);
+        }
+      }
+    }
+
+    /** Gives Skada equipment a dark, legible panel with an item-coloured frame. */
+    @SubscribeEvent
+    public static void colourEquipmentTooltip(RenderTooltipEvent.Color e) {
+      if (e.getComponents().stream().noneMatch(component -> component instanceof EquipmentTooltipComponent)) return;
+      int accent = EquipmentTooltipComponent.accent(e.getItemStack());
+      e.setBackgroundStart(0xF5101319);
+      e.setBackgroundEnd(0xF5181B24);
+      e.setBorderStart(0xD0000000 | accent);
+      e.setBorderEnd(0x90000000 | accent);
     }
 
     @SuppressWarnings("null")
@@ -250,48 +295,103 @@ public class ClientEvent {
       return (pHideFlags & pPart.getMask()) == 0;
     }
 
-    /** Resolves and predicts one cycle; the same ordered ID is sent to the server. */
-    private static ResourceLocation cycleAttackType(ItemStack stack) {
+    /** Predicts a step through the saved attack order; the selected ID is sent to the server. */
+    private static ResourceLocation cycleAttackType(ItemStack stack, int direction) {
       AttackSelection selected = AttackSelection.resolve(stack);
-      if (selected.order().size() < 2 || Minecraft.getInstance().screen instanceof ChatScreen) return null;
+      if (selected.order().size() < 2) return null;
       Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.PLAYER_ATTACK_NODAMAGE, 1.0F, 1.0F));
-      return selected.cycle(stack);
+      return selected.cycle(stack, direction);
     }
 
+    /** Applies hand priority to both gameplay shortcuts and includes the selected hotbar slot in the request. */
+    private static void cycleHeldAttackType(int direction) {
+      Player player = Minecraft.getInstance().player;
+      InteractionHand hand = player.getMainHandItem().isEmpty() ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+      ResourceLocation selected = cycleAttackType(player.getItemInHand(hand), direction);
+      if (selected != null) SkadaNetwork.playerToServer(new C2SSelectAttackType(selected, hand, player.getInventory().selected));
+    }
+
+    /** Discards unavailable clicks so switching never occurs later when attack charge recovers. */
     @SubscribeEvent
     public static void listenForAttackTypeCycleInGame(ClientTickEvent e) {
-      if (e.phase != ClientTickEvent.Phase.END || Minecraft.getInstance().player == null
-          || Minecraft.getInstance().player.getAttackStrengthScale(0.5f) <= 0.9) return;
+      if (e.phase != ClientTickEvent.Phase.END || Keybinds.cycleAttackType == null) return;
+      Minecraft minecraft = Minecraft.getInstance();
       while (Keybinds.cycleAttackType.consumeClick()) {
-        ResourceLocation selected = cycleAttackType(Minecraft.getInstance().player.getMainHandItem());
-        if (selected != null) SkadaNetwork.playerToServer(new C2SSelectAttackType(selected));
+        if (minecraft.screen == null && minecraft.player != null && !minecraft.player.isSpectator()
+            && minecraft.player.getAttackStrengthScale(0.5f) > 0.9) cycleHeldAttackType(1);
       }
     }
 
     /** Keeps vanilla creative stack transport and normal-menu server requests aligned. */
-    private static void cycleHoveredAttackType() {
+    private static void cycleHoveredAttackType(int direction) {
       if (Minecraft.getInstance().player == null || Minecraft.getInstance().player.getAttackStrengthScale(0.5f) <= 0.9) return;
       if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen && screen.getSlotUnderMouse() != null) {
         Slot hoveredSlot = screen.getSlotUnderMouse();
         ItemStack stack = hoveredSlot.getItem();
-        ResourceLocation selected = cycleAttackType(stack);
+        if (screen instanceof CreativeModeInventoryScreen) stack = stack.copy();
+        ResourceLocation selected = cycleAttackType(stack, direction);
         if (selected == null) return;
         if (screen instanceof CreativeModeInventoryScreen) {
-          Minecraft.getInstance().gameMode.handleCreativeModeItemAdd(stack.copy(), hoveredSlot.index);
+          hoveredSlot.set(stack);
+          // Creative tabs use different slot indices. Only actual inventory slots need server transport;
+          // catalogue previews carry their selected attack when the player takes a copy.
+          for (Slot inventorySlot : Minecraft.getInstance().player.inventoryMenu.slots) {
+            if (inventorySlot.isSameInventory(hoveredSlot) && inventorySlot.getSlotIndex() == hoveredSlot.getSlotIndex()) {
+              Minecraft.getInstance().gameMode.handleCreativeModeItemAdd(stack.copy(), inventorySlot.index);
+              break;
+            }
+          }
         } else {
           SkadaNetwork.playerToServer(new C2SSelectAttackTypeFromMenu(selected, screen.getMenu().containerId, hoveredSlot.index));
         }
       }
     }
 
-    @SubscribeEvent
-    public static void listenForAttackTypeCycleKeybindInGUI(ScreenEvent.KeyPressed.Post e) {
-      if (e.getKeyCode() == Keybinds.cycleAttackType.getKey().getValue()) cycleHoveredAttackType();
+    /** Claims modifier scrolling only for a target with multiple attacks, even during attack recovery. */
+    private static boolean scrollAttackType(double delta) {
+      Minecraft minecraft = Minecraft.getInstance();
+      if (delta == 0 || minecraft.player == null || minecraft.player.isSpectator()
+          || !Keybinds.isAttackScrollModifierDown()) return false;
+      ItemStack stack;
+      if (minecraft.screen instanceof AbstractContainerScreen<?> screen) {
+        Slot hoveredSlot = screen.getSlotUnderMouse();
+        if (hoveredSlot == null) return false;
+        stack = hoveredSlot.getItem();
+      } else if (minecraft.screen == null) {
+        stack = minecraft.player.getMainHandItem().isEmpty()
+            ? minecraft.player.getOffhandItem() : minecraft.player.getMainHandItem();
+      } else return false;
+      if (AttackSelection.resolve(stack).order().size() < 2) return false;
+      if (minecraft.player.getAttackStrengthScale(0.5f) > 0.9) {
+        int direction = delta < 0 ? 1 : -1;
+        if (minecraft.screen == null) cycleHeldAttackType(direction);
+        else cycleHoveredAttackType(direction);
+      }
+      return true;
     }
 
+    /** Intercepts gameplay scrolling before vanilla changes the selected hotbar slot. */
+    @SubscribeEvent
+    public static void listenForAttackTypeScrollInGame(InputEvent.MouseScrollingEvent e) {
+      if (scrollAttackType(e.getScrollDelta())) e.setCanceled(true);
+    }
+
+    /** Intercepts container scrolling before creative tabs or other screen widgets consume it. */
+    @SubscribeEvent
+    public static void listenForAttackTypeScrollInGUI(ScreenEvent.MouseScrolled.Pre e) {
+      if (scrollAttackType(e.getScrollDelta())) e.setCanceled(true);
+    }
+
+    /** Matches the complete keyboard binding without confusing keyboard codes with mouse buttons. */
+    @SubscribeEvent
+    public static void listenForAttackTypeCycleKeybindInGUI(ScreenEvent.KeyPressed.Post e) {
+      if (Keybinds.cycleAttackType.isActiveAndMatches(InputConstants.getKey(e.getKeyCode(), e.getScanCode()))) cycleHoveredAttackType(1);
+    }
+
+    /** Retains support for players who bind the original cycle action to a mouse button. */
     @SubscribeEvent
     public static void listenForAttackTypeCycleMousebindInGUI(ScreenEvent.MouseButtonPressed.Post e) {
-      if (e.getButton() == Keybinds.cycleAttackType.getKey().getValue()) cycleHoveredAttackType();
+      if (Keybinds.cycleAttackType.isActiveAndMatches(InputConstants.Type.MOUSE.getOrCreate(e.getButton()))) cycleHoveredAttackType(1);
     }
 
     @SubscribeEvent

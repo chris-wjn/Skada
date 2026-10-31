@@ -34,7 +34,7 @@ import java.util.Objects;
 public class ElementInfoPanel {
 
     private static final Minecraft minecraft = Minecraft.getInstance();
-    private static final Player player = minecraft.player;
+
     private final ResourceLocation TEXTURE = Util.rl("textures/gui/damage_page/element_info_widget.png");
     private static final int WIDTH = 229, HEIGHT = 293;
     private final StatScreen screen;
@@ -66,7 +66,9 @@ public class ElementInfoPanel {
     }
 
     public void render(GuiGraphics pGuiGraphics) {
-        if (!visible) return;
+        if (!visible || minecraft.player == null) return;
+        damageInfoLines = getDamageInfoLines();
+        armourInfoLines = getArmourInfoLines();
         pGuiGraphics.blit(TEXTURE, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
         int ICON_OFFSET_X = WIDTH/2 - 16;//subtract 16 from x offset because the icon is scaled to 32x32
         int ICON_OFFSET_Y = 14;
@@ -102,6 +104,17 @@ public class ElementInfoPanel {
         drawDamageInfo(pGuiGraphics, DIVIDER_Y);
         //armour info scrollbox
         drawArmourInfo(pGuiGraphics, DIVIDER_Y);
+    }
+
+    /** Explains live damage/defence breakdowns without relying on cached player references. */
+    public void offerHelp(int mouseX, int mouseY) {
+        Player player = minecraft.player;
+        if (!visible || player == null) return;
+        screen.offerTooltip(x + 13, y + 61, SCROLLBOX_WIDTH, SCROLLBOX_HEIGHT, mouseX, mouseY,
+            com.cwjn.skada.client.gui.StatHelp.lines("damage_breakdown", null));
+        screen.offerTooltip(x + 13, y + HEIGHT / 2 + 21, SCROLLBOX_WIDTH, SCROLLBOX_HEIGHT, mouseX, mouseY,
+            com.cwjn.skada.client.gui.StatHelp.lines(element.equals(Element.physical()) ? "physical_resist" : "element_resist",
+                player.getAttributeValue(element.resist())));
     }
 
     public boolean handleScroll(double mouseX, double mouseY, double pDelta) {
@@ -174,6 +187,8 @@ public class ElementInfoPanel {
     }
 
     private List<Component> getDamageInfoLines() {
+        Player player = minecraft.player;
+        if (player == null) return List.of();
         List<Component> retList = new ArrayList<>();
         double weaponDamage = weaponInfo.getSpread().getDamageFromElementRatio(player.getAttributeValue(Attributes.ATTACK_DAMAGE), this.element);
         if (weaponDamage > 0) {
@@ -203,6 +218,8 @@ public class ElementInfoPanel {
     }
 
     private List<Component> getArmourInfoLines() {
+        Player player = minecraft.player;
+        if (player == null) return List.of();
         List<Component> retList = new ArrayList<>();
         AttributeInstance resist = player.getAttribute(element.resist());
         if (resist.getValue() != 0) {
@@ -237,6 +254,7 @@ public class ElementInfoPanel {
      * modifiers from future non-item sources without changing the rendering code again.
      */
     private Component resolveModifierSource(Attribute attribute, AttributeModifier modifier) {
+        Player player = minecraft.player;
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = player.getItemBySlot(slot);
             if (stack.isEmpty()) {
@@ -284,6 +302,8 @@ public class ElementInfoPanel {
         String translationKey = mitigationPercent < 0
                 ? "skada.statscreen.element_panel.total_vulnerability"
                 : "skada.statscreen.element_panel.total_reduction";
+        if (element.usesArmourAsResistance()) translationKey = mitigationPercent < 0
+                ? "skada.help.result.base_increasing" : "skada.help.result.base_reducing";
         return UtilText.pixelFontComponent(Component.translatable(translationKey, Util.roundToString(Math.abs(mitigationPercent), 1)));
     }
 

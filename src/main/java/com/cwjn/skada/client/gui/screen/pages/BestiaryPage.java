@@ -254,6 +254,7 @@ public class BestiaryPage extends JournalPage {
 
   @Override
   public void renderExtraDrawables(GuiGraphics graphics, int mouseX, int mouseY) {
+    helpMouseX = mouseX; helpMouseY = mouseY;
     refreshEntriesFromCache();
     updateWidgetState(mouseX, mouseY);
 
@@ -543,6 +544,8 @@ public class BestiaryPage extends JournalPage {
     graphics.drawString(minecraft.font, previewText, drawX, drawY, UtilColour.UI_BORDER_COLOUR, false);
   }
 
+  private int helpMouseX, helpMouseY;
+
   private void renderStatSection(GuiGraphics graphics, int statX, int statY) {
     int lineHeight = minecraft.font.lineHeight + 2;
     int drawX = statX + STAT_TEXT_INSET_X;
@@ -564,6 +567,7 @@ public class BestiaryPage extends JournalPage {
           UtilColour.UI_TEXT_COLOUR);
 
       for (BestiaryEntryView.StatRow statRow : selectedEntry.statRows()) {
+        offerStatHelp(statX, statY, lineHeight, lineIndex, statRow.labelKey(), statRow.value());
         lineIndex = drawStatLine(graphics, drawCenterX, statY, lineHeight, lineIndex,
             statComponent(statRow.labelKey(), statRow.formattedValue()), UtilColour.UI_TEXT_COLOUR);
       }
@@ -574,6 +578,7 @@ public class BestiaryPage extends JournalPage {
                 false, true),
             UtilColour.UI_BORDER_COLOUR);
         for (BestiaryEntryView.ResistanceRow resistanceRow : selectedEntry.resistanceRows()) {
+        offerStatHelp(statX, statY, lineHeight, lineIndex, resistanceRow.labelKey(), resistanceRow.value());
           lineIndex = drawStatLine(graphics, drawCenterX, statY, lineHeight, lineIndex,
               statComponent(resistanceRow.labelKey(), resistanceRow.formattedValue()), UtilColour.UI_TEXT_COLOUR);
         }
@@ -581,6 +586,18 @@ public class BestiaryPage extends JournalPage {
     }
 
     screen.disableScissor();
+  }
+
+  /** Clips hover targets to the same scroll viewport as the visible species stats. */
+  private void offerStatHelp(int x, int y, int lineHeight, int line, String label, double value) {
+    int rowY = y + line * lineHeight - statScroll;
+    int top = Math.max(y, rowY);
+    int bottom = Math.min(y + DETAIL_STAT_HEIGHT, rowY + lineHeight);
+    if (bottom <= top) return;
+    java.util.List<Component> help = new java.util.ArrayList<>(com.cwjn.skada.client.gui.StatHelp.lines(
+        com.cwjn.skada.client.gui.StatHelp.statForLabel(label), value));
+    help.set(0, Component.translatable("skada.help.species_summary", help.get(0)));
+    screen.offerTooltip(x, top, DETAIL_STAT_WIDTH, bottom - top, helpMouseX, helpMouseY, help);
   }
 
   private int drawStatLine(GuiGraphics graphics, int drawCenterX, int statY, int lineHeight, int lineIndex,

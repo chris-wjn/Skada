@@ -132,7 +132,12 @@ public record AttackSelection(WeaponInfo weapon, AttackType type, AttackTypeInfo
 
     /** Cycles from this resolved order without decoding or reconciling the stack again. */
     public ResourceLocation cycle(ItemStack stack) {
-        ResourceLocation id = order.get((index + 1) % order.size()).rl();
+        return cycle(stack, 1);
+    }
+
+    /** Moves through this resolved order in either direction, wrapping at both ends. */
+    public ResourceLocation cycle(ItemStack stack, int direction) {
+        ResourceLocation id = order.get(Math.floorMod(index + direction, order.size())).rl();
         stack.getOrCreateTag().putString(SkadaData.CURRENT_ATTACK_TYPE_ID_TAG_KEY, id.toString());
         return id;
     }

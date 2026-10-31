@@ -27,6 +27,11 @@ public record C2SSelectAttackTypeFromMenu(ResourceLocation attackId, int contain
             if (player == null || player.containerMenu.containerId != msg.containerID
                     || msg.slot < 0 || msg.slot >= player.containerMenu.slots.size()
                     || !player.containerMenu.stillValid(player)) return;
+            if (com.cwjn.skada.event.Onboarding.isProtected(player) || player.isSpectator()
+                    || player.getAttackStrengthScale(0.5f) <= 0.9) {
+                player.containerMenu.broadcastFullState();
+                return;
+            }
             if (AttackSelection.select(player.containerMenu.getSlot(msg.slot).getItem(), msg.attackId)) {
                 player.containerMenu.broadcastChanges();
             } else player.containerMenu.broadcastFullState();

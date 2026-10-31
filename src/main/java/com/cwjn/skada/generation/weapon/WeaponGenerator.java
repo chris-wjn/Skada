@@ -234,10 +234,10 @@ public final class WeaponGenerator {
                     resolveAttackSpeed(baseAttackSpeed, generatedStats.attackSpeed(), entry.getValue().attackSpeed()),
                     Util.round(damageModifier + entry.getValue().damage(), 3),
                     Util.round(generatedStats.criticalFail() * entry.getValue().critFailModifier(), 3),
-                    knockback,
+                    Util.round(knockback, 2),
                     entry.getValue().reticleShapes()));
         }
-        return new WeaponInfo(retMap, spread, applicability, PhysicsUtil.toKg(assembly.mass(256)));
+        return new WeaponInfo(retMap, spread, applicability, Util.round(PhysicsUtil.toKg(assembly.mass(256)), 2));
     }
 
     /** Manual finite non-negative values override the provisional generated estimate, including explicit zero. */

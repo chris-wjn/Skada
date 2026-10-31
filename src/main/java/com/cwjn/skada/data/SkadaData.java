@@ -57,6 +57,7 @@ public abstract class SkadaData {
   public static final UUID SKADA_ATTACK_TYPE_DAMAGE_UUID = UUID.fromString("7b8e9f2a-3c4d-5e6f-7890-1a2b3c4d5e6f");
   public static final UUID SKADA_ATTACK_TYPE_REACH_UUID = UUID.fromString("8c9f0a3b-4d5e-6f70-8901-2b3c4d5e6f70");
   public static final UUID SKADA_ATTACK_TYPE_SPEED_UUID = UUID.fromString("9d0a1b4c-5e6f-7081-9012-3c4d5e6f7081");
+  public static final UUID SKADA_ATTACK_TYPE_KNOCKBACK_UUID = UUID.fromString("ae1b2c5d-6f70-8192-a123-4d5e6f708192");
   public static final UUID[] SKADA_ARMOUR_BASE_MOD_UUID = {
           UUID.fromString("a7b3c4d5-e6f7-8901-2345-6789abcdef01"),
           UUID.fromString("b8c4d5e6-f7a8-9012-3456-789abcdef012"),

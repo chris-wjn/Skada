@@ -18,6 +18,8 @@ import com.cwjn.skada.network.SkadaNetwork;
 import com.cwjn.skada.network.server_to_client.*;
 import com.cwjn.skada.util.Util;
 import com.cwjn.skada.util.UtilData;
+import com.cwjn.skada.util.EquipmentWeightUtil;
+import com.cwjn.skada.util.KnockbackWeightResistanceUtil;
 import com.google.common.collect.HashMultimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -47,6 +49,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -85,6 +88,10 @@ public class CommonEvent {
           e.add(entityType, element.baseDamage());
         }
       });
+      // Slime and magma-cube contact has no vanilla ATTACK_KNOCKBACK attribute by default.
+      // Expose the vanilla attribute so authors can configure its ordinary contact force in mob data.
+      e.add(net.minecraft.world.entity.EntityType.SLIME, Attributes.ATTACK_KNOCKBACK);
+      e.add(net.minecraft.world.entity.EntityType.MAGMA_CUBE, Attributes.ATTACK_KNOCKBACK);
     }
 
     @SubscribeEvent
@@ -105,6 +112,9 @@ public class CommonEvent {
     static final float BURDEN_EXHAUSTION_RATE_PER_TICK = 0.0005f;
     static final float BURDEN_JUMP_EXHAUSTION_RATE = 0.02f;
     private static final String PLAYER_BODY_WEIGHT_SYNC_KEY = "skada_body_weight_sync_kg";
+    private static final String PLAYER_TOTAL_WEIGHT_SYNC_KEY = "skada_total_weight_sync_kg";
+    private static final String WEIGHT_RESISTANCE_BODY_WEIGHT_KEY = "skada_weight_resistance_body_weight_kg";
+    private static final String WEIGHT_RESISTANCE_EQUIPMENT_WEIGHT_KEY = "skada_weight_resistance_equipment_weight_kg";
 
     /** Initializes equipment data when attribute modifiers are first requested on either logical side. */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -141,6 +151,11 @@ public class CommonEvent {
             e.removeAttribute(Attributes.ATTACK_DAMAGE);
             e.addModifier(Attributes.ATTACK_DAMAGE, new AttributeModifier(SKADA_ATTACK_TYPE_DAMAGE_UUID, "attack_type_damage_mod",
             attackInfo.damage(), AttributeModifier.Operation.ADDITION));
+          }
+          if (attackInfo.knockback() != 0) {
+            e.addModifier(Attributes.ATTACK_KNOCKBACK,
+                new AttributeModifier(SKADA_ATTACK_TYPE_KNOCKBACK_UUID, "attack_type_knockback_mod",
+                    attackInfo.knockback(), AttributeModifier.Operation.ADDITION));
           }
         }
       }
@@ -179,6 +194,9 @@ public class CommonEvent {
      */
     @SubscribeEvent
     public static void onMobJoinWorld(EntityJoinLevelEvent e) {
+      if (e.getEntity() instanceof LivingEntity livingEntity && !livingEntity.level().isClientSide()) {
+        updateWeightDerivedResistance(livingEntity);
+      }
       if (e.getEntity() instanceof Mob mob) {
         if (mob.getPersistentData().contains("skada_has_persistent_bonus"))
           return;
@@ -200,6 +218,41 @@ public class CommonEvent {
           mob.getPersistentData().putBoolean("skada_has_persistent_bonus", true);
         }
       }
+    }
+
+    /** Refreshes derived resistance immediately after server-side equipment changes. */
+    @SubscribeEvent
+    public static void onLivingEquipmentChange(LivingEquipmentChangeEvent event) {
+      LivingEntity entity = event.getEntity();
+      if (!entity.level().isClientSide()) updateWeightDerivedResistance(entity);
+    }
+
+    /** Re-resolves body dimensions so growth and data reload changes replace the derived modifier. */
+    @SubscribeEvent
+    public static void updateWeightResistanceOnLivingTick(LivingEvent.LivingTickEvent event) {
+      LivingEntity entity = event.getEntity();
+      if (entity.level().isClientSide()) return;
+      double bodyWeightKg = resolveBodyWeightKg(entity);
+      double equipmentWeightKg = EquipmentWeightUtil.getTotalEquippedWeightKg(entity);
+      CompoundTag persistentData = entity.getPersistentData();
+      if (!persistentData.contains(WEIGHT_RESISTANCE_BODY_WEIGHT_KEY)
+          || !persistentData.contains(WEIGHT_RESISTANCE_EQUIPMENT_WEIGHT_KEY)
+          || Math.abs(persistentData.getDouble(WEIGHT_RESISTANCE_BODY_WEIGHT_KEY) - bodyWeightKg) > 1.0e-6
+          || Math.abs(persistentData.getDouble(WEIGHT_RESISTANCE_EQUIPMENT_WEIGHT_KEY) - equipmentWeightKg) > 1.0e-6) {
+        updateWeightDerivedResistance(entity);
+      }
+    }
+
+    /** Replaces the entity's weight modifier using current body and equipped mass. */
+    private static void updateWeightDerivedResistance(LivingEntity entity) {
+      double bodyWeightKg = resolveBodyWeightKg(entity);
+      CompoundTag persistentData = entity.getPersistentData();
+      double totalWeightKg = bodyWeightKg + EquipmentWeightUtil.getTotalEquippedWeightKg(entity);
+      if (!Double.isFinite(totalWeightKg)) totalWeightKg = Double.MAX_VALUE;
+      KnockbackWeightResistanceUtil.updateModifier(entity, totalWeightKg);
+      persistentData.putDouble(WEIGHT_RESISTANCE_BODY_WEIGHT_KEY, bodyWeightKg);
+      persistentData.putDouble(WEIGHT_RESISTANCE_EQUIPMENT_WEIGHT_KEY,
+          EquipmentWeightUtil.getTotalEquippedWeightKg(entity));
     }
 
     @SubscribeEvent
@@ -225,6 +278,15 @@ public class CommonEvent {
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPlayerJoin(OnDatapackSyncEvent event) {
+      if (event.getPlayer() != null) {
+        if (!event.getPlayer().level().isClientSide()) updateWeightDerivedResistance(event.getPlayer());
+      } else {
+        for (var level : event.getPlayerList().getServer().getAllLevels()) {
+          for (var entity : level.getAllEntities()) {
+            if (entity instanceof LivingEntity livingEntity) updateWeightDerivedResistance(livingEntity);
+          }
+        }
+      }
       ResourceManager manager = event.getPlayerList().getServer().getResourceManager();
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
       HashMultimap<String, Map<String, WeaponInfo>> weaponMapToSend = HashMultimap.create();
@@ -412,17 +474,22 @@ public class CommonEvent {
         e.player.causeFoodExhaustion((float) (totalBurden * BURDEN_EXHAUSTION_RATE_PER_TICK));
     }
 
-    /** Sends the server-resolved player body weight when data or normal-pose size changes. */
+    /** Sends server-resolved body and total equipped weight when either displayed value changes. */
     private static void syncPlayerBodyWeight(ServerPlayer player, boolean force) {
       double weightKg = resolveBodyWeightKg(player);
+      double totalWeightKg = weightKg + EquipmentWeightUtil.getTotalEquippedWeightKg(player);
+      if (!Double.isFinite(totalWeightKg)) totalWeightKg = Double.MAX_VALUE;
       CompoundTag persistentData = player.getPersistentData();
-      if (force || !persistentData.contains(PLAYER_BODY_WEIGHT_SYNC_KEY)
-          || Math.abs(persistentData.getDouble(PLAYER_BODY_WEIGHT_SYNC_KEY) - weightKg) > 1.0e-6) {
+      boolean bodyChanged = !persistentData.contains(PLAYER_BODY_WEIGHT_SYNC_KEY)
+          || Math.abs(persistentData.getDouble(PLAYER_BODY_WEIGHT_SYNC_KEY) - weightKg) > 1.0e-6;
+      boolean totalChanged = !persistentData.contains(PLAYER_TOTAL_WEIGHT_SYNC_KEY)
+          || Math.abs(persistentData.getDouble(PLAYER_TOTAL_WEIGHT_SYNC_KEY) - totalWeightKg) > 1.0e-6;
+      if (force || bodyChanged || totalChanged) {
         persistentData.putDouble(PLAYER_BODY_WEIGHT_SYNC_KEY, weightKg);
-        SkadaNetwork.serverToPlayer(new S2CSyncPlayerBodyWeight(weightKg), player);
+        persistentData.putDouble(PLAYER_TOTAL_WEIGHT_SYNC_KEY, totalWeightKg);
+        SkadaNetwork.serverToPlayer(new S2CSyncPlayerBodyWeight(weightKg, totalWeightKg), player);
       }
     }
-
     private static double resolveBodyWeightKg(LivingEntity entity) {
       MobData mobData = MOB_DATA.get(entity.getType());
       Double referenceWeightKg = mobData == null ? null : mobData.referenceWeightKg();

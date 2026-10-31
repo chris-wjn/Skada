@@ -132,12 +132,13 @@ class MobDataWeightTest {
   }
 
   @Test
-  void shippedVanillaDataIncludesExplicitFiniteWeightsIncludingPlayer() throws IOException {
+  void shippedVanillaMobsHaveExplicitFiniteWeightsWithoutPlayerOverride() throws IOException {
     JsonObject data = JsonParser.parseString(Files.readString(
         Path.of("src/main/resources/data/skada/mob_info/minecraft.json"))).getAsJsonObject();
 
-    assertTrue(data.has("player"));
-    assertEquals(70.0, data.getAsJsonObject("player").get("weight").getAsDouble());
+    assertFalse(data.entrySet().isEmpty());
+    // Players use the dimension-based fallback instead of a fixed mob-data weight.
+    assertFalse(data.has("player"));
     data.entrySet().forEach(entry -> {
       assertTrue(entry.getValue().getAsJsonObject().has("weight"), entry.getKey());
       double weight = entry.getValue().getAsJsonObject().get("weight").getAsDouble();

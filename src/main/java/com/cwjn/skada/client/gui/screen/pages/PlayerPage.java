@@ -43,6 +43,8 @@ import net.minecraft.world.entity.player.Player;
  */
 public class PlayerPage extends JournalPage {
 
+  private int hoverX, hoverY;
+
   private static final ResourceLocation PLAYER_BOX_TEXTURE = Util.rl("textures/gui/player_page/player_box.png");
   private static final ResourceLocation DAMAGE_ICON = Util.rl("textures/gui/book_page_icons/damage_page_icon.png");
   private static final ResourceLocation HEALTH_ICON = Util.rl("textures/gui/player_page/health_icon.png");
@@ -135,10 +137,12 @@ public class PlayerPage extends JournalPage {
    * Draws the two stat sections that sit beneath the preview frame.
    *
    * @param pGuiGraphics the graphics context used for rendering
-   * @param pMouseX ignored for this page section
-   * @param pMouseY ignored for this page section
+   * @param pMouseX pointer x in book-local coordinates
+   * @param pMouseY pointer y in book-local coordinates
    */
   private void drawPlayerStats(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
+    hoverX = pMouseX;
+    hoverY = pMouseY;
     Player currentPlayer = Minecraft.getInstance().player;
     if (currentPlayer == null) {
       return;
@@ -182,10 +186,13 @@ public class PlayerPage extends JournalPage {
     drawPlayerStatline(pGuiGraphics, coreColumnX, statRowY + coreRow++ * STAT_ROW_SPACING, MOVESPEED_ICON,
       Component.translatable("skada.journal.player.core.move_speed.compact"),
       Util.getPlayerSpeedInBlocksPerSecond(currentPlayer.getAttributeValue(Attributes.MOVEMENT_SPEED)));
-    if (Double.isFinite(ClientHandler.playerBodyWeightKg)) {
+    if (Double.isFinite(ClientHandler.playerTotalWeightKg)) {
       drawPlayerWeightStatline(pGuiGraphics, coreColumnX, statRowY + coreRow++ * STAT_ROW_SPACING,
-          ClientHandler.playerBodyWeightKg);
+          ClientHandler.playerTotalWeightKg);
     }
+    drawPlayerStatline(pGuiGraphics, coreColumnX, statRowY + coreRow++ * STAT_ROW_SPACING, RESISTANCE_ICON,
+      Component.translatable("skada.journal.player.core.knockback_resistance.compact"),
+      currentPlayer.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) * 100.0);
     drawPlayerDefenceStatline(pGuiGraphics, coreColumnX, statRowY + coreRow++ * STAT_ROW_SPACING, SLASH_ICON,
       Component.translatable("skada.journal.player.core.slash.compact"), currentPlayer.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute()),
       UtilDefenseDisplay.attackTypeMitigationPercent(currentPlayer.getAttributeValue(SkadaRegistry.SLASH.get().resistAttribute())));
@@ -197,8 +204,11 @@ public class PlayerPage extends JournalPage {
       UtilDefenseDisplay.attackTypeMitigationPercent(currentPlayer.getAttributeValue(SkadaRegistry.STRIKE.get().resistAttribute())));
   }
 
-  /** Draws the server-authoritative body weight preview without conflating it with burden. */
+  /** Draws the server-authoritative total weight preview without conflating it with burden. */
   private void drawPlayerWeightStatline(GuiGraphics graphics, int x, int y, double weightKg) {
+    screen.offerTooltip(x, y, STATLINE_WIDTH, STAT_ROW_SPACING, hoverX, hoverY,
+        com.cwjn.skada.client.gui.StatHelp.lines("weight", null));
+
     drawStatlineUnderline(graphics, x, y, STATLINE_WIDTH);
     Font currentFont = Minecraft.getInstance().font;
     Component label = UtilText.compassNineFontComponent(
@@ -220,6 +230,10 @@ public class PlayerPage extends JournalPage {
    * @param value the stat value shown at the right edge of the row
    */
   private void drawPlayerStatline(GuiGraphics pGuiGraphics, int x, int y, ResourceLocation icon, MutableComponent name, double value) {
+    String helpId = name.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents contents
+        ? com.cwjn.skada.client.gui.StatHelp.statForLabel(contents.getKey()) : "configured_stat";
+    screen.offerTooltip(x, y, STATLINE_WIDTH, STAT_ROW_SPACING, hoverX, hoverY,
+        com.cwjn.skada.client.gui.StatHelp.lines(helpId, value));
     Font currentFont = Minecraft.getInstance().font;
 
     drawStatlineUnderline(pGuiGraphics, x, y, STATLINE_WIDTH);
@@ -233,7 +247,7 @@ public class PlayerPage extends JournalPage {
   }
 
   /**
-   * Draws a defence statline and adds the derived mitigation summary beneath the raw rating.
+   * Draws a defence rating whose derived mitigation is available in its hover explanation.
    *
    * @param pGuiGraphics the graphics context used for rendering
    * @param x the statline x position in book-local space
@@ -261,6 +275,10 @@ public class PlayerPage extends JournalPage {
    */
   private void drawElementStatline(GuiGraphics pGuiGraphics, int x, int y, ResourceLocation icon, MutableComponent label, double damage,
       double resist, int colour) {
+    screen.offerTooltip(x, y, 78, STAT_ROW_SPACING, hoverX, hoverY,
+        com.cwjn.skada.client.gui.StatHelp.lines("element_damage", null));
+    screen.offerTooltip(x + 78, y, 32, STAT_ROW_SPACING, hoverX, hoverY,
+        com.cwjn.skada.client.gui.StatHelp.lines(icon.getPath().contains("physical") ? "physical_resist" : "element_resist", resist));
     Font currentFont = Minecraft.getInstance().font;
 
     drawStatlineUnderline(pGuiGraphics, x, y, STATLINE_WIDTH);

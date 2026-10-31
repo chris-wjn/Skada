@@ -87,6 +87,10 @@ public final class WeaponAttackGameTests {
         helper.assertTrue(next.equals(AttackType.thrust().rl()) && AttackSelection.resolve(stack).type() == AttackType.thrust(), "Cycling must select the next ordered ID");
         AttackSelection.resolve(stack).cycle(stack);
         helper.assertTrue(AttackSelection.resolve(stack).type() == AttackType.slash(), "Cycling must wrap");
+        AttackSelection.resolve(stack).cycle(stack, -1);
+        helper.assertTrue(AttackSelection.resolve(stack).type() == AttackType.thrust(), "Reverse cycling must wrap to the final attack");
+        AttackSelection.resolve(stack).cycle(stack, -1);
+        helper.assertTrue(AttackSelection.resolve(stack).type() == AttackType.slash(), "Reverse cycling must follow the saved order");
         helper.assertTrue(!AttackSelection.select(stack, AttackType.strike().rl()), "Unsupported client selections must be rejected");
         helper.succeed();
     }
@@ -156,9 +160,11 @@ public final class WeaponAttackGameTests {
         }
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         try {
-            C2SSelectAttackType expected = new C2SSelectAttackType(AttackType.thrust().rl());
-            C2SSelectAttackType.encode(expected, buffer);
-            helper.assertTrue(expected.equals(C2SSelectAttackType.decode(buffer)), "Held packet must retain the attack ID");
+            for (InteractionHand hand : InteractionHand.values()) {
+                C2SSelectAttackType expected = new C2SSelectAttackType(AttackType.thrust().rl(), hand, 7);
+                C2SSelectAttackType.encode(expected, buffer);
+                helper.assertTrue(expected.equals(C2SSelectAttackType.decode(buffer)), "Held packet must retain the attack ID, hand and hotbar slot");
+            }
             C2SSelectAttackTypeFromMenu menu = new C2SSelectAttackTypeFromMenu(AttackType.slash().rl(), 12, 4);
             C2SSelectAttackTypeFromMenu.encode(menu, buffer);
             helper.assertTrue(menu.equals(C2SSelectAttackTypeFromMenu.decode(buffer)), "Menu packet must retain ID and menu context");

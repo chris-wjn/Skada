@@ -89,6 +89,7 @@ public class StatScreen extends Screen {
   private int bookScreenLeft;
   private int bookScreenTop;
   private final Screen savedScreen;
+  private java.util.List<net.minecraft.util.FormattedCharSequence> hoverLines;
 
   static {
     OPEN_ANIM.setSoundEffect(SoundEvents.BOOK_PAGE_TURN);
@@ -228,6 +229,7 @@ public class StatScreen extends Screen {
 
   @Override
   public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+    hoverLines = null;
     int localMouseX = toBookLocalX(pMouseX);
     int localMouseY = toBookLocalY(pMouseY);
 
@@ -280,7 +282,9 @@ public class StatScreen extends Screen {
           anim = null;
       }
     }
-    super.render(pGuiGraphics,localMouseX,localMouseY,pPartialTick);pGuiGraphics.pose().popPose();
+    super.render(pGuiGraphics,localMouseX,localMouseY,pPartialTick);
+    pGuiGraphics.pose().popPose();
+    if (anim == null && hoverLines != null) pGuiGraphics.renderTooltip(minecraft.font, hoverLines, pMouseX, pMouseY);
   }
 
   private void drawFromState(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
@@ -377,6 +381,15 @@ public class StatScreen extends Screen {
 
   public void disableScissor() {
     GL11.glDisable(GL11.GL_SCISSOR_TEST);
+  }
+
+  /** Registers a book-local hover target; the tooltip itself renders at readable screen scale. */
+  public void offerTooltip(int x, int y, int width, int height, int mouseX, int mouseY,
+      java.util.List<Component> lines) {
+    if (mouseX < x || mouseX >= x + width || mouseY < y || mouseY >= y + height) return;
+    java.util.ArrayList<net.minecraft.util.FormattedCharSequence> wrapped = new java.util.ArrayList<>();
+    for (Component line : lines) wrapped.addAll(minecraft.font.split(line, Math.min(260, Math.max(80, this.width - 24))));
+    hoverLines = wrapped;
   }
 
   private int toBookLocalX(double mouseX) {
